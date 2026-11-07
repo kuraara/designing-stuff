@@ -17,7 +17,7 @@ part = "tool";        // [tool, coupon, info]
 L  = 190;             // overall length incl. hook (retail ones are ~190)
 W  = 25;              // overall width across the serpentine (retail ~25)
 w  = 4.5;             // strand width, in plane. Stretch stiffness of the zigzag ~ w^3
-t  = 4.0;             // strand thickness = print height. Floppiness toward/away from the head ~ t^3
+t  = 6.0;             // strand thickness = print height. Floppiness toward/away from the head ~ t^3
 p  = 10;              // run pitch, centre to centre. Hair slot gap = p - w
 
 /* [Hook] */

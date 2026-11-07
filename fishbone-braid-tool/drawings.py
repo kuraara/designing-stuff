@@ -48,7 +48,7 @@ for e in s.discrete:
         continue
     ax2.plot(e[:, 1] - yr, e[:, 2], color="#1f4e79", lw=1.2)
     ax2.fill(e[:, 1] - yr, e[:, 2], color="#9ec5e8")
-ax2.set_aspect("equal"); ax2.set_xlim(-4, 4); ax2.set_ylim(-1, 5.5)
+ax2.set_aspect("equal"); ax2.set_xlim(-4, 4); ax2.set_ylim(-1, info["thickness"] + 1.5)
 ax2.set_title(f"Strand section {w:g} × {info['thickness']:g}\n"
               f"top round-over R{info['top_r']:g}, bottom chamfer {info['bot_c']:g}", fontsize=9)
 ax2.axhline(0, color="k", lw=0.6); ax2.text(3.8, -0.6, "bed", ha="right", fontsize=7)
@@ -56,7 +56,7 @@ ax2.grid(alpha=0.3); ax2.set_xlabel("mm", fontsize=7); ax2.tick_params(labelsize
 
 ax3 = fig.add_axes([0.6, 0.1, 0.36, 0.35]); ax3.axis("off")
 ax3.text(0, 1, "\n".join([
-    "Fishbone braid tool v0.1",
+    "Fishbone braid tool v0.2",
     f"Length {L:g}  Width {W:g}  Thickness {info['thickness']:g}",
     f"Strand {w:g} wide, pitch {p:g} → slot gap {info['slot_gap']:g}",
     f"Slots: {info['slots_total']} ({info['slots_a']} one side, {info['slots_b']} other)",
