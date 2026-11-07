@@ -1,6 +1,6 @@
 # Fishbone braid tool — v0.2
 
-A copy of the cheap "fish bone / French braid tool roller" (zigzag strip with a hook), made parametric and set up for TPU on the MK3S+. Status: **v0.2 test piece (coupon) sliced and ready to print; full tool sliced and waiting on the coupon result. Nothing printed yet.** 7 Nov 2026.
+A copy of the cheap "fish bone / French braid tool roller" (zigzag strip with a hook), made parametric and set up for TPU on the MK3S+. Status: **v0.2 coupon printed and passed (7 Nov 2026). Full tool ready to print with the same conservative settings.** 8 Nov 2026.
 
 ## Requests (verbatim)
 
@@ -18,9 +18,26 @@ Attached: screenshot of eBay AU listing *"Fish Bone Hair Braiding French Braid T
 
 > Then upload to GitHub and provide instructions on what to do next (print coupon)
 
+8 Nov 2026, 00:20:
+
+> The print worked well, let's go full sized and keep the conservative speeds
+
 Printer: Prusa i3 MK3S+. Project preference: functional over pretty, faster over perfect; TPU/PETG preferred.
 
-## Next step: print the coupon
+## Next step: print the full tool
+
+**Print** `gcode/braid_tool_TPUsafe_0.20SPEED_loops.gcode`: **1 h 30 min, 16.4 g**. It uses exactly the coupon's settings: eSun TPU 95A @MK3S (conservative), 0.20mm SPEED, 5 perimeters, avoid crossing perimeters, t = 6. No design changes from the coupon.
+
+- **Bed:** the part runs front to back, centred, Y ≈ 8–202 mm including the skirt. Wipe the sheet edge to edge, because the hook and tail sit near the front and back.
+- **Prep:** same as the coupon: dry filament, loosened idler, glue stick on smooth PEI.
+- **First layer:** the long run means a TPU underflow or clog shows up partway through. Check the first layer across the whole length, and look in once or twice.
+- **After:** repeat the coupon checks on the full part (table below), particularly stretch end to end and hair sliding through all 17 slots.
+
+## Coupon result (7 Nov 2026)
+
+Printed with `gcode/braid_coupon_TPUsafe_0.20SPEED_loops.gcode`. Reported as working well (see the 8 Nov request above), so nothing changed for the full tool. The individual checks weren't reported one by one.
+
+## Coupon print and checks (reference)
 
 The coupon is a 50 mm slice of the tool: same strand section (4.5 × 6), 4 runs, 3 hair slots, and the hook. **23 min, 4.2 g.**
 
@@ -39,7 +56,7 @@ The coupon is a 50 mm slice of the tool: same strand section (4.5 × 6), 4 runs,
 | Edges: run a fingernail along the bottom edge | no lip or string | lip → raise *Elephant foot compensation* to 0.3; strings in slots → dry the filament, or drop 5 °C |
 | Hook: can you hook a finger or hair tie? | yes | bigger/smaller → `hook_r` |
 
-6. **Report back** what passed and failed. If everything passes, print the full tool (below) as-is.
+6. **Report back** what passed and failed. If everything passes, print the full tool as-is.
 
 ## Existing models (the "find" half)
 
@@ -78,8 +95,8 @@ Number of runs is derived: as many as fit in `L` at pitch `p`; the stem absorbs 
 PrusaSlicer 2.7.2 CLI, stock *Original Prusa i3 MK3S & MK3S+* printer, *0.20mm SPEED @MK3*, **Perimeters = 5**, *Avoid crossing perimeters* on. The 5 perimeters fill the 4.5 mm strand solid as continuous loops. That's the only change to the stock print profile apart from avoid-crossing.
 
 Filament presets (from `printer-profiles/esun-tpu95a-mk3s`):
-- **TPU safe** = *eSun TPU 95A @MK3S* (forum preset): max 2.4 mm³/s, 220/212 °C → ~29 mm/s walls. **Use for the coupon.**
-- **TPU FAST** = *eSun TPU 95A FAST @MK3S*: max 3.5 mm³/s, 225 °C → ~43 mm/s walls. Switch to this once the safe one prints cleanly.
+- **TPU safe** = *eSun TPU 95A @MK3S* (forum preset): max 2.4 mm³/s, 220/212 °C → ~29 mm/s walls. **Used for the coupon (passed) and the full tool.**
+- **TPU FAST** = *eSun TPU 95A FAST @MK3S*: max 3.5 mm³/s, 225 °C → ~43 mm/s walls. Optional later, to save ~25 min on the full tool.
 
 | Part | TPU safe | TPU FAST | PETG (Generic) |
 |---|---|---|---|
@@ -96,7 +113,7 @@ From the GENERA listing's instructions: hold the tool vertically against the hea
 
 ## Open questions / to verify
 
-- TPU stiffness and surface grip against hair at t = 6: untested. The coupon answers both.
+- TPU stiffness and surface grip against hair at t = 6: the coupon passed. Confirm on the full-length tool, especially stretch end to end.
 - Slot gap 5.5 mm and hook size were estimated from the listing photo, not measured from a real tool.
 - Which end goes at the crown: the hook end is assumed to be the top/handle end.
 
@@ -109,14 +126,15 @@ From the GENERA listing's instructions: hold the tool vertically against the hea
 | `slice_all.py` | flattens the PrusaSlicer vendor presets + the eSun TPU bundle, slices every variant → `print_times.json`, keeps the TPU safe/FAST G-code in `gcode/`. `python3 slice_all.py braid_coupon` slices just one part |
 | `drawings.py` | top view + strand cross-section from the STL → `img/braid_tool_drawing.png` |
 | `stl/braid_tool.stl`, `stl/braid_coupon.stl` | print files (t = 6) |
-| `gcode/braid_coupon_TPUsafe_0.20SPEED_loops.gcode` | **print this first** |
-| `gcode/braid_tool_TPUsafe_0.20SPEED_loops.gcode` | full tool, conservative |
+| `gcode/braid_coupon_TPUsafe_0.20SPEED_loops.gcode` | coupon, conservative (printed, passed) |
+| `gcode/braid_tool_TPUsafe_0.20SPEED_loops.gcode` | **full tool, conservative: print this next** |
 | `gcode/*_TPU_0.20SPEED_loops.gcode` | same with the FAST preset |
 
 Regenerate: `./render_all.sh && python3 slice_all.py && python3 drawings.py` (needs OpenSCAD 2021+, xvfb-run for the PNG, PrusaSlicer 2.7 CLI, Python trimesh/shapely/matplotlib). `slice_all.py` expects `../printer-profiles/esun-tpu95a-mk3s/eSun_TPU95A_MK3S.ini`. The full-tool render takes about 80 s in OpenSCAD 2021 (CGAL).
 
 ## Changelog
 
+- **v0.2 printed** (8 Nov 2026): coupon passed. Full tool released to print with the conservative preset. Docs only, no geometry or slicing changes.
 - **v0.2** (7 Nov 2026): `t` 4 → 6. Coupon first. Conservative eSun preset added to slicing (and its G-code kept). `slice_all.py` takes part names and merges results.
 - **v0.1** (7 Nov 2026): first design, t = 4, sliced with eSun FAST only.
 

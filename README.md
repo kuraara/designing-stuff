@@ -6,7 +6,7 @@ Printer: Prusa i3 MK3S+ with a 0.4 nozzle. Materials: TPU (eSun eTPU-95A) first,
 
 | Folder | What | Status |
 |---|---|---|
-| [fishbone-braid-tool](fishbone-braid-tool) | Zigzag French/fishbone hair braiding tool in TPU, with a short test coupon | v0.2: coupon ready to print |
+| [fishbone-braid-tool](fishbone-braid-tool) | Zigzag French/fishbone hair braiding tool in TPU, with a short test coupon | v0.2: coupon passed, full tool ready to print |
 | [printer-profiles/esun-tpu95a-mk3s](printer-profiles/esun-tpu95a-mk3s) | PrusaSlicer filament presets for eSun TPU 95A: forum-safe and FAST | sliced, not printed |
 
 ## Layout
