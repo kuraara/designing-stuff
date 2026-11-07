@@ -1,0 +1,7 @@
+# slicer / render scratch
+slice/
+*.echo
+_view.scad
+printer-profiles/*/test_*.ini
+__pycache__/
+.DS_Store
