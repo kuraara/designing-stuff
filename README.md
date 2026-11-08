@@ -22,4 +22,4 @@ Slicing scripts use the PrusaSlicer 2.7 CLI and read TPU presets from `printer-p
 
 ## Workflow
 
-New designs and changes go on a `feature/<name>` branch, with one commit per build. They're merged to `main` only after sign-off.
+Each design gets its own folder. Every change is committed and **pushed straight to `main`**: one commit per build, no feature branches, no waiting for sign-off. This repo-wide rule was set by the owner on 8 Nov 2026 and overrides any general "feature branch, check before merging" habit.
