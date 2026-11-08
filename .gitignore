@@ -5,3 +5,6 @@ _view.scad
 printer-profiles/*/test_*.ini
 __pycache__/
 .DS_Store
+_build/
+out/
+_plate.scad

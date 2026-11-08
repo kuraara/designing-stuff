@@ -1,0 +1,40 @@
+{
+ "name": "AUBREY",
+ "font": "Sniglet:style=ExtraBold",
+ "text_dir": "down",
+ "letter_h": 10.81,
+ "name_len": 62.0,
+ "length": 99.7,
+ "width": 28.8,
+ "thickness": 6,
+ "floor_t": 2.4,
+ "inlay_h": 4.6,
+ "inlay_face_down": true,
+ "params": {
+  "text_dir": "down",
+  "text_size": 10.7852,
+  "ink": [
+   0.5038,
+   62.5038,
+   -0.2247,
+   10.9554
+  ]
+ },
+ "outline_holes": 0,
+ "inlay_pieces": 2,
+ "inlay_area": 765.5,
+ "islands": 5,
+ "floating_islands": 0,
+ "warnings": [
+  "long name: letters shrunk to 10.8 mm (from 12) to keep it within 62 mm"
+ ],
+ "files": {
+  "preview_svg": "aubrey_preview.svg",
+  "base_stl": "aubrey_base.stl",
+  "inlay_stl": "aubrey_inlay.stl",
+  "preview_png": "aubrey_preview.png",
+  "info_json": "aubrey_info.json"
+ },
+ "engine": "manifold",
+ "seconds": 3.4
+}
