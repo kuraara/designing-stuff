@@ -7,6 +7,7 @@ Printer: Prusa i3 MK3S+ with a 0.4 nozzle. Materials: TPU (eSun eTPU-95A) first,
 | Folder | What | Status |
 |---|---|---|
 | [fishbone-braid-tool](fishbone-braid-tool) | Zigzag French/fishbone hair braiding tool in TPU, with a short test coupon | v0.2: coupon passed, full tool ready to print |
+| [pi5-poe-nvme-case](pi5-poe-nvme-case) | Slide-in Raspberry Pi 5 case for the Waveshare PoE HAT (G) and Pimoroni NVMe Base Duo, no screws into the boards, plus a DIN rail bracket | v0.2: STLs and design PDF ready, not printed |
 | [printer-profiles/esun-tpu95a-mk3s](printer-profiles/esun-tpu95a-mk3s) | PrusaSlicer filament presets for eSun TPU 95A: forum-safe and FAST | sliced, not printed |
 
 ## Layout
@@ -16,7 +17,7 @@ Each design is a self-contained folder:
 - `README.md`: brief (verbatim), design notes, parameters, print settings and times, open questions
 - `*.scad`: the parametric model
 - `render_all.sh`, `slice_all.py`, `drawings.py`: regenerate STLs, G-code, times and images
-- `stl/`, `gcode/`, `img/`: build outputs, committed so they can be printed straight from GitHub
+- `stl/`, `gcode/`, `img/`: build outputs, committed so they can be printed straight from GitHub (pi5-poe-nvme-case keeps its printable STLs in `print/`)
 
 Slicing scripts use the PrusaSlicer 2.7 CLI and read TPU presets from `printer-profiles/`.
 

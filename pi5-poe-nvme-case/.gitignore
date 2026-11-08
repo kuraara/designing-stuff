@@ -1,0 +1,5 @@
+# intermediate renders (regenerate with render_all.sh); the printable files are in print/
+stl/
+drawings.json
+pdf_work/
+*.tmp.pdf
