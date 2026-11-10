@@ -10,6 +10,12 @@ Status (10 Nov 2026, v0.2): **body printed (PLA) and reported fine; lid, feet an
 
 **Printed 10 Nov 2026:** the body, in PLA rather than PETG: stock *0.30mm DRAFT @MK3* with *Generic PLA* (215 °C / bed 60), 4 h 22 m, 75 g, sliced by PrusaSlicer 2.7.2 CLI the same way as `slice_all.py`. The owner said it printed fine. Board fit, the lid (TPU) and the feet aren't tested yet.
 
+| USB end (printed on the bed) | Floor | Inside |
+| --- | --- | --- |
+| ![USB end of the printed body: RJ45 and two USB cut-outs](img/print_v0.2_usb_end.jpg) | ![Floor of the printed body: vent slots and the four counterbored foot holes](img/print_v0.2_floor.jpg) | ![Inside the printed body: the ledges and lips along the walls, and the side vents](img/print_v0.2_inside.jpg) |
+
+The yellow on the USB end is leftover filament from the previous print, pressed into the first layers (nozzle and sheet weren't cleaned first); it's cosmetic. The jack cut-outs, vents, foot counterbores and the board ledges all came out clean at 0.30 mm layers.
+
 | File | Material | Orientation (already set) | Time (0.30 DRAFT) |
 |---|---|---|---|
 | [`print/pi5_case_body_PETG.stl`](print/pi5_case_body_PETG.stl) | PETG | USB end on the bed | 4h 26m, 77 g |
