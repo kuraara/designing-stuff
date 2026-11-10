@@ -2,11 +2,13 @@
 
 Slide-in "tube" case for a Raspberry Pi 5 + Waveshare PoE HAT (G) + Pimoroni NVMe Base Duo. No screws or standoffs in any board: each board rests on its own ledge. One parametric OpenSCAD file.
 
-Status (8 Nov 2026, v0.2): **print-ready, not yet printed.** Case + lid + feet, and an optional DIN rail bracket. Model renders clean, all parts watertight, stack envelope and insertion sweep checked against the body/lid with no interference.
+Status (10 Nov 2026, v0.2): **body printed (PLA) and reported fine; lid, feet and DIN bracket not printed yet.** Case + lid + feet, and an optional DIN rail bracket. Model renders clean, all parts watertight, stack envelope and insertion sweep checked against the body/lid with no interference.
 
 ![Assembly](img/pi5_case_3d_assembly.jpg)
 
 ## Print it
+
+**Printed 10 Nov 2026:** the body, in PLA rather than PETG: stock *0.30mm DRAFT @MK3* with *Generic PLA* (215 °C / bed 60), 4 h 22 m, 75 g, sliced by PrusaSlicer 2.7.2 CLI the same way as `slice_all.py`. The owner said it printed fine. Board fit, the lid (TPU) and the feet aren't tested yet.
 
 | File | Material | Orientation (already set) | Time (0.30 DRAFT) |
 |---|---|---|---|
