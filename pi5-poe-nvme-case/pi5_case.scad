@@ -104,8 +104,12 @@ vent_w = 3;  vent_pitch = 6.25;  vent_seg = 24;  vent_bar = 4;
 side_vents = true;    // slots in both long walls between the two lips
 
 /* [Feet] */
-foot_d = 14; foot_h = 5; foot_x = [4, 80];
-insert_d = 4.0; insert_depth = 6;
+foot_d = 14; foot_h = 6; foot_x = [4, 80];
+foot_cb = [6.4, 3.0];   // counterbore Ø x depth: M3 button head (ISO 7380, Ø5.7 x 1.65) or socket head (Ø5.5 x 3)
+foot_screw = 8;         // M3 x 8 under-head length; leaves 3.0 mm of TPU under the head, 5.0 mm in the insert
+foot_recess = 0.6;      // locating recess in the case floor for each foot / DIN boss
+insert_d = 4.0; insert_len = 5.7;
+insert_depth = 6.5;     // insert hole below the recess floor (v0.2 printed bodies: 5.4)
 
 /* [DIN rail bracket] */
 // Bolts to the four foot inserts in place of the feet. Clips onto a TS35 rail
@@ -240,8 +244,8 @@ module body() {
         if (side_vents) side_slots();
         // feet: heat-set insert holes + locating recesses
         for (x = foot_x, y = [y_foot, bw - y_foot]) {
-            translate([x, y, -1]) cylinder(d = insert_d, h = insert_depth + 1);
-            translate([x, y, -1]) cylinder(d = foot_d + 0.4, h = 1.6);
+            translate([x, y, -1]) cylinder(d = insert_d, h = 1 + foot_recess + insert_depth);
+            translate([x, y, -1]) cylinder(d = foot_d + 0.4, h = 1 + foot_recess);
         }
     }
 }
@@ -309,10 +313,14 @@ module lid_asm() {
 module lid_print() { rotate([0, -90, 0]) translate([-(x_mouth - lid_t), 0, 0]) lid_asm(); }
 
 // printed counterbore-up (no overhang); fit with the counterbore facing the desk
+// screw stack (case frame, z = 0 at the case bottom): head seat, tip, hole and insert ends
+foot_seat = foot_recess - (foot_h - foot_cb[1]);
+foot_tip = foot_seat + foot_screw;
+assert(foot_tip <= foot_recess + min(insert_len, 5.4) - 0.3, "foot screw would bottom out");
 module feet() { for (i = [0 : 3]) translate([i * (foot_d + 3), 0, 0]) difference() {
     cylinder(d = foot_d, h = foot_h);
     translate([0, 0, -1]) cylinder(d = 3.4, h = foot_h + 2);
-    translate([0, 0, foot_h - 3.2]) cylinder(d = 6.0, h = 3.2 + 1);
+    translate([0, 0, foot_h - foot_cb[1]]) cylinder(d = foot_cb[0], h = foot_cb[1] + 1);
 } }
 
 // ------------------------------------------------------------ DIN RAIL BRACKET
@@ -425,6 +433,8 @@ module info() {
       ",\"hook\":", latch_hook, ",\"w\":", latch_w, ",\"hx\":", l_hx, ",\"slot\":", latch_slot, ",\"gap\":", latch_gap,
       ",\"flex\":", l_flex, ",\"strain\":", l_strain, "}", ",\"sv_z\":", sv_z,
       ",\"foot\":[", foot_d, ",", foot_h, "],\"foot_x\":", foot_x, ",\"y_foot\":", y_foot,
+      ",\"foot_cb\":", foot_cb, ",\"foot_screw\":", foot_screw, ",\"foot_seat\":", foot_seat, ",\"foot_tip\":", foot_tip,
+      ",\"foot_recess\":", foot_recess, ",\"insert\":[", insert_d, ",", insert_len, ",", insert_depth, "]",
       ",\"din\":{\"uc\":", din_uc, ",\"H\":", din_H, ",\"plate\":", din_plate, ",\"gap\":", din_gap, ",\"ledge\":", din_ledge,
       ",\"ut\":", d_ut, ",\"ub\":", d_ub, ",\"u0\":", d_u0, ",\"u1\":", d_u1, ",\"v0\":", d_v0, ",\"v1\":", d_v1,
       ",\"tab\":", din_tab, ",\"hook\":", din_hook, ",\"latch\":", din_latch, ",\"travel\":", din_travel, ",\"lip\":", din_lip,

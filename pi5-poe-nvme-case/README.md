@@ -22,7 +22,7 @@ The yellow on the USB end is leftover filament from the previous print, pressed 
 |---|---|---|---|
 | [`print/pi5_case_body_PETG.stl`](print/pi5_case_body_PETG.stl) | PETG (PLA works: printed 10 Nov, 4h 22m) | USB end on the bed | 4h 26m, 77 g |
 | [`print/pi5_case_lid_PLA.stl`](print/pi5_case_lid_PLA.stl) | **PLA** (PETG also fine), 0.20 mm SPEED | outer face down | 58m, 14 g (PETG 1h 01m) |
-| [`print/pi5_case_feet_x4_TPU.stl`](print/pi5_case_feet_x4_TPU.stl) | TPU, eSun 95A FAST | counterbore up (fit them turned over) | 14m, 3 g |
+| [`print/pi5_case_feet_x4_TPU.stl`](print/pi5_case_feet_x4_TPU.stl) | TPU, eSun 95A FAST | counterbore up (fit them turned over) | ~15m, 4 g |
 | [`print/pi5_case_din_bracket_PETG.stl`](print/pi5_case_din_bracket_PETG.stl) | PETG, 4 perimeters, 40% gyroid | rail side down | 2h 24m, 43 g |
 
 Body, feet and bracket at 0.30 DRAFT. No supports. Feet **or** DIN bracket, not both. Fit the microSD card before the PCIe ribbon (the ribbon covers the slot).
@@ -124,6 +124,27 @@ Messages (verbatim, 11 Nov 2026):
 
 Tuning: `latch_t` (arm thickness, softer at 1.2) and `latch_hook` (hook height, firmer at 1.2). Both only need a lid reprint.
 
+## Feet v0.4: suit M3 × 8 button heads (11 Nov 2026)
+
+Message (verbatim, 11 Nov 2026, with two photos of a button-head screw in calipers):
+
+> Can you confirm your design of the feet suit these screws
+
+The caliper display was off; the beam scale reads ≈10 mm overall, i.e. an **M3 × 8 button head** (ISO 7380, head Ø5.7 × 1.65).
+
+**v0.2 feet did not suit it** (design error): the foot left 1.8 mm of TPU under the head, so 6.2 mm of screw entered the case, but the insert hole is only 5.4 mm deep below the 0.6 mm foot recess (shorter than the 5.7 mm insert itself). The screw would bottom out 0.8 mm before clamping.
+
+v0.4 stack-up (z = 0 at the case bottom; foot top sits in the recess at z = 0.6):
+
+| | z |
+|---|---|
+| head seat (foot 6 tall, 3.0 counterbore → 3.0 mm TPU under the head) | -2.4 |
+| screw tip (M3 × 8) | 5.6 |
+| insert end (M3 × 5.7, pressed flush with the recess floor) | 6.3 |
+| hole end, printed v0.2 body / new bodies (`insert_depth` 6.5 below the recess) | 6.0 / 7.1 |
+
+5.0 mm of thread in the insert; the head sits 1.35 mm below the foot's face. On the printed body, press the inserts flush with the recess floor; the last 0.3 mm melts into solid plastic above the 5.4 mm hole, which is fine. The DIN bracket's M3 × 20 (button or socket head) ends at z = 5.0: 4.4 mm in the insert, no change needed. The model now `assert`s that the foot screw can't bottom out.
+
 ## Parts identified
 
 | Part | Source |
@@ -160,7 +181,7 @@ Design (`part = "din"`, `"din_asm"`, `"din_rail"`; parameters under `[DIN rail b
 |---|---|---|
 | **Body** | PETG, USB end on the bed (tube vertical) | Closed USB/RJ45 end with jack cut-outs; upper and lower lips along both long walls; thick SSD-bay walls below the lower lip; USB-C/HDMI window; roof, floor and side vents; snap windows at the mouth; feet inserts |
 | **Lid** (v0.3) | PLA or PETG, 0.20 mm, outer face on the bed | Click-in at the SD end: chamfered skirt + 2 flexing latch arms whose hooks click into the upper side windows; 3 prongs locate the boards (both Duo corners, the Pi's GPIO-side corner) |
-| Feet × 4 | TPU, flat, counterbore up | Ø14 × 5, M3 counterbore (faces the desk when fitted), into heat-set inserts |
+| Feet × 4 (v0.4) | TPU, flat, counterbore up | Ø14 × 6, Ø6.4 × 3.0 counterbore (faces the desk when fitted), M3 × 8 button or socket head into heat-set inserts |
 
 **How the boards are held (no screws, no standoffs):** each long wall has two lips (user's second sketch). The Duo rests on the lower ledge (3 mm reach); the Pi rests on the upper ledge (1 mm reach), and the upper lip sits in the 12 mm gap between the boards. A 1.2 mm fence on each ledge (below PCB thickness) locates each board sideways with 0.4 mm play a side. The PCIe ribbon is the only link between the boards. They slide in together from the SD end, USB first, and stop on the closed USB end wall; the lid prongs locate them with 0.2 mm of end play (v0.2 had a 0.1 mm preload from the TPU lid). The HAT is held by its GPIO + PoE headers only.
 
@@ -191,6 +212,8 @@ Coordinates in the SCAD: board-aligned. X = 0 at the boards' SD edge, 85 at the 
 | `low_in` | 0.5 | SSD-bay wall face, inward from the board edge |
 | `wall` etc. | 2.4 | 3.0 costs +57 min on the body |
 | side window | 42 × 11 | USB-C + both micro HDMI |
+| `foot_h` / `foot_cb` / `foot_screw` | 6 / [6.4, 3.0] / 8 | foot height / counterbore Ø × depth / screw length under the head (v0.4) |
+| `insert_len` / `insert_depth` / `foot_recess` | 5.7 / 6.5 / 0.6 | heat-set insert / its hole below the recess floor (v0.2 printed: 5.4) / foot recess |
 | `fit` / `lead_c` / `prong_tip` | 0.25 / 0.6 / 0.3 | skirt clearance / skirt lead-in chamfer / prongs stop 0.2 mm short |
 | `latch_t` / `latch_hook` / `latch_w` | 1.6 / 1 / 8 | lid latch arm thickness / hook height / hook width (v0.3; replaces v0.2's `bump` 0.8) |
 | `latch_slot` / `latch_gap` / `latch_end` | 1.2 / 0.8 / 1.0 | slots freeing the arm: inside / outside through the plate / across the free end |
@@ -224,7 +247,7 @@ Print-orientation check on the exported STLs: lid has no overhangs >45°; body's
 
 ## Hardware
 
-4 × M3 × 5.7 heat-set inserts · 4 × M3 × 8 socket head (feet). Nothing for the boards; the Duo kit's standoffs and screws aren't used.
+4 × M3 × 5.7 heat-set inserts · 4 × M3 × 8 button head (ISO 7380) or socket head (feet) · DIN bracket instead of feet: 4 × M3 × 20. Nothing for the boards; the Duo kit's standoffs and screws aren't used.
 
 ## Files
 

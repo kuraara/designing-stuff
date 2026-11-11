@@ -392,10 +392,11 @@ ftm = trimesh.load(ROOT / "stl" / "feet.stl")
 v = View(30, 3)
 v.loops(clip(section(ftm, [0, 0, 0], [0, 1, 0], xz), -fd / 2 - 1, -1, fd / 2 + 1, fh + 1), "cutl")
 v.dim_h(-fd / 2, fd / 2, 0, -1.6, f"Ø{f1(fd)}")
-v.dim_h(-3.0, 3.0, fh, 1.4, "Ø6")
+cbd, cbh = I["foot_cb"]
+v.dim_h(-cbd / 2, cbd / 2, fh, 1.4, f"Ø{f1(cbd)}")
 v.dim_h(-1.7, 1.7, fh, 3.2, "Ø3.4")
 v.dim_v(0, fh, fd / 2, 1.6)
-v.dim_v(fh - 3.2, fh, -fd / 2, -1.6, "3.2")
+v.dim_v(fh - cbh, fh, -fd / 2, -1.6, f"{f1(cbh)}")
 v.text(0, fh, "counterbore up, as printed", "zt", dv=v.fs * 5.0)
 out["foot"] = v.svg()
 
