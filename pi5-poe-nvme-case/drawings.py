@@ -164,6 +164,7 @@ def clip(loops, u0, v0, u1, v1):
 I = json.loads((ROOT / "info" / "info.json").read_text())
 body = trimesh.load(ROOT / "stl" / "body_asm.stl")
 lid = trimesh.load(ROOT / "stl" / "lid_asm.stl")
+ret = trimesh.load(ROOT / "stl" / "retainer_asm.stl")
 bw, bl, pcb = I["bw"], I["bl"], I["pcb"]
 zd, zdt, zpb, zpt = I["zd"], I["z_duo_t"], I["z_pi_b"], I["z_pi_t"]
 zhb, zht, zhc, zr, H = I["z_hat_b"], I["z_hat_t"], I["z_hat_c"], I["z_roof"], I["H"]
@@ -254,6 +255,7 @@ yb = 28.0
 v = View(xeo - xl)
 v.loops(section(body, [0, yb, 0], [0, 1, 0], xz), "cutf")
 v.loops(section(lid, [0, yb, 0], [0, 1, 0], xz), "cutl")
+v.loops(section(ret, [0, yb, 0], [0, 1, 0], xz), "cutr")
 v.rect(2, zd - drop, 83, zd - 0.01, "ssd", 1)
 v.rect(0, zd, bl, zdt, "pcb"); v.rect(0, zpb, bl, zpt, "pcb")
 v.rect(0, zhb, hat_l, zht, "pcb"); v.rect(1, zht, hat_l - 1, zhc, "env", 1)
@@ -274,19 +276,22 @@ v.dim_h(bl, xei, H, 1.4, f"{f1(xei - bl)}")
 v.dim_h(0, bl, H, 3.2, f"{f1(bl)} boards")
 out["b"] = v.svg()
 
-# ---------------------------------------------------------------- C-C long section along the GPIO-side ledges and prongs
+# ---------------------------------------------------------------- C-C long section along the GPIO-side ledges and retainer fingers
 yc = bw - 0.6
 v = View(xeo - xl)
 v.loops(section(body, [0, yc, 0], [0, 1, 0], xz), "cutf")
 v.loops(section(lid, [0, yc, 0], [0, 1, 0], xz), "cutl")
-v.rect(0, zd, bl, zdt, "pcb"); v.rect(0, zpb, bl, zpt, "pcb")
-v.rect(0, zhb, hat_l, zht, "pcb")
-v.leader(-5, zpb + 1.4, xl - 3, zhb, "prong on the Pi corner", "end")
-v.leader(-5, zd + 1.4, xl - 3, zd + 7, "prong on the Duo corner", "end")
+v.loops(section(ret, [0, yc, 0], [0, 1, 0], xz), "cutr")
+RT = I["ret"]; e0 = RT["edge"]
+v.rect(e0, zd, e0 + bl, zdt, "pcb"); v.rect(e0, zpb, e0 + bl, zpt, "pcb")
+v.rect(e0, zhb, e0 + hat_l, zht, "pcb")
+v.leader(RT["tip"] - 0.3, zpb + 2, xl - 3, zhb, "TPU retainer finger on the Pi corner", "end")
+v.leader(RT["tip"] - 0.3, zd + 2, xl - 3, zd + 7, "finger on the Duo corner", "end")
+v.leader(-4, zr - 1.2, xl - 3, zr + 4, "TPU card retainer", "end")
 v.leader(40, zpb - 1.5, 46, zhb - 6, "upper lip, full length", "start")
 v.leader(40, zd - 1.5, 46, -4, "lower lip, full length", "start")
 v.leader(xei + 0.2, zd + 0.8, xei - 8, zd + 5, "boards stop on the end wall", "end")
-v.dim_h(xm, I["prong_tip"], zr, 1.6, f"{f1(I['prong_tip'] - xm)} prongs")
+v.dim_h(RT["back"], RT["front"], zr, 1.6, f"{f1(RT['front'] - RT['back'])} ring")
 v.dim_v(0, H, xl, -1.8, f"{f1(H)}")
 out["c"] = v.svg()
 
@@ -356,9 +361,6 @@ ui = lambda p: (yo1 + yo0 - p[1], p[2])
 v.loops(section(lid, [xm - lid_t / 2, 0, 0], [1, 0, 0], ui), "panell")
 v.loops(section(lid, [xm + 3.4, 0, 0], [1, 0, 0], ui), "cutl")
 v.loops(section(lid, [-3, 0, 0], [1, 0, 0], ui), "cutl")
-v.leader(m(1), zd + 1.0, yo1 + 4, zd - 4, "Duo prongs", "start")
-v.leader(m(bw - 1), zd + 1.0, yo1 + 4, zd - 4, "", "start")
-v.leader(m(bw - 1), zpb + 1.0, yo1 + 4, zpb + 4, "Pi prong (GPIO side)", "start")
 LT = I["latch"]
 v.leader(m(yi0 + 0.8), (LT["free"] + LT["root"]) / 2 + 3, yo1 + 4, LT["root"] + 2, "flexing arm, fixed at the top", "start")
 v.leader(m(yi0 - 0.5), LT["z"], yo1 + 4, LT["z"] - 6, "latch hook", "start")
@@ -366,6 +368,48 @@ v.dim_v(LT["free"], LT["root"], yo0, -1.8, f"{f1(LT['root'] - LT['free'])} arm")
 v.dim_h(yo0, yo1, 0, -1.8)
 v.dim_v(0, H, yo0, -4.2)
 out["lid"] = v.svg()
+
+# ---------------------------------------------------------------- card retainer, seen from the mouth (cut at x = -4, with the body)
+v = View(yo1 - yo0)
+xr = (RT["back"] + RT["front"]) / 2 + 0.6
+v.loops(section(body, [xr, 0, 0], [1, 0, 0], ui), "cutf")
+v.loops(section(ret, [xr, 0, 0], [1, 0, 0], ui), "cutr")
+for z0, sd in RT["fz"]:
+    yy = 0.9 if sd == 0 else bw - 0.9
+    v.circle(m(yy), z0 + RT["fh"] / 2, 0.9, "port")
+v.leader(m(RT["roof_y"][0]), zr + RT["bump"] / 2, m(RT["roof_y"][0]) + 6, H + 5, "bumps in the roof vents", "start")
+v.leader(m(RT["floor_y"][0]), zf - RT["bump"] / 2, m(RT["floor_y"][0]) + 6, -5, "bumps in the floor vents", "start")
+v.leader(m(0.9), RT["fz"][0][0] + 2, yo1 + 4, RT["fz"][0][0] - 3, "finger, Duo corner", "start")
+v.leader(m(bw - 0.9), RT["fz"][2][0] + 2, yo0 - 4, RT["fz"][2][0] + 6, "finger, Pi corner (GPIO side)", "end")
+v.leader(m(bw - 0.9), RT["fz"][1][0] + 2, yo0 - 4, RT["fz"][1][0] - 3, "finger, Duo corner", "end")
+v.text(m(bw / 2), (zf + zr) / 2, "open: ribbon + air", "zt")
+v.dim_h(yo0, yo1, 0, -3.6)
+out["ret"] = v.svg()
+
+# ---------------------------------------------------------------- retainer details: finger (plan, 3:1) and bump (side, 3:1)
+K = 3
+v = View(14, K)
+zc = RT["fz"][0][0] + RT["fh"] / 2
+u0, u1, w0, w1 = RT["back"] - 0.8, e0 + 4.5, I["y_in"][0] - 1.6, 4.2
+v.loops(clip(section(body, [0, 0, zc], [0, 0, 1], xy), u0, w0, u1, w1), "cutf")
+v.loops(clip(section(ret, [0, 0, zc], [0, 0, 1], xy), u0, w0, u1, w1), "cutr")
+v.rect(e0, 0, u1, w1, "pcb")
+v.leader(e0 + 3, 2.5, u1 + 1.2, 3.6, "Duo board", "start")
+v.leader((RT["front"] + RT["tip"]) / 2 + 0.2, 0.2, u1 + 1.2, -1.4, "finger bends as the board pushes it", "start")
+v.dim_h(e0, RT["tip"], w1, 1.2, f"{f1(RT['tip'] - e0)} preload")
+v.dim_h(RT["back"], RT["front"], w0, -1.4, f"{f1(RT['front'] - RT['back'])} ring")
+out["ret_finger"] = v.svg()
+
+v = View(14, K)
+yb0 = RT["roof_y"][0]
+u0, u1, w0, w1 = RT["back"] - 2.2, RT["front"] + 0.8, zr - RT["wall"] - 0.6, H + 0.6
+v.loops(clip(section(body, [0, yb0, 0], [0, 1, 0], xz), u0, w0, u1, w1), "cutf")
+v.loops(clip(section(ret, [0, yb0, 0], [0, 1, 0], xz), u0, w0, u1, w1), "cutr")
+v.leader(RT["back"] + 1.0, zr + RT["bump"] * 0.6, u1 + 0.6, H + 1.2, "bump in the roof vent", "start")
+v.leader(RT["back"] - 0.3, zr + 1.6, u0 - 0.6, H + 1.2, "catches on the slot end", "end")
+v.dim_v(zr, zr + RT["bump"], u1, 1.2, f"{f1(RT['bump'])}")
+v.text((u0 + u1) / 2, w0, "cut through a roof vent slot", "zt", dv=-v.fs * 1.4)
+out["ret_bump"] = v.svg()
 
 # ---------------------------------------------------------------- latch detail: plan through the GPIO-side hook (4:1)
 K = 4

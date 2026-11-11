@@ -101,6 +101,25 @@ latch_end  = 1.0;   // slot across the arm's free end
 
 /* [Vents] */
 vent_w = 3;  vent_pitch = 6.25;  vent_seg = 24;  vent_bar = 4;
+vent_x = [-7, 83];    // roof and floor vent rows, along X
+function vs_n(ylo, yhi) = floor((yhi - ylo - vent_w) / vent_pitch) + 1;
+function vs_c(i, ylo, yhi) = ylo + ((yhi - ylo) - ((vs_n(ylo, yhi) - 1) * vent_pitch + vent_w)) / 2 + i * vent_pitch + vent_w / 2;
+
+/* [Card retainer] */
+// v0.4: a TPU ring pushed into the mouth behind the boards, before the lid. Three leaning
+// fingers spring against the board edges; four bumps drop into the first roof and floor
+// vent slots and catch on their mouth-side ends. The PLA lid then just closes (no prongs).
+retainer = true;
+ret_fit   = 0.15;     // interference per side against the cavity mouth (TPU squeeze)
+ret_wall  = 2.4;      // ring section
+ret_front = -1.5;     // ring front face (boards' SD edges sit at x = 0.5)
+ret_reach = 0.4;      // finger tips reach this far past the board edge: spring preload
+ret_ft    = 1.8;      // finger width across Y (about 1.3 mm thick across its lean)
+ret_fh    = 4.0;      // finger height (Z)
+ret_bump  = 1.2;      // bump height into the 2.4 mm roof / floor
+ret_bw    = 2.0;      // bump width (slot is 3)
+ret_roof_slots  = [2, 6];   // which roof vent slots (0..8) take the top bumps
+ret_floor_slots = [1, 6];   // which floor vent slots (0..7) take the bottom bumps
 side_vents = true;    // slots in both long walls between the two lips
 
 /* [Feet] */
@@ -239,8 +258,8 @@ module body() {
         // thumb notch to lift the lid
         translate([x_mouth - 0.1, bw / 2 - 8, H - 1.2]) cube([1.6, 16, 2]);
         // vents
-        vent_slots(z_roof - 0.5, H + 0.5, 0, bw, -7, 83);
-        vent_slots(-0.5, zf + 0.5, low_in + 2, bw - low_in - 2, -7, 83);
+        vent_slots(z_roof - 0.5, H + 0.5, 0, bw, vent_x[0], vent_x[1]);
+        vent_slots(-0.5, zf + 0.5, low_in + 2, bw - low_in - 2, vent_x[0], vent_x[1]);
         if (side_vents) side_slots();
         // feet: heat-set insert holes + locating recesses
         for (x = foot_x, y = [y_foot, bw - y_foot]) {
@@ -302,14 +321,55 @@ module lid_asm() {
             if (latch) for (s = [0, 1]) latch_cuts(s);
         }
         if (latch) for (s = [0, 1]) latch_hook(s);
-        // prongs, clear of the PCIe ribbon in the middle:
+        // prongs (v0.2/v0.3 only; with the retainer the boards are held by it instead):
         // both corners of the Duo, and the Pi's GPIO-side corner only
         // (its USB-C-side corner is left free: the Pi 5 power button is by the USB-C)
-        for (yr = [[yi0, 1.5], [bw - 1.5, yi1]])
-            translate([x_mouth - 0.01, yr[0], zd - 0.2]) cube([prong_tip - x_mouth + 0.01, yr[1] - yr[0], pcb + 1.2]);
-        translate([x_mouth - 0.01, bw - 1.5, z_pi_b - 0.2]) cube([prong_tip - x_mouth + 0.01, yi1 - bw + 1.5, pcb + 1.2]);
+        if (!retainer) {
+            for (yr = [[yi0, 1.5], [bw - 1.5, yi1]])
+                translate([x_mouth - 0.01, yr[0], zd - 0.2]) cube([prong_tip - x_mouth + 0.01, yr[1] - yr[0], pcb + 1.2]);
+            translate([x_mouth - 0.01, bw - 1.5, z_pi_b - 0.2]) cube([prong_tip - x_mouth + 0.01, yi1 - bw + 1.5, pcb + 1.2]);
+        }
     }
 }
+
+// ------------------------------------------------------------ CARD RETAINER (TPU), built in place
+r_edge = x_end_in - bl;                            // boards' SD edges with the boards home (0.5)
+r_tip  = r_edge + ret_reach;                       // finger tips, unloaded
+r_back = vent_x[0] + vent_w / 2 - sqrt(pow(vent_w / 2, 2) - pow(ret_bw / 2, 2)) + 0.1;  // bumps' back = ring back
+r_fz   = [[zd + 0.2, 0], [zd + 0.2, 1], [z_pi_b + 0.2, 1]];   // [finger z0, side]: Duo both sides, Pi GPIO side
+r_roof_y  = [for (i = ret_roof_slots)  vs_c(i, 0, bw)];
+r_floor_y = [for (i = ret_floor_slots) vs_c(i, low_in + 2, bw - low_in - 2)];
+
+module ret_finger(z0, s) {
+    // leaning slab from a boss on the ring's side bar to the board edge near its corner;
+    // it bends as the board pushes its tip, so the preload stays a few newtons
+    mir = s == 0 ? 0 : 1;
+    translate([0, mir * bw, 0]) mirror([0, mir, 0]) {
+        translate([r_back, y_in0 + ret_wall - 0.01, z0]) cube([ret_front - r_back, 1.0, ret_fh]);   // boss to y = -0.6
+        hull() {
+            translate([ret_front - 0.5, -2.0, z0]) cube([0.5, ret_ft, ret_fh]);
+            translate([r_tip - 0.3, 0.9 - ret_ft / 2, z0]) cube([0.3, ret_ft, ret_fh]);
+        }
+    }
+}
+module ret_bump(y, top) {
+    // 90 deg face against the slot's mouth-side end (prints on the bed), 45 deg lead-in
+    zs = top ? z_roof + ret_fit - 0.01 : zf - ret_fit + 0.01; sg = top ? 1 : -1;
+    translate([0, y + ret_bw / 2, zs]) rotate([90, 0, 0]) linear_extrude(ret_bw)
+        polygon([[r_back, 0], [r_back, sg * ret_bump], [r_back + 2.0, sg * ret_bump], [r_back + 2.0 + ret_bump, 0]]);
+}
+module retainer_asm() {
+    union() {
+        along_x(r_back, ret_front) difference() {
+            rrect2([y_in0 - ret_fit, zf - ret_fit], [y_in1 + ret_fit, z_roof + ret_fit], 1.5);
+            rrect2([y_in0 + ret_wall, zf + ret_wall], [y_in1 - ret_wall, z_roof - ret_wall], 1.0);
+        }
+        for (f = r_fz) ret_finger(f[0], f[1]);
+        for (y = r_roof_y) ret_bump(y, true);
+        for (y = r_floor_y) ret_bump(y, false);
+    }
+}
+module retainer_print() { rotate([0, -90, 0]) translate([-r_back, 0, 0]) retainer_asm(); }   // back face on the bed
 module lid_print() { rotate([0, -90, 0]) translate([-(x_mouth - lid_t), 0, 0]) lid_asm(); }
 
 // printed counterbore-up (no overhang); fit with the counterbore facing the desk
@@ -433,6 +493,9 @@ module info() {
       ",\"hook\":", latch_hook, ",\"w\":", latch_w, ",\"hx\":", l_hx, ",\"slot\":", latch_slot, ",\"gap\":", latch_gap,
       ",\"flex\":", l_flex, ",\"strain\":", l_strain, "}", ",\"sv_z\":", sv_z,
       ",\"foot\":[", foot_d, ",", foot_h, "],\"foot_x\":", foot_x, ",\"y_foot\":", y_foot,
+      ",\"ret\":{\"back\":", r_back, ",\"front\":", ret_front, ",\"edge\":", r_edge, ",\"tip\":", r_tip, ",\"fz\":", r_fz,
+      ",\"roof_y\":", r_roof_y, ",\"floor_y\":", r_floor_y, ",\"bump\":", ret_bump, ",\"bw\":", ret_bw, ",\"wall\":", ret_wall,
+      ",\"fit\":", ret_fit, ",\"fh\":", ret_fh, ",\"ft\":", ret_ft, "}",
       ",\"foot_cb\":", foot_cb, ",\"foot_screw\":", foot_screw, ",\"foot_seat\":", foot_seat, ",\"foot_tip\":", foot_tip,
       ",\"foot_recess\":", foot_recess, ",\"insert\":[", insert_d, ",", insert_len, ",", insert_depth, "]",
       ",\"din\":{\"uc\":", din_uc, ",\"H\":", din_H, ",\"plate\":", din_plate, ",\"gap\":", din_gap, ",\"ledge\":", din_ledge,
@@ -448,6 +511,8 @@ else if (part == "body_asm") body();
 else if (part == "lid") lid_print();
 else if (part == "lid_asm") lid_asm();
 else if (part == "feet") feet();
+else if (part == "retainer") retainer_print();
+else if (part == "retainer_asm") retainer_asm();
 else if (part == "din") din_bracket();                                 // rail side on the bed
 else if (part == "din_asm") translate([0, 0, -din_H]) din_bracket();   // in place under the case
 else if (part == "din_rail") translate([0, 0, -din_H]) din_rail();

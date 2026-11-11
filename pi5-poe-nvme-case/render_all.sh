@@ -3,7 +3,7 @@
 # Needs OpenSCAD 2021+.
 cd "$(dirname "$0")"; mkdir -p stl info
 openscad -D 'part="info"' -o /tmp/_pi5_info.stl pi5_case.scad 2>&1 | sed -n 's/^ECHO: "INFO\(.*\)"$/\1/p' > info/info.json
-for P in body body_asm lid lid_asm feet din din_asm din_rail; do
+for P in body body_asm lid lid_asm retainer retainer_asm feet din din_asm din_rail; do
   openscad -D "part=\"$P\"" -o stl/$P.stl pi5_case.scad >/dev/null 2>&1 && echo "done $P" &
 done
 # comparison: the same body with 3 mm walls / floor / roof / end
@@ -14,6 +14,7 @@ mkdir -p print
 python3 - <<'PY'
 import trimesh
 for src, dst in [("body", "pi5_case_body_PETG"), ("lid", "pi5_case_lid_PLA"),
+                 ("retainer", "pi5_case_card_retainer_TPU"),
                  ("feet", "pi5_case_feet_x4_TPU"), ("din", "pi5_case_din_bracket_PETG")]:
     m = trimesh.load(f"stl/{src}.stl")
     m.apply_translation(-m.bounds[0])

@@ -77,6 +77,7 @@ STRONG = ["--perimeters", "4", "--fill-density", "40%", "--fill-pattern", "gyroi
 JOBS = [  # (stl stem, material, profile, extra CLI args, result key)
     ("body", "PETG", "draft", [], "PETG"), ("body", "PLA", "draft", [], "PLA"), ("body_wall3", "PETG", "draft", [], "PETG"),
     ("lid", "PLA", "speed", [], "PLA"), ("lid", "PETG", "speed", [], "PETG"),          # v0.3 lid: 0.20 mm for the hooks
+    ("retainer", "TPU", "draft", [], "TPU"),                                        # v0.4 card retainer
     ("feet", "TPU", "draft", [], "TPU"),
     ("din", "PETG", "draft", [], "PETG"), ("din", "PETG", "draft", STRONG, "PETG_strong")]
 results = {}

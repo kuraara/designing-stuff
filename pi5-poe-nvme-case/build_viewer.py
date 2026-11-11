@@ -16,7 +16,7 @@ def b64(name):
     return base64.b64encode(buf.getvalue()).decode()
 
 
-DATA = {k: b64(k) for k in ("body_asm", "lid_asm", "feet", "din", "din_rail")}
+DATA = {k: b64(k) for k in ("body_asm", "lid_asm", "retainer_asm", "feet", "din", "din_rail")}
 
 html = """<title>Pi 5 Case Viewer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -90,6 +90,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
       <button type="button" id="tab-asm" data-mode="asm" aria-pressed="true">Assembly</button>
       <button type="button" id="tab-body" data-mode="body" aria-pressed="false">Body</button>
       <button type="button" id="tab-lid" data-mode="lid" aria-pressed="false">Lid</button>
+      <button type="button" id="tab-ret" data-mode="ret" aria-pressed="false">Retainer</button>
       <button type="button" id="tab-feet" data-mode="feet" aria-pressed="false">Feet</button>
       <button type="button" id="tab-din" data-mode="din" aria-pressed="false">DIN bracket</button>
     </div>
@@ -113,7 +114,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
     <div class="ctl asm-only"><button type="button" id="t-cut" aria-pressed="false">Section</button>
       <input type="range" id="cut" min="0" max="100" step="0.5" value="54" aria-label="Section position along the case" disabled>
       <output id="cut-out" for="cut">X 54 mm</output></div>
-    <div class="legend asm-only" aria-label="Colours"><span><i style="background:#9fb2b7"></i>body</span><span><i style="background:#5b84c4"></i>lid, feet</span><span><i style="background:#3c9a5f"></i>PCBs</span><span><i style="background:#8a6fd1"></i>SSDs</span><span><i style="background:#d39a2a"></i>HAT parts</span><span><i style="background:#c8322b"></i>DIN bracket</span></div>
+    <div class="legend asm-only" aria-label="Colours"><span><i style="background:#9fb2b7"></i>body</span><span><i style="background:#5b84c4"></i>lid, feet</span><span><i style="background:#2f9e9a"></i>TPU retainer</span><span><i style="background:#3c9a5f"></i>PCBs</span><span><i style="background:#8a6fd1"></i>SSDs</span><span><i style="background:#d39a2a"></i>HAT parts</span><span><i style="background:#c8322b"></i>DIN bracket</span></div>
   </div>
 
   <section class="req" aria-labelledby="req-h">
@@ -128,9 +129,10 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
         <tr><td>3 mm walls optional; use ribs if they save print time</td><td>2.4 mm walls stiffened by the full-length lips. Saves about an hour on the body</td></tr>
         <tr><td>2–3 parts: body and lid</td><td>Body, lid, and 4 feet</td></tr>
         <tr><td>Lid on an end; the Pi slides in like a tube</td><td>Lid at the SD end. Boards slide in USB first and stop on the closed USB end</td></tr>
-        <tr><td>Lid screwed with M3 or clicked in, TPU for a click fit</td><td>Click-in lid. v0.3 is PLA with two flexing latch arms, because the TPU bumps were too small to print. Its prongs locate the boards</td></tr>
+        <tr><td>Lid screwed with M3 or clicked in, TPU for a click fit</td><td>Click-in PLA lid with two flexing latch arms (v0.3; the TPU bumps were too small to print)</td></tr>
+        <tr><td>After the first print: hold the boards with a separate TPU insert, then the PLA lid goes on</td><td>TPU card retainer (v0.4): a press-fit ring with three spring fingers on the board corners, locked by bumps in the first vent slots</td></tr>
         <tr><td>Vents top and bottom; more space around the base and HAT for heat</td><td>Roof and floor vents, side vents between the boards, 4 mm air down each side</td></tr>
-        <tr><td>Feet screwed on with M3 counterbored screws</td><td>4 TPU feet, M3 × 8 into heat-set inserts</td></tr>
+        <tr><td>Feet screwed on with M3 counterbored screws</td><td>4 TPU feet (v0.4), M3 × 8 button or socket heads into heat-set inserts</td></tr>
         <tr><td>SIM-style SD card tray</td><td><span class="st dropped">dropped</span>At your call. The PCIe ribbon covers the slot, so fit the card before the ribbon</td></tr>
         <tr><td>DIN rail bracket on the feet footprint: plenty of airflow clearance, sturdy enough for rough installing and removing</td><td>Bolts to the 4 foot inserts (M3 × 20). 14 mm air gap under the floor vents plus open windows. Full-width fixed hook, a latch with an over-travel stop, and 20 mm side ribs</td></tr>
         <tr><td>2D projections before the 3D model</td><td>Drawings page first, STLs once you'd answered the questions</td></tr>
@@ -173,7 +175,7 @@ const DATA = __DATA__;
     g.setAttribute("normal", new THREE.BufferAttribute(nor, 3));
     return g;
   }
-  const G = { body: parseSTL(DATA.body_asm), lid: parseSTL(DATA.lid_asm), feet: parseSTL(DATA.feet), din: parseSTL(DATA.din), rail: parseSTL(DATA.din_rail) };
+  const G = { body: parseSTL(DATA.body_asm), lid: parseSTL(DATA.lid_asm), ret: parseSTL(DATA.retainer_asm), feet: parseSTL(DATA.feet), din: parseSTL(DATA.din), rail: parseSTL(DATA.din_rail) };
 
   // ---------- renderer / scene (Z up, like the CAD model)
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -211,6 +213,8 @@ const DATA = __DATA__;
   const asm = new THREE.Group();
   const bodyA = solid(G.body, BODY); asm.add(bodyA);
   const lidA = solid(G.lid, LID); asm.add(lidA);
+  const RETC = 0x2f9e9a;
+  const retA = solid(G.ret, RETC); asm.add(retA);
   const feetA = new THREE.Group();
   const fd = I.foot[0], fh = I.foot[1];
   for (const x of I.foot_x) for (const y of [I.y_foot, I.bw - I.y_foot]) {
@@ -260,6 +264,7 @@ const DATA = __DATA__;
   const plates = {
     body: { grp: new THREE.Group(), geom: onBed(G.body, bodyPrint), color: BODY },
     lid: { grp: new THREE.Group(), geom: onBed(G.lid, lidPrint), color: LID },
+    ret: { grp: new THREE.Group(), geom: onBed(G.ret, new THREE.Matrix4().makeRotationY(-Math.PI / 2).multiply(T(-I.ret.back, 0, 0))), color: RETC },
     feet: { grp: new THREE.Group(), geom: onBed(G.feet, null), color: LID },
     din: { grp: new THREE.Group(), geom: onBed(G.din, null), color: DINC },
   };
@@ -267,15 +272,16 @@ const DATA = __DATA__;
 
   // ---------- info cards
   const PT = TIMES;
-  const total = PT.body.PETG.min + PT.lid.PLA.min + PT.feet.TPU.min;
+  const total = PT.body.PETG.min + PT.lid.PLA.min + PT.retainer.TPU.min + PT.feet.TPU.min;
   const CARDS = {
     asm: ["Assembly", [["Outside", f1(I.L_total) + " × " + f1(I.W) + " × " + f1(I.H)], ["On feet", f1(I.H + I.foot[1] - 0.6) + " high"], ["Print, all", hm(total)], ["Boards", "each on its own ledge"]]],
     body: ["Body", [["Material", "PETG"], ["On the bed", "USB end down"], ["Size", ""], ["Print", hm(PT.body.PETG.min) + " · " + Math.round(PT.body.PETG.g) + " g"]]],
-    lid: ["Lid v0.3", [["Material", "PLA (or PETG), 0.20 mm"], ["On the bed", "outer face down"], ["Size", ""], ["Print", hm(PT.lid.PLA.min) + " · " + Math.round(PT.lid.PLA.g) + " g"], ["Latch", "2 flexing arms, hooks in the upper side windows"]]],
+    lid: ["Lid v0.4", [["Material", "PLA (or PETG), 0.20 mm"], ["On the bed", "outer face down"], ["Size", ""], ["Print", hm(PT.lid.PLA.min) + " · " + Math.round(PT.lid.PLA.g) + " g"], ["Latch", "2 flexing arms, hooks in the upper side windows"]]],
+    ret: ["Card retainer v0.4", [["Material", "TPU, eSun 95A FAST"], ["On the bed", "back face down"], ["Size", ""], ["Print", hm(PT.retainer.TPU.min) + " · " + Math.round(PT.retainer.TPU.g) + " g"], ["Holds", "3 spring fingers on the board corners"], ["Locks", "4 bumps in the first roof/floor vents"]]],
     din: ["DIN bracket", [["Material", "PETG"], ["On the bed", "rail side down"], ["Size", ""], ["Print", hm(PT.din.PETG_strong.min) + " at 4 walls, 40% gyroid · " + Math.round(PT.din.PETG_strong.g) + " g"], ["Fixing", "4 × M3 × 20 into the foot inserts"], ["Rail", "TS35 (35 × 7.5 or 15)"]]],
     feet: ["Feet × 4", [["Material", "TPU, eSun 95A FAST"], ["On the bed", "counterbore up"], ["Size", "Ø" + f1(I.foot[0]) + " × " + f1(I.foot[1])], ["Print", hm(PT.feet.TPU.min) + " · " + Math.round(PT.feet.TPU.g) + " g"]]],
   };
-  for (const k of ["body", "lid", "din"]) {
+  for (const k of ["body", "lid", "ret", "din"]) {
     const b = plates[k].geom.boundingBox || (plates[k].geom.computeBoundingBox(), plates[k].geom.boundingBox);
     const s = new THREE.Vector3(); plates[k].geom.boundingBox.getSize(s);
     CARDS[k][1][2][1] = f1(s.x) + " × " + f1(s.y) + " × " + f1(s.z) + " tall";
