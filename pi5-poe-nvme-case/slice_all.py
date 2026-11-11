@@ -4,8 +4,8 @@ collect print time + filament. Body in PETG (and PLA for reference), lid in PLA 
 the project's eSun TPU 95A presets (printer-profiles/esun-tpu95a-mk3s): FAST for estimates, and the slower forum
 baseline for the committed feet G-code. Both are rebuilt here from the vendor 'Generic FLEX' + the same overrides.
 
-Also writes committed G-code to gcode/: the four feet as separate objects, sliced with
-'Complete individual objects' (sequential printing), forum preset.
+Also writes committed G-code to gcode/ (forum preset): the four feet as separate objects with
+'Complete individual objects' (sequential printing), and the card retainer.
 
 PrusaSlicer 2.7 CLI can't pick vendor presets by name, so the vendor bundle is flattened
 (resolving `inherits`) into one .ini per material."""
@@ -121,4 +121,19 @@ else:
     mins, grams = round(to_min(TIME_RE.search(g).group(1)), 1), float(GRAM_RE.search(g).group(1))
     results.setdefault("feet", {})["TPUforum_sequential"] = {"min": mins, "g": grams}
     print("feet TPUforum_sequential", mins, "min", grams, "g ->", gout.relative_to(root), flush=True)
+# ---- committed G-code: single objects, centred on the bed
+GCODE = [  # (stl stem, material, profile, extra CLI args, output name)
+    ("retainer", "TPUforum", "draft", [], "pi5_case_card_retainer_TPU.gcode"),   # back face down, slower TPU preset
+]
+for stem, mat, prof, extra, name in GCODE:
+    gout = root / "gcode" / name
+    cmd = ["prusa-slicer", "--export-gcode", "--load", str(work / f"{mat}_{prof}.ini"), *extra,
+           "--center", "125,105", "--ensure-on-bed", "-o", str(gout), str(root / "stl" / f"{stem}.stl")]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode or not gout.exists():
+        print("FAIL", name, (r.stderr or r.stdout)[-600:], file=sys.stderr); continue
+    g = gout.read_text(errors="ignore")
+    mins, grams = round(to_min(TIME_RE.search(g).group(1)), 1), float(GRAM_RE.search(g).group(1))
+    results.setdefault(stem, {})[f"{mat}_gcode"] = {"min": mins, "g": grams}
+    print(stem, f"{mat}_gcode", mins, "min", grams, "g ->", gout.relative_to(root), flush=True)
 (root / "print_times.json").write_text(json.dumps(results, indent=1))
