@@ -20,7 +20,10 @@ def f1(v):
 L, W, H = I["L_total"], I["W"], I["H"]
 feet_h = I["foot"][1] - 0.6
 body_p, body3 = T["body"]["PETG"], T["body_wall3"]["PETG"]
-lid_t = T["lid"]["TPU"]
+lid_t = T["lid"]["PLA"]
+lid_g = T["lid"]["PETG"]
+din_s = T["din"]["PETG_strong"]
+LT = I["latch"]
 feet = T["feet"]["TPU"]
 total = body_p["min"] + lid_t["min"] + feet["min"]
 saved = body3["min"] - body_p["min"]
@@ -32,11 +35,11 @@ GROUPS = [
         ("ledge_win", "Detail · ledges at the port window (3:1)", "A chunky USB-C plug's overmold hangs about 2 mm below the Pi's board edge. Along the 42 mm port window the upper lip's outer half drops 2.5 mm so the plug can seat; the 1 mm ledge under the Pi carries on, tied to the wall lower down."),
     ]),
     ("Lengthwise", [
-        ("c", "Section C–C · along the GPIO-side ledges", "Both lips run the full length. The boards slide in from the SD end, USB first, together (the ribbon joins them) and stop on the closed end wall. TPU prongs on the lid push both boards' corners, preloading them against that wall."),
+        ("c", "Section C–C · along the GPIO-side ledges", "Both lips run the full length. The boards slide in from the SD end, USB first, together (the ribbon joins them) and stop on the closed end wall. Prongs on the lid locate both boards' corners, leaving them 0.2 mm of end play."),
         ("b", "Section B–B · down the middle", "Centre line, through the first USB stack. The PCIe ribbon loops round the SD end of the boards; there is 10 mm for it between the boards and the lid."),
     ]),
     ("Outside", [
-        ("side", "Side elevation · HDMI / USB-C side", "One 42 × 11 window covers USB-C and both micro HDMI, sized for a dock cable's overmold. Below it, slots vent the space between the two boards. The two small windows by the lid are the snap catches. The other long side has the same vents without the port window."),
+        ("side", "Side elevation · HDMI / USB-C side", "One 42 × 11 window covers USB-C and both micro HDMI, sized for a dock cable's overmold. Below it, slots vent the space between the two boards. Near the lid, the upper small window takes the lid's latch hook; the lower one is now just a vent. The other long side has the same vents without the port window."),
         ("end", "USB / RJ45 end", "The closed end of the body. It prints first, flat on the bed. Cut-outs are 0.5 mm clear of each jack."),
         ("top", "Top", "Roof vents: 3 mm slots on a 6.25 mm pitch in three rows. The bars between rows stiffen the roof."),
         ("bottom", "Bottom", "Floor vents under the SSDs. M3 heat-set inserts for the four feet sit in the thick SSD-bay walls, inside 0.6 mm locating recesses."),
@@ -47,7 +50,8 @@ GROUPS = [
         ("din_clip", "Bracket · clip on the rail (2:1)", "A fixed hook runs the full width on one flange. The other flange gets a latch on four flexures with a lead-in ramp, so it snaps on when pushed. To remove it, lever the pull tab with a screwdriver; a stop limits the latch to 2.2 mm of travel so it can't be overbent, and the hook stays engaged even then. Rail contact is spread across the bracket's full width."),
     ]),
     ("Lid and feet", [
-        ("lid", "Lid · inside face", "TPU. A 6 mm skirt locates it in the mouth and four bumps click into the side windows. Three prongs push the boards home: both Duo corners and the Pi's GPIO-side corner. The Pi's other corner is left free because its power button sits by the USB-C."),
+        ("lid", "Lid · inside face", "v0.3, PLA or PETG. A 6 mm skirt locates it in the mouth. On each long side, slots cut a 19 mm arm out of the skirt, fixed at its top end; its hook clicks into the body's upper side window. Three prongs locate the boards: both Duo corners and the Pi's GPIO-side corner. The Pi's other corner is left free because its power button sits by the USB-C."),
+        ("latch", "Detail · latch in the window (4:1)", f"Plan cut through the hook. The arm is {f1(LT['t'])} mm thick and bends sideways, in the plane of the print layers, so PLA flexes along its filaments; at the {LT['flex']:.2f} mm it moves to pass the wall, the strain is about {LT['strain'] * 100:.1f}%. The hook's lower face is a 45° overhang as printed; the lead-in is gentler, so it pushes in more easily than it pulls out."),
         ("foot", "Foot", "TPU, Ø14 × 5, printed counterbore-up. Fit it counterbore toward the desk: M3 × 8 socket head in the 3.2 mm counterbore, into a heat-set insert in the case floor."),
     ]),
 ]
@@ -98,7 +102,13 @@ FOLLOWUPS = ["I’d prefer the cross section be like this  [second sketch]",
              "3. Not fussed, the gpio pins hold it in pretty snugly",
              "Let’s create another component that uses the footprint of the feet to attach it to the case.",
              "It will be a bracket to mount it on a DIN rail",
-             "Leave plenty of clearance for the airflow, make sure the bracket is sturdy and rigid as people may be rough installing and removing it"]
+             "Leave plenty of clearance for the airflow, make sure the bracket is sturdy and rigid as people may be rough installing and removing it",
+             "",
+             "11 Nov, after printing:",
+             "The case printed well, the little tabs on the lid did not print at all",
+             "PLA might be able to do the job if you make the tabs thin enough to flex a little",
+             "The rails are doing a good job of securing the nvme base",
+             "I can shake the case and the base is secure"]
 
 html = f"""<title>Pi 5 PoE NVMe Case</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -260,10 +270,10 @@ code {{ font: 13px var(--f-mono); background: var(--paper); padding: 1px 4px; bo
 
 <main class="wrap">
   <header class="intro">
-    <p class="eyebrow">Enclosure study · v0.2 · drawings + STLs · 1 Nov 2026</p>
+    <p class="eyebrow">Enclosure study · v0.3 · body printed, lid revised · 11 Nov 2026</p>
     <h1>Pi 5 PoE NVMe Case</h1>
-    <p class="lede">A slide-in tube for a Raspberry Pi 5 with the <b>Waveshare PoE HAT (G)</b> on its header and a <b>Pimoroni NVMe Base Duo</b> underneath. No screws or standoffs in either board: <b>each board rests on its own ledge</b>, the PCIe ribbon is the only link between them, and a <b>click-in TPU lid</b> at the SD end pushes both home against the closed USB end. The body prints standing on its USB end, so the ledges, vents and ports need no supports.</p>
-    <div class="chips"><span class="chip">PoE HAT (G) · WS-27670</span><span class="chip">NVMe Base Duo · PIM704</span><span class="chip">Pi 5 + Active Cooler</span><span class="chip">PETG body · TPU lid + feet</span><span class="chip">Prusa MK3S+</span></div>
+    <p class="lede">A slide-in tube for a Raspberry Pi 5 with the <b>Waveshare PoE HAT (G)</b> on its header and a <b>Pimoroni NVMe Base Duo</b> underneath. No screws or standoffs in either board: <b>each board rests on its own ledge</b>, the PCIe ribbon is the only link between them, and a <b>click-in PLA lid</b> at the SD end locates both against the closed USB end. The body prints standing on its USB end, so the ledges, vents and ports need no supports.</p>
+    <div class="chips"><span class="chip">PoE HAT (G) · WS-27670</span><span class="chip">NVMe Base Duo · PIM704</span><span class="chip">Pi 5 + Active Cooler</span><span class="chip">PETG or PLA body · PLA lid · TPU feet</span><span class="chip">Prusa MK3S+</span></div>
   </header>
 
   <dl class="spec">
@@ -274,7 +284,18 @@ code {{ font: 13px var(--f-mono); background: var(--paper); padding: 1px 4px; bo
   </dl>
 
   <section aria-labelledby="ask-h">
-    <h2 id="ask-h">Settled, files sent</h2>
+    <h2 id="ask-h">Print test, 11 Nov</h2>
+    <div class="ask">
+      <ul>
+        <li><b>Body: printed well</b> (PLA, 10 Nov). The ledges hold the NVMe Base Duo; you shook the case and the base stayed put. No change to the body, so no reprint.</li>
+        <li><b>TPU lid: the snap bumps came out as faint nubs.</b> The slicer did include them, but they were only 0.3–0.8 mm proud over five 0.3 mm layers, which TPU smoothed away. Even printed perfectly, only 0.55 mm would have reached into the windows.</li>
+        <li><b>v0.3 lid: PLA, with flexing latch arms</b> (your suggestion). One arm per long side, cut free by slots and fixed at the top. Its 1 mm hook clicks into the upper side window that's already in your body. The toolpath now shows the full 1.0 mm hook over 12 layers. Print only the new lid.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="set-h">
+    <h2 id="set-h">Settled</h2>
     <div class="ask settled">
       <ul>
         <li><b>SSDs: Samsung 980 series.</b> Single-sided, 2.38 mm, no heatsink. On Pimoroni's 5 mm SSD standoffs they reach about 7.4 mm below the Duo, inside the {f1(I['drive_drop'])} mm allowed.</li>
@@ -282,20 +303,20 @@ code {{ font: 13px var(--f-mono); background: var(--paper); padding: 1px 4px; bo
         <li><b>HAT stays on its headers.</b> No hold-down ribs.</li>
         <li><b>SD tray dropped.</b> Fit the microSD card before the PCIe ribbon.</li>
       </ul>
-      <p>The print-ready STLs are in the chat: body (PETG), lid (TPU), four feet (TPU). Each is already oriented for the bed.</p>
+      <p>The print-ready STLs are in the chat: body (PETG), lid (PLA), four feet (TPU), DIN bracket (PETG). Each is already oriented for the bed.</p>
     </div>
   </section>
 
   <section class="times" aria-labelledby="pt-h">
     <h2 id="pt-h">Print time</h2>
     <div class="tbl"><table>
-      <caption>PrusaSlicer 2.7 · 0.30 mm DRAFT · 0.4 nozzle · MK3S+</caption>
+      <caption>PrusaSlicer 2.7 · 0.30 mm DRAFT (lid 0.20 mm SPEED) · 0.4 nozzle · MK3S+</caption>
       <thead><tr><th></th><th scope="col">Material</th><th scope="col">Time</th></tr></thead>
       <tbody>
         <tr><th scope="row">Body</th><td class="mat">PETG, USB end on the bed</td><td>{hm(body_p['min'])}<span>{body_p['g']:.0f} g</span></td></tr>
-        <tr><th scope="row">Lid</th><td class="mat">TPU, your eSun 95A FAST preset</td><td>{hm(lid_t['min'])}<span>{lid_t['g']:.0f} g</span></td></tr>
+        <tr><th scope="row">Lid</th><td class="mat">PLA, 0.20 mm, outer face on the bed (PETG: {hm(lid_g['min'])})</td><td>{hm(lid_t['min'])}<span>{lid_t['g']:.0f} g</span></td></tr>
         <tr><th scope="row">Feet × 4</th><td class="mat">TPU, eSun 95A FAST</td><td>{hm(feet['min'])}<span>{feet['g']:.0f} g</span></td></tr>
-        <tr><th scope="row">DIN bracket</th><td class="mat">PETG, rail side down. Draft: {hm(T['din']['PETG']['min'])}. Recommended 4 walls, 40% gyroid</td><td>2h 24m<span>43 g</span></td></tr>
+        <tr><th scope="row">DIN bracket</th><td class="mat">PETG, rail side down. Draft: {hm(T['din']['PETG']['min'])}. Recommended 4 walls, 40% gyroid</td><td>{hm(din_s['min'])}<span>{din_s['g']:.0f} g</span></td></tr>
         <tr class="tot"><th scope="row">Case + feet</th><td></td><td>{hm(total)}</td></tr>
       </tbody>
     </table></div>
@@ -304,7 +325,7 @@ code {{ font: 13px var(--f-mono); background: var(--paper); padding: 1px 4px; bo
 
   <section aria-labelledby="dw-h">
     <h2 id="dw-h">Drawings</h2>
-    <div class="legend" aria-label="Drawing legend"><span><i class="lg-cut"></i>body (cut)</span><span><i class="lg-lid"></i>lid / TPU parts</span><span><i class="lg-pcb"></i>PCB</span><span><i class="lg-ssd"></i>SSD zone</span><span><i class="lg-env"></i>HAT parts</span><span><i class="lg-rib"></i>PCIe ribbon</span><span><i class="lg-dim"></i>dimension (mm)</span></div>
+    <div class="legend" aria-label="Drawing legend"><span><i class="lg-cut"></i>body (cut)</span><span><i class="lg-lid"></i>lid / feet</span><span><i class="lg-pcb"></i>PCB</span><span><i class="lg-ssd"></i>SSD zone</span><span><i class="lg-env"></i>HAT parts</span><span><i class="lg-rib"></i>PCIe ribbon</span><span><i class="lg-dim"></i>dimension (mm)</span></div>
     <div class="dwgs">{''.join(cards)}</div>
   </section>
 
@@ -334,9 +355,9 @@ code {{ font: 13px var(--f-mono); background: var(--paper); padding: 1px 4px; bo
         <li>Fit the SSDs to the Duo and the ribbon to both boards as Pimoroni describe, but leave the standoffs out. Plug the HAT onto the Pi's GPIO and PoE headers. Fit your microSD card now if you use one.</li>
         <li>Press four M3 × 5.7 heat-set inserts into the floor.</li>
         <li>Fold the Duo under the Pi and slide both in from the open end, USB first: the Duo onto the lower ledges, the Pi onto the upper ledges. Push them together by their SD edges until they stop on the end wall.</li>
-        <li>Click the lid in. Its prongs push on the boards' corners.</li>
+        <li>Push the lid in until both latches click into the upper side windows. Its prongs sit against the boards' corners.</li>
         <li>Screw the TPU feet on with M3 × 8 socket heads.</li>
-        <li>To open, lift the lid's top edge at the thumb notch and pull.</li>
+        <li>To open, pull the lid out by the thumb notch at the top. If it's tight, press both hooks in through the side windows with a small screwdriver as you pull.</li>
       </ol></div>
     </details>
 
@@ -344,9 +365,9 @@ code {{ font: 13px var(--f-mono); background: var(--paper); padding: 1px 4px; bo
       <summary>Printing</summary>
       <div class="d-body"><ul>
         <li>Body: USB end flat on the bed, PETG. Every wall, the lip and the drive-bay walls are vertical in that orientation. Vent slots and windows only bridge 3–10 mm. No supports, no brim.</li>
-        <li>Lid: outer face on the bed, TPU. The snap bumps have a 45° underside. The prongs grow straight up from the plate.</li>
+        <li>Lid: outer face on the bed, PLA (PETG also works and is more forgiving), 0.20 mm layers, no supports, no brim. The arm slots go right through the plate; check they're clear on the first layer. The hooks' undersides are 45° overhangs.</li>
         <li>Feet: TPU, counterbore side up (no overhang). Turn them over to fit.</li>
-        <li>The click is set by <code>bump</code> (0.8) and <code>fit</code> (0.25). If the lid is too stiff or too loose, change those and reprint only the lid ({hm(lid_t['min'])}).</li>
+        <li>The click is set by <code>latch_t</code> ({f1(LT['t'])}, arm thickness) and <code>latch_hook</code> ({f1(LT['hook'])}). Too stiff: thin the arm to 1.2. Too loose: raise the hook to 1.2. Either way, reprint only the lid ({hm(lid_t['min'])}).</li>
       </ul></div>
     </details>
 
@@ -362,7 +383,7 @@ code {{ font: 13px var(--f-mono); background: var(--paper); padding: 1px 4px; bo
     <details>
       <summary>Your brief (verbatim)</summary>
       <div class="d-body"><pre class="brief">{BRIEF}</pre><p class="note">With a first sketch of the side profile: thin upper wall, a lip the board sits on, a thicker wall below.</p>
-      <p class="note">Follow-ups, 1 Nov:</p><pre class="brief">{chr(10).join(FOLLOWUPS)}</pre><p class="note">The second sketch: an upper lip with the Pi resting on top, a recess in the wall where the NVMe board's edge runs, a lower lip the NVMe board rests on, then the wall steps back out below.</p></div>
+      <p class="note">Follow-ups:</p><pre class="brief">{chr(10).join(FOLLOWUPS)}</pre><p class="note">The second sketch: an upper lip with the Pi resting on top, a recess in the wall where the NVMe board's edge runs, a lower lip the NVMe board rests on, then the wall steps back out below.</p></div>
     </details>
   </section>
 

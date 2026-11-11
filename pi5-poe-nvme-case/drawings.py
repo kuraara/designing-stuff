@@ -263,7 +263,7 @@ r = (ya - yb2) / 2; cz = (ya + yb2) / 2
 arc = [(2.5, ya), (0.5, ya)] + [(0.5 - r * math.sin(t), cz + r * math.cos(t)) for t in np.linspace(0, math.pi, 24)] + [(2.5, yb2)]
 v.poly(arc, "ribbon", closed=False)
 v.leader(-0.5 - r, cz + 3, xl - 3, zhb, "PCIe ribbon loop", "end")
-v.leader(xl + 0.6, zd + 2, xl - 3, zd + 8, "TPU lid", "end")
+v.leader(xl + 0.6, zd + 2, xl - 3, zd + 8, "lid", "end")
 v.leader(bl - 4, zpt + 9, bl - 14, zhc + 1.5, "USB-A", "end")
 v.dim_h(xl, xeo, 0, -2.6, f"{f1(xeo - xl)} overall")
 v.dim_h(xm, xeo, 0, -4.4, f"{f1(xeo - xm)} body")
@@ -307,7 +307,8 @@ v.dim_v(0, scz, xeo, 1.6, f"{f1(scz)}")
 v.dim_v(-fh + 0.6, 0, xl, -1.8, f"{f1(fh - 0.6)}")
 v.leader(62, sum(I["sv_z"]) / 2, 70, sz1 + 4, "side vents", "start")
 sxw = I["snap_x"]; szs = I["snap_z"]
-v.leader((sxw[0] + sxw[1]) / 2, szs[1], xl - 2, H + 3, "snap windows", "end")
+v.leader((sxw[0] + sxw[1]) / 2, szs[1], xl - 2, H + 3, "latch window", "end")
+v.leader((sxw[0] + sxw[1]) / 2, szs[0], xl - 2, szs[0] - 9, "vent (v0.2 snap window)", "end")
 out["side"] = v.svg()
 
 # ---------------------------------------------------------------- USB end (seen from the end)
@@ -358,10 +359,33 @@ v.loops(section(lid, [-3, 0, 0], [1, 0, 0], ui), "cutl")
 v.leader(m(1), zd + 1.0, yo1 + 4, zd - 4, "Duo prongs", "start")
 v.leader(m(bw - 1), zd + 1.0, yo1 + 4, zd - 4, "", "start")
 v.leader(m(bw - 1), zpb + 1.0, yo1 + 4, zpb + 4, "Pi prong (GPIO side)", "start")
-v.leader(m(yi0 + 0.3), I["snap_z"][1], yo1 + 4, I["snap_z"][1] + 6, "snap bump", "start")
+LT = I["latch"]
+v.leader(m(yi0 + 0.8), (LT["free"] + LT["root"]) / 2 + 3, yo1 + 4, LT["root"] + 2, "flexing arm, fixed at the top", "start")
+v.leader(m(yi0 - 0.5), LT["z"], yo1 + 4, LT["z"] - 6, "latch hook", "start")
+v.dim_v(LT["free"], LT["root"], yo0, -1.8, f"{f1(LT['root'] - LT['free'])} arm")
 v.dim_h(yo0, yo1, 0, -1.8)
-v.dim_v(0, H, yo0, -1.8)
+v.dim_v(0, H, yo0, -4.2)
 out["lid"] = v.svg()
+
+# ---------------------------------------------------------------- latch detail: plan through the GPIO-side hook (4:1)
+K = 4
+v = View(12, K)
+yi1 = I["y_in"][1] - 0.25
+u0, u1, w0, w1 = xm - lid_t - 0.6, xm + 7.2, yi1 - 5.2, yo1 + 0.6
+xy = lambda p: (p[0], p[1])
+v.loops(clip(section(body, [0, 0, LT["z"]], [0, 0, 1], xy), u0, w0, u1, w1), "cutf")
+v.loops(clip(section(lid, [0, 0, LT["z"]], [0, 0, 1], xy), u0, w0, u1, w1), "cutl")
+hx = LT["hx"]
+v.leader(xm + 5.5, yi1 - LT["t"] / 2, xm + 8.4, yi1 - 3.6, "arm (bends in the layer plane)", "start")
+v.leader(xm - 1.2, yi1 - LT["t"] - LT["slot"] / 2, xm - 4.2, yi1 - 4.4, "slot: room to flex", "end")
+v.leader(xm - 1.2, yi1 + LT["gap"] / 2, xm - 4.2, yo1 + 1.6, "slot through the plate", "end")
+v.text(xm + 6.4, yo1 + 0.5, "body wall", "zt", "middle")
+v.dim_h(I["snap_x"][0], I["snap_x"][1], yo1, 1.4, f"{f1(I['snap_x'][1] - I['snap_x'][0])} window")
+v.dim_h(hx[0], hx[3], yi1, -4.6, f"{f1(hx[3] - hx[0])} hook")
+v.dim_v(yi1, yi1 + LT["hook"], u1, 1.2, f"{f1(LT['hook'])}")
+v.dim_v(yi1 - LT["t"], yi1, u1, 3.4, f"{f1(LT['t'])} arm")
+v.dim_v(I["y_in"][1], yi1 + LT["hook"], u0, -1.4, f"{LT['hook'] - 0.25:.2f} into wall")
+out["latch"] = v.svg()
 
 # ---------------------------------------------------------------- foot
 ftm = trimesh.load(ROOT / "stl" / "feet.stl")

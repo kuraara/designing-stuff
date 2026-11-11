@@ -128,7 +128,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
         <tr><td>3 mm walls optional; use ribs if they save print time</td><td>2.4 mm walls stiffened by the full-length lips. Saves about an hour on the body</td></tr>
         <tr><td>2–3 parts: body and lid</td><td>Body, lid, and 4 feet</td></tr>
         <tr><td>Lid on an end; the Pi slides in like a tube</td><td>Lid at the SD end. Boards slide in USB first and stop on the closed USB end</td></tr>
-        <tr><td>Lid screwed with M3 or clicked in, TPU for a click fit</td><td>TPU click-in lid with 4 snap bumps; its prongs push the boards home</td></tr>
+        <tr><td>Lid screwed with M3 or clicked in, TPU for a click fit</td><td>Click-in lid. v0.3 is PLA with two flexing latch arms, because the TPU bumps were too small to print. Its prongs locate the boards</td></tr>
         <tr><td>Vents top and bottom; more space around the base and HAT for heat</td><td>Roof and floor vents, side vents between the boards, 4 mm air down each side</td></tr>
         <tr><td>Feet screwed on with M3 counterbored screws</td><td>4 TPU feet, M3 × 8 into heat-set inserts</td></tr>
         <tr><td>SIM-style SD card tray</td><td><span class="st dropped">dropped</span>At your call. The PCIe ribbon covers the slot, so fit the card before the ribbon</td></tr>
@@ -267,12 +267,12 @@ const DATA = __DATA__;
 
   // ---------- info cards
   const PT = TIMES;
-  const total = PT.body.PETG.min + PT.lid.TPU.min + PT.feet.TPU.min;
+  const total = PT.body.PETG.min + PT.lid.PLA.min + PT.feet.TPU.min;
   const CARDS = {
     asm: ["Assembly", [["Outside", f1(I.L_total) + " × " + f1(I.W) + " × " + f1(I.H)], ["On feet", f1(I.H + I.foot[1] - 0.6) + " high"], ["Print, all", hm(total)], ["Boards", "each on its own ledge"]]],
     body: ["Body", [["Material", "PETG"], ["On the bed", "USB end down"], ["Size", ""], ["Print", hm(PT.body.PETG.min) + " · " + Math.round(PT.body.PETG.g) + " g"]]],
-    lid: ["Lid", [["Material", "TPU, eSun 95A FAST"], ["On the bed", "outer face down"], ["Size", ""], ["Print", hm(PT.lid.TPU.min) + " · " + Math.round(PT.lid.TPU.g) + " g"]]],
-    din: ["DIN bracket", [["Material", "PETG"], ["On the bed", "rail side down"], ["Size", ""], ["Print", hm(PT.din.PETG.min) + " draft · about 2h 24m at 4 walls, 40% infill"], ["Fixing", "4 × M3 × 20 into the foot inserts"], ["Rail", "TS35 (35 × 7.5 or 15)"]]],
+    lid: ["Lid v0.3", [["Material", "PLA (or PETG), 0.20 mm"], ["On the bed", "outer face down"], ["Size", ""], ["Print", hm(PT.lid.PLA.min) + " · " + Math.round(PT.lid.PLA.g) + " g"], ["Latch", "2 flexing arms, hooks in the upper side windows"]]],
+    din: ["DIN bracket", [["Material", "PETG"], ["On the bed", "rail side down"], ["Size", ""], ["Print", hm(PT.din.PETG_strong.min) + " at 4 walls, 40% gyroid · " + Math.round(PT.din.PETG_strong.g) + " g"], ["Fixing", "4 × M3 × 20 into the foot inserts"], ["Rail", "TS35 (35 × 7.5 or 15)"]]],
     feet: ["Feet × 4", [["Material", "TPU, eSun 95A FAST"], ["On the bed", "counterbore up"], ["Size", "Ø" + f1(I.foot[0]) + " × " + f1(I.foot[1])], ["Print", hm(PT.feet.TPU.min) + " · " + Math.round(PT.feet.TPU.g) + " g"]]],
   };
   for (const k of ["body", "lid", "din"]) {

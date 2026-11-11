@@ -13,7 +13,7 @@ wait
 mkdir -p print
 python3 - <<'PY'
 import trimesh
-for src, dst in [("body", "pi5_case_body_PETG"), ("lid", "pi5_case_lid_TPU"),
+for src, dst in [("body", "pi5_case_body_PETG"), ("lid", "pi5_case_lid_PLA"),
                  ("feet", "pi5_case_feet_x4_TPU"), ("din", "pi5_case_din_bracket_PETG")]:
     m = trimesh.load(f"stl/{src}.stl")
     m.apply_translation(-m.bounds[0])

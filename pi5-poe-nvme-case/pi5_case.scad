@@ -14,12 +14,13 @@
 //  lower lip the wall steps back out to make the SSD bay.
 //  A low fence on each ledge (1.2 mm, under PCB thickness) locates each board
 //  sideways. The boards slide in from the SD end, USB first, stop on the
-//  closed USB end wall, and the TPU lid's prongs push them home.
+//  closed USB end wall, and the lid's prongs push them home.
 //
 //  Print
 //    BODY : USB end wall on the bed, tube vertical. Every lip is a vertical
 //           extrusion, vents are vertical slots: no supports.
-//    LID  : outer face on the bed, TPU (click-in).      FEET: flat, TPU.
+//    LID  : outer face on the bed, PLA or PETG (two flexing latch arms click into
+//           the body's upper side windows).               FEET: flat, TPU.
 //
 //  Coordinates: board-aligned. X = 0 at the boards' SD-end edge, 85 at the
 //  USB end. Y = 0 at the HDMI / USB-C edge, 56 at the GPIO edge.
@@ -82,8 +83,21 @@ lid_t  = 2.4;
 plug_d = 6;       // skirt depth into the body
 skirt  = 1.8;
 fit    = 0.25;
-bump   = 0.8;     // snap bump height (TPU)
-prong_tip = 0.6;  // prongs end here: 0.1 mm preload with the boards on the end wall
+lead_c = 0.6;     // chamfer on the skirt's leading edge (rigid lid: eases it into the mouth)
+prong_tip = 0.3;  // prongs end here: boards float 0.2 mm, no preload (rigid PLA/PETG lid)
+
+/* [Lid latches] */
+// v0.3: PLA/PETG lid. The v0.2 TPU bumps (0.8 mm) printed as faint nubs.
+// One flexing arm per long side, cut out of the skirt by slots through the lid,
+// fixed at its top end. It bends in the layer plane (along the filaments), and
+// its hook clicks into the body's UPPER side window (lower windows: vents only).
+latch = true;
+latch_t    = 1.6;   // arm thickness (Y). Thinner = softer click
+latch_hook = 1.0;   // hook height above the arm face; 0.75 mm of it reaches into the window
+latch_w    = 8;     // hook width along Z (window is 9)
+latch_slot = 1.2;   // room inside the arm to flex into
+latch_gap  = 0.8;   // slot through the lid plate outside the arm (wide enough to survive first-layer squish)
+latch_end  = 1.0;   // slot across the arm's free end
 
 /* [Vents] */
 vent_w = 3;  vent_pitch = 6.25;  vent_seg = 24;  vent_bar = 4;
@@ -233,22 +247,57 @@ module body() {
 }
 
 // ------------------------------------------------------------ LID (built in place, outer face at x_mouth - lid_t)
+l_yi = [y_in0 + fit, y_in1 - fit];              // skirt outer faces
+l_zi = [zf + fit, z_roof - fit];
+l_z    = snap_z[1];                              // hook centre = upper window centre
+l_free = l_z - latch_w / 2 - 1.0;                // arm's free end
+l_root = l_zi[1] - skirt - 0.6;                  // arm's fixed end, under the skirt's top wall
+l_len  = l_root - l_z;                           // root -> hook
+l_hx   = [snap_x[0] + 0.2, snap_x[0] + 0.2 + latch_hook, snap_x[0] + 0.5 + latch_hook, snap_x[1] - 0.1];
+l_flex = latch_hook - fit;                       // arm deflection to pass the wall
+l_strain = 1.5 * latch_t * l_flex / (l_len * l_len);
+
+module latch_cuts(s) {
+    yf = l_yi[s]; sg = s == 0 ? 1 : -1;          // sg points inward
+    yin = [yf + sg * latch_t, yf + sg * (latch_t + latch_slot)];
+    yout = [yf, yf - sg * latch_gap];
+    module slot2(ya, yb, z0, z1) {               // YZ slot with a round end at the root
+        r = abs(yb - ya) / 2; yc = (ya + yb) / 2;
+        hull() { translate([min(ya, yb), z0]) square([2 * r, 0.01]); translate([yc, z1 - r]) circle(r = r, $fn = 24); }
+    }
+    along_x(x_mouth - lid_t - 1, x_skirt + 1) slot2(yin[0], yin[1], l_free - latch_end, l_root);
+    along_x(x_mouth - lid_t - 1, x_mouth + 0.01) slot2(yout[0], yout[1], l_free - latch_end, l_root);
+    along_x(x_mouth - lid_t - 1, x_skirt + 1)
+        translate([min(yin[1], yout[1]), l_free - latch_end]) square([abs(yin[1] - yout[1]), latch_end]);
+}
+module latch_hook(s) {   // 45 deg retaining face (prints as a 45 deg overhang), ~40 deg lead-in
+    yf = l_yi[s] + (s == 0 ? 0.01 : -0.01); sg = s == 0 ? -1 : 1;   // sg points outward
+    h = latch_hook;
+    translate([0, yf, l_z - latch_w / 2]) linear_extrude(latch_w)
+        polygon([[l_hx[0], 0], [l_hx[1], sg * h], [l_hx[2], sg * h], [l_hx[3], 0]]);
+}
+
 module lid_asm() {
-    yi0 = y_in0 + fit; yi1 = y_in1 - fit; zi0 = zf + fit; zi1 = z_roof - fit;
+    yi0 = l_yi[0]; yi1 = l_yi[1]; zi0 = l_zi[0]; zi1 = l_zi[1];
     union() {
-        along_x(x_mouth - lid_t, x_mouth) outer2();
-        // skirt
-        along_x(x_mouth - 0.01, x_skirt) difference() {
-            rrect2([yi0, zi0], [yi1, zi1], 1.25);
-            rrect2([yi0 + skirt, zi0 + skirt], [yi1 - skirt, zi1 - skirt], 0.5);
+        difference() {
+            union() {
+                along_x(x_mouth - lid_t, x_mouth) outer2();
+                // skirt, chamfered on its leading edge
+                difference() {
+                    union() {
+                        along_x(x_mouth - 0.01, x_skirt - lead_c) rrect2([yi0, zi0], [yi1, zi1], 1.25);
+                        hull() {
+                            along_x(x_skirt - lead_c - 0.01, x_skirt - lead_c) rrect2([yi0, zi0], [yi1, zi1], 1.25);
+                            along_x(x_skirt - 0.01, x_skirt) rrect2([yi0 + lead_c, zi0 + lead_c], [yi1 - lead_c, zi1 - lead_c], 0.65);
+                        }
+                    }
+                    along_x(x_mouth, x_skirt + 1) rrect2([yi0 + skirt, zi0 + skirt], [yi1 - skirt, zi1 - skirt], 0.5);
+                }
+            }
+            if (latch) for (s = [0, 1]) latch_cuts(s);
         }
-        // snap bumps on the side faces: 30 deg lead-in toward +X, 45 deg retaining face
-        for (s = [0, 1], z = snap_z) {
-            yf = s == 0 ? yi0 + 0.01 : yi1 - 0.01; sg = s == 0 ? -1 : 1;
-            w0 = snap_x[0];
-            translate([0, yf, z - 3.5]) linear_extrude(7)
-                polygon([[w0 + 0.2, 0], [w0 + 0.2 + bump, sg * bump], [w0 + 1.2, sg * bump], [w0 + 2.6, 0]]);
-        }
+        if (latch) for (s = [0, 1]) latch_hook(s);
         // prongs, clear of the PCIe ribbon in the middle:
         // both corners of the Duo, and the Pi's GPIO-side corner only
         // (its USB-C-side corner is left free: the Pi 5 power button is by the USB-C)
@@ -371,7 +420,10 @@ module info() {
       ",\"L_body\":", L_body, ",\"L_total\":", L_total, ",\"lid_t\":", lid_t, ",\"plug_d\":", plug_d, ",\"prong_tip\":", prong_tip,
       ",\"eth\":[", eth_y, ",", eth_cut[0], ",", eth_cut[1], "],\"usb_y\":", usb_y, ",\"usb_cut\":", usb_cut,
       ",\"port_z0\":", port_z0, ",\"usbc_x\":", usbc_x, ",\"hdmi_x\":", hdmi_x, ",\"side\":[", sx0, ",", sx1, ",", side_cz, ",", sz0, ",", sz1, "]",
-      ",\"snap_x\":", snap_x, ",\"snap_z\":", snap_z, ",\"sv_z\":", sv_z,
+      ",\"snap_x\":", snap_x, ",\"snap_z\":", snap_z,
+      ",\"latch\":{\"z\":", l_z, ",\"free\":", l_free, ",\"root\":", l_root, ",\"len\":", l_len, ",\"t\":", latch_t,
+      ",\"hook\":", latch_hook, ",\"w\":", latch_w, ",\"hx\":", l_hx, ",\"slot\":", latch_slot, ",\"gap\":", latch_gap,
+      ",\"flex\":", l_flex, ",\"strain\":", l_strain, "}", ",\"sv_z\":", sv_z,
       ",\"foot\":[", foot_d, ",", foot_h, "],\"foot_x\":", foot_x, ",\"y_foot\":", y_foot,
       ",\"din\":{\"uc\":", din_uc, ",\"H\":", din_H, ",\"plate\":", din_plate, ",\"gap\":", din_gap, ",\"ledge\":", din_ledge,
       ",\"ut\":", d_ut, ",\"ub\":", d_ub, ",\"u0\":", d_u0, ",\"u1\":", d_u1, ",\"v0\":", d_v0, ",\"v1\":", d_v1,

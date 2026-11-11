@@ -1,8 +1,8 @@
-# Pi 5 PoE NVMe Case — enclosure v0.2
+# Pi 5 PoE NVMe Case — enclosure v0.3
 
 Slide-in "tube" case for a Raspberry Pi 5 + Waveshare PoE HAT (G) + Pimoroni NVMe Base Duo. No screws or standoffs in any board: each board rests on its own ledge. One parametric OpenSCAD file.
 
-Status (10 Nov 2026, v0.2): **body printed (PLA) and reported fine; lid, feet and DIN bracket not printed yet.** Case + lid + feet, and an optional DIN rail bracket. Model renders clean, all parts watertight, stack envelope and insertion sweep checked against the body/lid with no interference.
+Status (11 Nov 2026, v0.3): **body printed and working; lid redesigned, to reprint in PLA.** The body (v0.2, unchanged; printed 10 Nov in PLA) printed well and its ledges hold the NVMe Base Duo through a shake test. The v0.2 TPU lid's snap bumps printed as faint nubs, so v0.3 replaces them with two flexing latch arms in a PLA lid that click into the body's existing upper side windows. **Reprint only the lid.** Feet and DIN bracket are unchanged.
 
 ![Assembly](img/pi5_case_3d_assembly.jpg)
 
@@ -16,14 +16,16 @@ Status (10 Nov 2026, v0.2): **body printed (PLA) and reported fine; lid, feet an
 
 The yellow on the USB end is leftover filament from the previous print, pressed into the first layers (nozzle and sheet weren't cleaned first); it's cosmetic. The jack cut-outs, vents, foot counterbores and the board ledges all came out clean at 0.30 mm layers.
 
-| File | Material | Orientation (already set) | Time (0.30 DRAFT) |
+**11 Nov 2026:** boards fitted. The ledges hold the NVMe Base Duo through a shake test. The v0.2 TPU lid printed, but its snap bumps came out as faint nubs, so the lid is redesigned for PLA (v0.3, below). The body stays as printed.
+
+| File | Material | Orientation (already set) | Time |
 |---|---|---|---|
-| [`print/pi5_case_body_PETG.stl`](print/pi5_case_body_PETG.stl) | PETG | USB end on the bed | 4h 26m, 77 g |
-| [`print/pi5_case_lid_TPU.stl`](print/pi5_case_lid_TPU.stl) | TPU, eSun 95A FAST | outer face down | 1h 09m, 16 g |
+| [`print/pi5_case_body_PETG.stl`](print/pi5_case_body_PETG.stl) | PETG (PLA works: printed 10 Nov, 4h 22m) | USB end on the bed | 4h 26m, 77 g |
+| [`print/pi5_case_lid_PLA.stl`](print/pi5_case_lid_PLA.stl) | **PLA** (PETG also fine), 0.20 mm SPEED | outer face down | 58m, 14 g (PETG 1h 01m) |
 | [`print/pi5_case_feet_x4_TPU.stl`](print/pi5_case_feet_x4_TPU.stl) | TPU, eSun 95A FAST | counterbore up (fit them turned over) | 14m, 3 g |
 | [`print/pi5_case_din_bracket_PETG.stl`](print/pi5_case_din_bracket_PETG.stl) | PETG, 4 perimeters, 40% gyroid | rail side down | 2h 24m, 43 g |
 
-No supports. Feet **or** DIN bracket, not both. Fit the microSD card before the PCIe ribbon (the ribbon covers the slot).
+Body, feet and bracket at 0.30 DRAFT. No supports. Feet **or** DIN bracket, not both. Fit the microSD card before the PCIe ribbon (the ribbon covers the slot).
 
 [`print/pi5_case_design.pdf`](print/pi5_case_design.pdf): 15-page design pack (drawings, 3D views, print and assembly notes, brief) with the four STLs embedded as PDF attachments.
 
@@ -35,6 +37,8 @@ Online: [drawings page](https://claude.ai/artifact/S3LdNWXs8CYuMMDd2AhQnt) (priv
 | Section: Pi on the upper ledge, NVMe Base Duo on the lower ledge | On a TS35 DIN rail via the bracket |
 
 ![Section A-A](img/pi5_case_drawing_section_A-A.png)
+
+![Lid latch in the body window, 4:1](img/pi5_case_drawing_lid_latch.png)
 
 ## Brief (verbatim, 1 Nov 2026)
 
@@ -90,6 +94,36 @@ Changes for v0.2: standoffs and Duo screws dropped, each board on its own ledge 
 
 Printer: Prusa i3 MK3S+. Project preference: functional over pretty, faster over perfect; TPU/PETG preferred.
 
+## Print test and lid v0.3 (11 Nov 2026)
+
+Messages (verbatim, 11 Nov 2026):
+
+> The case printed well, the little tabs on the lid did not print at all
+
+*(5 photos: the yellow TPU lid edge-on showing the prongs and only faint nubs where the snap bumps should be; inside the white body showing the ledges and side windows; the floor with vents and feet bosses; the USB/RJ45 end.)*
+
+> PLA might be able to do the job if you make the tabs thin enough to flex a little
+
+> The rails are doing a good job of securing the nvme base
+
+*(2 photos: the NVMe Base Duo sitting on the lower ledges, PCIe connector clear; the lid's TPU prongs printed with stringy roots.)*
+
+> I can shake the case and the base is secure
+
+**Why the TPU bumps failed.** Slicing the v0.2 lid with the TPU preset (0.30 mm layers) and measuring the toolpath: the bumps *were* in the G-code, but they stood only 0.04 → 0.79 → 0.13 mm proud over about five layers, which TPU smoothed away. Even printed perfectly, only 0.55 mm of a 0.8 mm bump (after the 0.25 mm fit gap) would have reached into the windows. Too small for TPU.
+
+**v0.3 lid (body unchanged):**
+
+- PLA (or PETG), rigid. One flexing **latch arm** per long side: 19.1 mm of skirt cut free by slots through the lid plate (1.2 mm inside, 0.8 mm outside, 1.0 mm across the free end), fixed at its top end. Arm 1.6 mm thick; it bends sideways, in the layer plane, so PLA flexes along its filaments. Root to hook 14.1 mm, deflection 0.75 mm to pass the wall, strain ≈ 0.9%.
+- Hook 1 mm high × 8 mm wide, 45° retaining face (prints as a 45° overhang), ~40° lead-in; sits in the body's **upper** side window (2.8 × 9) with 0.2/0.1 mm clearance along X and 0.5 mm each side in Z; 0.75 mm reaches into the 2.4 mm wall. The lower windows are now vents (they line up with the Duo prongs, so no arm fits there).
+- Toolpath check (PLA, 0.20 SPEED): the hook bulge reaches the full 0.99 mm and spans 12 layers; the 0.8 and 1.2 mm slots have no extrusion on layers 1–2.
+- Skirt leading edge chamfered 0.6 mm to ease a rigid lid into the mouth.
+- Prongs now stop 0.2 mm short (`prong_tip` 0.6 → 0.3): a rigid lid can't take the old 0.1 mm preload. The ledges already hold the boards.
+- Assembled: lid ∩ body = 0, lid ∩ boards = 0. During insertion only the hooks overlap the wall, which the arms flex past.
+- To open: pull at the body's thumb notch; if tight, press the hooks in through the side windows with a small screwdriver.
+
+Tuning: `latch_t` (arm thickness, softer at 1.2) and `latch_hook` (hook height, firmer at 1.2). Both only need a lid reprint.
+
 ## Parts identified
 
 | Part | Source |
@@ -125,10 +159,10 @@ Design (`part = "din"`, `"din_asm"`, `"din_rail"`; parameters under `[DIN rail b
 | Part | Material / orientation | What it does |
 |---|---|---|
 | **Body** | PETG, USB end on the bed (tube vertical) | Closed USB/RJ45 end with jack cut-outs; upper and lower lips along both long walls; thick SSD-bay walls below the lower lip; USB-C/HDMI window; roof, floor and side vents; snap windows at the mouth; feet inserts |
-| **Lid** | TPU (eSun 95A FAST preset), outer face on the bed | Click-in at the SD end: skirt + 4 snap bumps into side windows; 3 prongs push the boards home (both Duo corners, the Pi's GPIO-side corner) |
+| **Lid** (v0.3) | PLA or PETG, 0.20 mm, outer face on the bed | Click-in at the SD end: chamfered skirt + 2 flexing latch arms whose hooks click into the upper side windows; 3 prongs locate the boards (both Duo corners, the Pi's GPIO-side corner) |
 | Feet × 4 | TPU, flat, counterbore up | Ø14 × 5, M3 counterbore (faces the desk when fitted), into heat-set inserts |
 
-**How the boards are held (no screws, no standoffs):** each long wall has two lips (user's second sketch). The Duo rests on the lower ledge (3 mm reach); the Pi rests on the upper ledge (1 mm reach), and the upper lip sits in the 12 mm gap between the boards. A 1.2 mm fence on each ledge (below PCB thickness) locates each board sideways with 0.4 mm play a side. The PCIe ribbon is the only link between the boards. They slide in together from the SD end, USB first, stop on the closed USB end wall, and the lid prongs preload them (0.1 mm) against it. The HAT is held by its GPIO + PoE headers only.
+**How the boards are held (no screws, no standoffs):** each long wall has two lips (user's second sketch). The Duo rests on the lower ledge (3 mm reach); the Pi rests on the upper ledge (1 mm reach), and the upper lip sits in the 12 mm gap between the boards. A 1.2 mm fence on each ledge (below PCB thickness) locates each board sideways with 0.4 mm play a side. The PCIe ribbon is the only link between the boards. They slide in together from the SD end, USB first, and stop on the closed USB end wall; the lid prongs locate them with 0.2 mm of end play (v0.2 had a 0.1 mm preload from the TPU lid). The HAT is held by its GPIO + PoE headers only.
 
 **Why the Pi's ledge is only 1 mm:** the GPIO solder joints and the USB/RJ45/USB-C/HDMI shell tabs on the Pi's underside start about 1.4 mm in from the long edges.
 
@@ -157,28 +191,34 @@ Coordinates in the SCAD: board-aligned. X = 0 at the boards' SD edge, 85 at the 
 | `low_in` | 0.5 | SSD-bay wall face, inward from the board edge |
 | `wall` etc. | 2.4 | 3.0 costs +57 min on the body |
 | side window | 42 × 11 | USB-C + both micro HDMI |
-| `bump` / `fit` / `prong_tip` | 0.8 / 0.25 / 0.6 | lid snap and prong preload |
+| `fit` / `lead_c` / `prong_tip` | 0.25 / 0.6 / 0.3 | skirt clearance / skirt lead-in chamfer / prongs stop 0.2 mm short |
+| `latch_t` / `latch_hook` / `latch_w` | 1.6 / 1 / 8 | lid latch arm thickness / hook height / hook width (v0.3; replaces v0.2's `bump` 0.8) |
+| `latch_slot` / `latch_gap` / `latch_end` | 1.2 / 0.8 / 1.0 | slots freeing the arm: inside / outside through the plate / across the free end |
 
 Outside: 106.3 L (with lid) × 68.8 W × 64.6 H; 69 H on feet.
 
 ## Print times
 
-PrusaSlicer 2.7.2, stock *Original Prusa i3 MK3S & MK3S+*, *0.30mm DRAFT @MK3*. TPU = the project's *eSun TPU 95A FAST @MK3S* overrides on Generic FLEX.
+PrusaSlicer 2.7.2, stock *Original Prusa i3 MK3S & MK3S+*, *0.30mm DRAFT @MK3* (lid: *0.20mm SPEED @MK3*). TPU = the project's *eSun TPU 95A FAST @MK3S* overrides on Generic FLEX.
 
 | Part | Material | Time | Filament |
 |---|---|---|---|
 | Body | PETG | 4h 26m | 77 g |
 | Body (reference) | PLA | 4h 23m | 75 g |
 | Body with 3 mm walls (comparison) | PETG | 5h 23m | 83 g |
-| Lid | TPU | 1h 09m | 16 g |
+| Lid v0.3 (0.20 SPEED) | PLA | 58m | 14 g |
+| Lid v0.3 (0.20 SPEED) | PETG | 1h 01m | 15 g |
+| ~~Lid v0.2~~ (superseded) | TPU | 1h 09m | 16 g |
 | Feet × 4 | TPU | 14m | 3 g |
+| DIN bracket (draft) | PETG | 1h 39m | 31 g |
+| DIN bracket (4 perimeters, 40% gyroid) | PETG | 2h 24m | 43 g |
 
 ## Decisions (v0.2)
 
 1. SSDs: Samsung 980-series (user wrote "980EVO"; Samsung's 980 and 970 EVO Plus 1TB are both single-sided 2.38 mm, no heatsink). On the Duo's 5 mm SSD standoffs they reach ~7.4 mm below the Duo; `drive_drop` 9.5 kept (~2 mm spare).
 2. HAT height unknown: `hat_gap` kept at 16 (worst case with the Active Cooler). A lower HAT just gets more air above it.
 3. HAT held by its GPIO + PoE headers only; no hold-down ribs.
-4. SD tray dropped (the PCIe ribbon covers the Pi's microSD slot; fit the card before the ribbon). Lid: click-in TPU.
+4. SD tray dropped (the PCIe ribbon covers the Pi's microSD slot; fit the card before the ribbon). Lid: click-in TPU (v0.2), then PLA with latch arms (v0.3, after the print test).
 
 Print-orientation check on the exported STLs: lid has no overhangs >45°; body's largest is the 11 mm bridge over the port window (snap windows 9 mm, vents 3 mm); feet print counterbore-up (fit them turned over).
 
@@ -192,18 +232,42 @@ Print-orientation check on the exported STLs: lid has no overhangs >45°; body's
 |---|---|
 | `pi5_case.scad` | parametric model. `part = body | body_asm | lid | lid_asm | feet | din | din_asm | din_rail | assembly | info` (`body`/`lid` are print-oriented; `_asm` in place) |
 | `render_all.sh` | renders STLs + `info/info.json` (+ a 3 mm-wall body for comparison) |
-| `slice_all.py` | flattens PrusaSlicer vendor profiles, adds the eSun TPU FAST overrides, slices → `print_times.json` |
+| `slice_all.py` | flattens PrusaSlicer vendor profiles (0.30 DRAFT and 0.20 SPEED), adds the eSun TPU FAST overrides, slices each job (per-job profile and extra CLI args) → `print_times.json`; G-code kept in `slice/` (not committed) |
 | `drawings.py` | 2D sections from the STLs (trimesh + shapely) → `drawings.json` |
 | `build_page.py` | builds the review page HTML |
 | `build_pdf.py` | prints the drawings page to an A4 PDF (Chromium via Playwright), adds 3D renders from the viewer, embeds the 4 print STLs as PDF attachments (qpdf), opens with the attachments panel. Needs `npm i @fontsource/ibm-plex-sans@5 @fontsource/ibm-plex-mono@5 @fontsource/saira-condensed@5 three@0.128.0`; run `python3 build_pdf.py <node_modules> [out.pdf]` |
 | `build_viewer.py` | builds the 3D viewer page (three.js, STLs embedded) incl. the DIN bracket and a requirements summary |
-| `print/` | **the files to print**: `pi5_case_body_PETG.stl`, `pi5_case_lid_TPU.stl`, `pi5_case_feet_x4_TPU.stl`, `pi5_case_din_bracket_PETG.stl` (binary, bed-oriented, regenerated by `render_all.sh`) and the design PDF `pi5_case_design.pdf` (4 Nov 2026, 15 pages, STLs embedded) |
+| `print/` | **the files to print**: `pi5_case_body_PETG.stl`, `pi5_case_lid_PLA.stl`, `pi5_case_feet_x4_TPU.stl`, `pi5_case_din_bracket_PETG.stl` (binary, bed-oriented, regenerated by `render_all.sh`) and the design PDF `pi5_case_design.pdf` (v0.3, 11 Nov 2026, 15 pages, the four STLs embedded) |
 | `img/` | 3D renders (from the viewer) and the Section A-A drawing |
 | `pi5_case.html`, `pi5_case_viewer.html` | the drawings page and 3D viewer, self-contained (open locally in a browser) |
 | `info/info.json` | layout values echoed by the SCAD, read by the drawing, page and viewer builders |
 | `stl/`, `drawings.json` (not committed) | intermediate renders the drawings are cut from; `render_all.sh` / `drawings.py` regenerate them |
 
 Regenerate: `./render_all.sh && python3 slice_all.py && python3 drawings.py && python3 build_page.py && python3 build_viewer.py` (OpenSCAD 2021+, PrusaSlicer 2.7 CLI, Python trimesh/shapely/networkx/manifold3d).
+
+## Other requests (verbatim)
+
+1 Nov 2026, 11:02:
+
+> Can you create an artifact to view the stl models in the browser?
+
+1 Nov 2026, 11:24:
+
+> Can you include a brief summary of my requirements in the artifact
+
+3 Nov 2026, 11:48:
+
+> Can you provide me the links to all the artefacts generated
+
+4 Nov 2026, 14:21 (recipient address redacted here):
+
+> Can you generate a pdf of the design shown in the artefact and embed the atlas as attachments in pdf? And the use the Gmail plugin to send the file to [work email]
+
+("atlas" read as "STLs". The Gmail connector can't carry an attachment that size, so a draft was left in Gmail for the PDF to be attached by hand.)
+
+8 Nov 2026, 08:14:
+
+> Can you push this to GitHub
 
 ## Sources
 
