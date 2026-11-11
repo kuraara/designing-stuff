@@ -35,6 +35,10 @@
   "TPU": {
    "min": 15.5,
    "g": 3.32
+  },
+  "TPUforum_sequential": {
+   "min": 21.1,
+   "g": 3.23
   }
  },
  "din": {

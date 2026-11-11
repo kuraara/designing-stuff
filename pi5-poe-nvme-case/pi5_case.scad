@@ -377,11 +377,12 @@ module lid_print() { rotate([0, -90, 0]) translate([-(x_mouth - lid_t), 0, 0]) l
 foot_seat = foot_recess - (foot_h - foot_cb[1]);
 foot_tip = foot_seat + foot_screw;
 assert(foot_tip <= foot_recess + min(insert_len, 5.4) - 0.3, "foot screw would bottom out");
-module feet() { for (i = [0 : 3]) translate([i * (foot_d + 3), 0, 0]) difference() {
+module foot() { difference() {
     cylinder(d = foot_d, h = foot_h);
     translate([0, 0, -1]) cylinder(d = 3.4, h = foot_h + 2);
     translate([0, 0, foot_h - foot_cb[1]]) cylinder(d = foot_cb[0], h = foot_cb[1] + 1);
 } }
+module feet() { for (i = [0 : 3]) translate([i * (foot_d + 3), 0, 0]) foot(); }
 
 // ------------------------------------------------------------ DIN RAIL BRACKET
 // Local frame for printing: u = case X, v = case Y, z = 0 on the bed (the rail side).
@@ -511,6 +512,7 @@ else if (part == "body_asm") body();
 else if (part == "lid") lid_print();
 else if (part == "lid_asm") lid_asm();
 else if (part == "feet") feet();
+else if (part == "foot") foot();                                       // one foot (sequential G-code)
 else if (part == "retainer") retainer_print();
 else if (part == "retainer_asm") retainer_asm();
 else if (part == "din") din_bracket();                                 // rail side on the bed

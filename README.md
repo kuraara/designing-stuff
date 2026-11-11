@@ -18,7 +18,7 @@ Each design is a self-contained folder:
 - `README.md`: brief (verbatim), design notes, parameters, print settings and times, open questions
 - `*.scad`: the parametric model
 - `render_all.sh`, `slice_all.py`, `drawings.py`: regenerate STLs, G-code, times and images
-- `stl/`, `gcode/`, `img/`: build outputs, committed so they can be printed straight from GitHub (pi5-poe-nvme-case keeps its printable STLs in `print/`)
+- `stl/`, `gcode/`, `img/`: build outputs, committed so they can be printed straight from GitHub (pi5-poe-nvme-case keeps its printable STLs in `print/` and ready-to-print G-code in `gcode/`)
 
 Slicing scripts use the PrusaSlicer 2.7 CLI and read TPU presets from `printer-profiles/`.
 
