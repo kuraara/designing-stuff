@@ -146,6 +146,115 @@ out["plan"] = ("Plan, cut just under the Duo",
                "vents, so air still reaches the Duo's underside. The webs (dashed) run on the floor's bars between the slots.",
                v.svg())
 
+# ---------------------------------------------------------------- 5. orthographic views of the concept lid (third angle)
+import numpy as np
+from shapely.geometry import Polygon as SPoly
+from shapely.ops import unary_union
+
+
+def vis_segments(mesh, d, step=0.25):
+    """visible sharp + silhouette edges seen along direction d (into the scene), as 3D segments"""
+    d = np.asarray(d, float)
+    n = mesh.face_normals[mesh.face_adjacency]
+    a, b = n[:, 0] @ d, n[:, 1] @ d
+    keep = (mesh.face_adjacency_angles > np.radians(25)) | ((a > 1e-6) & (b < -1e-6)) | ((a < -1e-6) & (b > 1e-6))
+    E = mesh.face_adjacency_edges[keep]
+    V = mesh.vertices
+    pts, cnt = [], []
+    for i, j in E:
+        ns = max(3, int(np.linalg.norm(V[j] - V[i]) / step) + 1)
+        pts.append(V[i] + (V[j] - V[i]) * np.linspace(0, 1, ns)[:, None]); cnt.append(ns)
+    P = np.vstack(pts)
+    hid = mesh.ray.intersects_any(P - d * 1e-3, np.tile(-d, (len(P), 1)))
+    segs = []
+    for Q, H_ in zip(np.split(P, np.cumsum(cnt)[:-1]), np.split(hid, np.cumsum(cnt)[:-1])):
+        run = None
+        for k, h in enumerate(list(H_) + [True]):
+            if not h and run is None:
+                run = k
+            elif h and run is not None:
+                if k - 1 > run:
+                    segs.append((Q[run], Q[k - 1]))
+                run = None
+    return segs
+
+
+def silhouette(mesh, proj):
+    tris = [SPoly([proj(p) for p in t]) for t in mesh.triangles]
+    return unary_union([t for t in tris if t.area > 1e-6])
+
+
+def draw_proj(v, mesh, d, proj):
+    sil = silhouette(mesh, proj)
+    loops = []
+    for g in getattr(sil, "geoms", [sil]):
+        loops.append(list(g.exterior.coords)); loops += [list(r.coords) for r in g.interiors]
+    v.loops(loops, "pfill")
+    dd = "".join(f"M{v.P(*proj(p))}L{v.P(*proj(q))}" for p, q in vis_segments(mesh, d))
+    v.el.append(f'<path class="vis" d="{dd}"/>')
+
+
+lx0, lx1 = lid.bounds[0][0], lid.bounds[1][0]          # lid outer face, tray tip
+Hl, G = H, 34.0
+pF = lambda p: (p[0], p[2])                                       # side, seen from the USB-C side
+pT = lambda p: (p[0], p[1] - yo0 + Hl + G)                        # top, above it
+pB = lambda p: (p[0], -(p[1] - yo0) - G)                          # underside, below it
+pR = lambda p: (p[1] - yo0 + lx1 + G, p[2])                       # inside face, to the right
+pL = lambda p: (lx0 - G - (p[1] - yo0), p[2])                     # outer face, to the left
+v = View(100)
+for d, pr in (((0, 1, 0), pF), ((0, 0, -1), pT), ((0, 0, 1), pB), ((-1, 0, 0), pR), ((1, 0, 0), pL)):
+    draw_proj(v, lid, d, pr)
+ty0, ty1 = T["y"]; py = T["post_y"]; xs_ = T["stop_x"]; lip = T["lip_over"] + e0
+# titles: above the top view, below the others
+cx = (lx0 + lx1) / 2
+v.text(cx, pT((0, yo1, 0))[1], "TOP", "vt", dv=v.fs * 3.2)
+v.text(cx, pB((0, yo1, 0))[1], "UNDERSIDE", "vt", dv=-v.fs * 3.6)
+v.text(cx, 0, "SIDE · from the USB-C side", "vt", dv=-v.fs * 5.6)
+v.text(lx1 + G + (yo1 - yo0) / 2, 0, "INSIDE · faces the boards", "vt", dv=-v.fs * 5.6)
+v.text(lx0 - G - (yo1 - yo0) / 2, 0, "OUTSIDE FACE", "vt", dv=-v.fs * 5.6)
+# side view
+v.dim_h(lx0, lx1, 0, -2.0, f"{f1(lx1 - lx0)}")
+v.dim_h(lx0, I["x_skirt"], Hl, 1.4, f"{f1(I['x_skirt'] - lx0)}")
+v.dim_h(lx0, xs_, Hl, 3.2, f"{f1(xs_ - lx0)} to the stops")
+v.dim_v(0, tz1, lx1, 1.2, f"{f1(tz1)}")
+v.dim_v(0, zpt + T["pi_over"], lx1, 3.0, f"{f1(zpt + T['pi_over'])}")
+v.leader(-8, 26, 14, 44, "corner post", "start")
+v.leader(1.4, zdt + T["lip_gap"] + 0.8, 14, 38, "small lip", "start")
+v.leader(40, tz0 + 1, 44, 24, "tray", "start")
+v.leader(-8, 6, lx0 - 3, -5, "webs", "end")
+v.leader(-13, 56, 4, Hl + 6, "skirt + latch arm (v0.3)", "start")
+# top view
+v.dim_v(*[pT((0, y, 0))[1] for y in (ty0, ty1)], lx1, 1.2, f"{f1(ty1 - ty0)} tray")
+v.dim_v(*[pT((0, y, 0))[1] for y in py[0]], lx0, -1.2, f"{f1(py[0][1] - py[0][0])}")
+v.dim_v(*[pT((0, y, 0))[1] for y in py[1]], lx0, -1.2, f"{f1(py[1][1] - py[1][0])}")
+v.dim_v(*[pT((0, y, 0))[1] for y in (yo0, yo1)], lx0, -4.8, f"{f1(yo1 - yo0)}")
+v.dim_h(xs_, lx1, pT((0, yo1, 0))[1], 1.4, f"{f1(lx1 - xs_)} past the stops")
+v.leader(-6, pT((0, 53.8, 0))[1], lx1 + 14, pT((0, yo1, 0))[1] - 1, "post, GPIO side", "start")
+v.leader(40, pT((0, 43.6, 0))[1], lx1 + 14, pT((0, 44, 0))[1], "slots over the floor vents", "start")
+v.leader(1.2, pT((0, 2, 0))[1], lx1 + 14, pT((0, yo0, 0))[1] + 1, "post + lip, USB-C side", "start")
+# underside
+v.dim_h(lx0, lx1 - 10, pB((0, yo1, 0))[1], -1.6, f"{f1(lx1 - 10 - lx0)}")
+v.leader(56, pB((0, T["web_y"][1], 0))[1], lx1 + 8, pB((0, T["web_y"][1], 0))[1],
+         f"3 webs, {f1(T['web_y'][1] - T['web_y'][0])} apart", "start")
+# inside face
+uR = lambda y: pR((0, y, 0))[0]
+v.dim_h(uR(py[0][1]), uR(py[1][0]), 0, -2.0, f"{f1(py[1][0] - py[0][1])} between posts")
+v.dim_v(0, zdt + T["lip_gap"], uR(yo1), 1.2, f"{f1(zdt + T['lip_gap'])}")
+v.dim_v(0, zpt + T["pi_over"], uR(yo1), 3.0, f"{f1(zpt + T['pi_over'])}")
+v.leader(uR(2.2), 24, uR(yo1) + 14, 40, "post (Pi stop at its top)", "start")
+v.leader(uR(2.2), zdt + 1, uR(yo1) + 14, 26, "small lip", "start")
+v.leader(uR(-0.2), 47, uR(yo1) + 14, 54, "latch arm", "start")
+# outside face
+v.leader(pL((0, -2, 0))[0], 47, pL((0, bw / 2, 0))[0], 30, "slots freeing the latch arms", "middle")
+v.dim_v(0, Hl, pL((0, yo1, 0))[0], -1.4, f"{f1(Hl)}")
+v.dim_h(pL((0, yo1, 0))[0], pL((0, yo0, 0))[0], 0, -2.0, f"{f1(yo1 - yo0)}")
+out["ortho"] = ("Lid v0.5 concept · orthographic views",
+                "Third-angle projection, all to the same scale and lined up. The side view sits in the middle. The top and "
+                "underside are above and below it, the face that goes inside the case is on the right, and the outer face is on the "
+                "left. Heights are measured from the bottom edge of the lid, and lengths from its outer face. The webs stop 0.4 mm "
+                "above the case floor.",
+                v.svg(), 1500)
+
 # ---------------------------------------------------------------- 3D previews (OpenSCAD, colours)
 CAMS = {"3d_lid": ("lid", "115,-70,80,20,28,18")}
 scad = (ROOT / "pi5_case.scad").resolve()
@@ -181,6 +290,10 @@ body { margin:0; background:var(--paper); color:var(--ink); font:15px/1.5 "IBM P
 h4 { font:600 22px/1.1 "Saira Condensed", "Arial Narrow", sans-serif; text-transform:uppercase; letter-spacing:.04em; margin:0 0 4px; }
 p { margin:0 0 10px; color:var(--muted); font-size:14px; max-width:78ch; }
 svg.dwg { width:100%; height:auto; display:block; max-height:640px; }
+#ortho svg.dwg { max-height:none; }
+.dwg .pfill { fill:var(--lid-bg); stroke:none; }
+.dwg .vis { fill:none; stroke:var(--lid); stroke-width:1.1px; stroke-linecap:round; }
+.dwg .vt { fill:var(--ink); font-weight:500; letter-spacing:.04em; }
 .dwg * { vector-effect:non-scaling-stroke; }
 .dwg .cutf { fill:url(#hatch); stroke:var(--ink); stroke-width:1.4px; }
 .dwg .cutl { fill:url(#hatchl); stroke:var(--lid); stroke-width:1.4px; }
@@ -210,14 +323,14 @@ DEFS = """<svg width="0" height="0" style="position:absolute"><defs>
 <rect width="2" height="2" style="fill:var(--lid-bg)"/><line x1="0" y1="0" x2="0" y2="2" style="stroke:var(--lid);stroke-width:.3;stroke-opacity:.6"/></pattern>
 </defs></svg>"""
 html = f"<!doctype html><meta charset='utf-8'><style>{CSS}</style>{DEFS}" + "".join(
-    f"<figure class='card' id='{k}'><h4>{t}</h4><p>{c}</p>{s}</figure>" for k, (t, c, s) in out.items())
+    f"<figure class='card' id='{k}' style='width:{(o + (1100,))[3]}px'><h4>{o[0]}</h4><p>{o[1]}</p>{o[2]}</figure>" for k, o in out.items())
 (ROOT / "slice").mkdir(exist_ok=True)
 page = ROOT / "slice" / "lid5_sketch.html"            # git-ignored work file
 page.write_text(html)
 from playwright.sync_api import sync_playwright
 with sync_playwright() as p:
     b = p.chromium.launch()
-    pg = b.new_page(viewport={"width": 1140, "height": 900}, device_scale_factor=2)
+    pg = b.new_page(viewport={"width": 1540, "height": 900}, device_scale_factor=2)
     pg.goto(page.as_uri()); pg.wait_for_timeout(400)
     for k in out:
         f = ROOT / "img" / f"pi5_case_lid_v0.5_sketch_{k}.png"

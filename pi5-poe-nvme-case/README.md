@@ -184,6 +184,10 @@ Open points for the owner:
 
 ![Concept lid seen from inside the case](img/pi5_case_lid_v0.5_sketch_3d_lid.png)
 
+Orthographic views of the concept lid (added 13 Nov after the owner asked about the large shaded area in the 3:1 detail: that is one solid 5.6 mm-wide corner post, cut through its middle):
+
+![Lid v0.5 concept, orthographic views](img/pi5_case_lid_v0.5_sketch_ortho.png)
+
 **Queued behind the lid (13 Nov 2026, verbatim):**
 
 > Add this to your work list and get to it once we’ve settled on the lid design:
@@ -390,7 +394,7 @@ Print-orientation check on the exported STLs: lid has no overhangs >45°; body's
 | `slice_all.py` | flattens PrusaSlicer vendor profiles (0.30 DRAFT and 0.20 SPEED), adds the eSun TPU FAST overrides, slices each job (per-job profile and extra CLI args) → `print_times.json`; G-code kept in `slice/` (not committed). Also writes the committed G-code to `gcode/` (eSun TPU 95A @MK3S): the feet as complete individual objects, and the card retainer |
 | `drawings.py` | 2D sections from the STLs (trimesh + shapely) → `drawings.json` |
 | `dwglib.py` | drawing helpers shared by `drawings.py` and `sketch_lid5.py` (SVG view in mm, STL sections, clipping) |
-| `sketch_lid5.py` | lid v0.5 concept sketches → `img/pi5_case_lid_v0.5_sketch_*.png` (sections of `stl/lid5_asm.stl` + an OpenSCAD preview; needs `xvfb-run` and Playwright). Run `python3 sketch_lid5.py [node_modules]` after `render_all.sh` |
+| `sketch_lid5.py` | lid v0.5 concept sketches → `img/pi5_case_lid_v0.5_sketch_*.png` (sections of `stl/lid5_asm.stl`, a third-angle orthographic sheet with hidden-line removal by ray casting, and an OpenSCAD preview; needs `xvfb-run` and Playwright). Run `python3 sketch_lid5.py [node_modules]` after `render_all.sh` |
 | `build_page.py` | builds the review page HTML |
 | `build_pdf.py` | prints the drawings page to an A4 PDF (Chromium via Playwright), adds 3D renders from the viewer, embeds the 4 print STLs as PDF attachments (qpdf), opens with the attachments panel. Needs `npm i @fontsource/ibm-plex-sans@5 @fontsource/ibm-plex-mono@5 @fontsource/saira-condensed@5 three@0.128.0`; run `python3 build_pdf.py <node_modules> [out.pdf]` |
 | `build_viewer.py` | builds the 3D viewer page (three.js, STLs embedded) incl. the DIN bracket and a requirements summary |
