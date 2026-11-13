@@ -3,7 +3,8 @@
 //  Slide-in "tube" case. No screws or standoffs in any board.
 //
 //  Stack (bottom -> top), each board on its own ledge
-//    NVMe Base Duo (PIM704), SSDs on its UNDERSIDE  -> rests on the LOWER ledge
+//    NVMe Base Duo (PIM704), SSDs on its TOP (owner, 13 Nov; v0.2-v0.4 assumed
+//    the underside)                                 -> rests on the LOWER ledge
 //    (12 mm gap, set by the PCIe ribbon)
 //    Raspberry Pi 5 (+ Active Cooler)               -> rests on the UPPER ledge
 //    PoE HAT (G) WS-27670, held by its GPIO + PoE headers only
@@ -26,7 +27,8 @@
 //  USB end. Y = 0 at the HDMI / USB-C edge, 56 at the GPIO edge.
 //  Z = 0 at the outside bottom of the case.
 //
-//  part = "body" | "body_asm" | "lid" | "lid_asm" | "feet" | "assembly" | "info"
+//  part = "body" | "body_asm" | "lid" | "lid_asm" | "lid5" | "lid5_asm" | "retainer" | "retainer_asm"
+//         | "feet" | "foot" | "din" | "din_asm" | "din_rail" | "assembly" | "info"
 // =====================================================================
 
 part = "assembly";
@@ -36,7 +38,8 @@ bl   = 85;       // board length (Pi 5, Duo)
 bw   = 56;       // board width
 pcb  = 1.6;
 duo_gap = 12;    // Duo top -> Pi underside; the PCIe ribbon is made for 12 mm
-drive_drop = 9.5;// Duo underside -> lowest point of the SSDs - CHECK (heatsinks: ~14)
+drive_drop = 9.5;// SSD bay under the Duo. The SSDs turned out to be on TOP of the Duo (13 Nov): this bay is
+                 // empty space the v0.5 lid's tray uses; a future body can drop it
 hat_gap  = 16;   // Pi top -> HAT underside (16 mm header clears the Active Cooler) - CHECK
 hat_l = 65; hat_w = 56.5;
 hat_comp = 9;    // tallest part on top of the HAT - MEASURE
@@ -121,6 +124,23 @@ ret_bw    = 2.0;      // bump width (slot is 3)
 ret_roof_slots  = [2, 6];   // which roof vent slots (0..8) take the top bumps
 ret_floor_slots = [1, 6];   // which floor vent slots (0..7) take the bottom bumps
 side_vents = true;    // slots in both long walls between the two lips
+
+/* [Lid v0.5 concept (13 Nov): the SSDs sit on TOP of the Duo, so the bay under it is free.
+    A PLA lid with a tray under the Duo, and corner posts that stop both boards] */
+tray_frac = 0.75;     // tray reaches this fraction of the Duo's length in from its SD edge (user: 50-75 %)
+tray_t    = 2.0;      // tray plate
+tray_side = 0.5;      // tray edge -> lower ledge face, each side
+tray_drop = 0.1;      // tray top below the ledge plane (the Duo's underside)
+tray_lead = [4, 1.0]; // lead-in on the tip's top edge: length, drop (lifts a sagging board on)
+web_t     = 1.6;      // webs under the tray, down to just above the floor
+web_y     = [9.25, 28, 46.75];   // on the floor's bars between vent slots
+web_clear = 0.4;      // web bottom above the floor
+stop_x    = 0.3;      // end-stop faces (boards' SD edges at 0.5 when home): 0.2 mm float
+post_y    = [[-0.6, 5.0], [51.0, 56.6]];   // corner posts across Y: HDMI/USB-C side, GPIO side
+lip_over  = 1.5;      // small lip over the Duo's top, measured from its SD edge
+lip_t     = 1.6;
+lip_gap   = 0.2;      // lip underside above the Duo's top
+pi_over   = 1.0;      // post top above the Pi's top
 
 /* [Feet] */
 foot_d = 14; foot_h = 6; foot_x = [4, 80];
@@ -300,7 +320,32 @@ module latch_hook(s) {   // 45 deg retaining face (prints as a 45 deg overhang),
         polygon([[l_hx[0], 0], [l_hx[1], sg * h], [l_hx[2], sg * h], [l_hx[3], 0]]);
 }
 
-module lid_asm() {
+// v0.5 concept: tray + corner posts, built in place (case frame)
+t_x1 = (x_end_in - bl) + tray_frac * bl;           // tray tip (boards' SD edges at x_end_in - bl when home)
+t_y  = [duo_ledge + tray_side, bw - duo_ledge - tray_side];
+t_z  = [zd - tray_drop - tray_t, zd - tray_drop];
+module lid_tray() {
+    difference() {
+        hull() {   // plate, top edge of the tip chamfered
+            translate([x_mouth - 0.01, t_y[0], t_z[0]]) cube([t_x1 - tray_lead[0] - x_mouth, t_y[1] - t_y[0], tray_t]);
+            translate([t_x1 - 0.01, t_y[0], t_z[0]]) cube([0.01, t_y[1] - t_y[0], tray_t - tray_lead[1]]);
+        }
+        // slots over the floor's vent slots (same Y), so air still reaches the Duo's underside
+        vent_slots(t_z[0] - 0.5, t_z[1] + 0.5, low_in + 2, bw - low_in - 2, 2, t_x1 - 6);
+    }
+    for (y = web_y) hull() {   // webs, tapered at the tip
+        translate([x_mouth - 0.01, y - web_t / 2, zf + web_clear]) cube([t_x1 - 10 - x_mouth, web_t, t_z[0] - zf - web_clear + 0.01]);
+        translate([x_mouth - 0.01, y - web_t / 2, t_z[0]]) cube([t_x1 - tray_lead[0] - x_mouth, web_t, 0.01]);
+    }
+    for (p = post_y) {
+        // post: lid plate -> end-stop face for both boards, from the tray up past the Pi's top
+        translate([x_mouth - 0.01, p[0], t_z[0]]) cube([stop_x - x_mouth + 0.01, p[1] - p[0], z_pi_t + pi_over - t_z[0]]);
+        // small lip over the Duo's top corner
+        translate([stop_x - 0.01, p[0], z_duo_t + lip_gap]) cube([(x_end_in - bl) + lip_over - stop_x + 0.01, p[1] - p[0], lip_t]);
+    }
+}
+
+module lid_asm(tray = false) {
     yi0 = l_yi[0]; yi1 = l_yi[1]; zi0 = l_zi[0]; zi1 = l_zi[1];
     union() {
         difference() {
@@ -324,7 +369,8 @@ module lid_asm() {
         // prongs (v0.2/v0.3 only; with the retainer the boards are held by it instead):
         // both corners of the Duo, and the Pi's GPIO-side corner only
         // (its USB-C-side corner is left free: the Pi 5 power button is by the USB-C)
-        if (!retainer) {
+        if (tray) lid_tray();
+        else if (!retainer) {
             for (yr = [[yi0, 1.5], [bw - 1.5, yi1]])
                 translate([x_mouth - 0.01, yr[0], zd - 0.2]) cube([prong_tip - x_mouth + 0.01, yr[1] - yr[0], pcb + 1.2]);
             translate([x_mouth - 0.01, bw - 1.5, z_pi_b - 0.2]) cube([prong_tip - x_mouth + 0.01, yi1 - bw + 1.5, pcb + 1.2]);
@@ -503,6 +549,9 @@ module info() {
       ",\"ut\":", d_ut, ",\"ub\":", d_ub, ",\"u0\":", d_u0, ",\"u1\":", d_u1, ",\"v0\":", d_v0, ",\"v1\":", d_v1,
       ",\"tab\":", din_tab, ",\"hook\":", din_hook, ",\"latch\":", din_latch, ",\"travel\":", din_travel, ",\"lip\":", din_lip,
       ",\"slot\":", din_slot, ",\"rib\":", din_rib, ",\"cb\":", din_cb, "}",
+      ",\"tray\":{\"x1\":", t_x1, ",\"frac\":", tray_frac, ",\"y\":", t_y, ",\"z\":", t_z, ",\"lead\":", tray_lead,
+      ",\"web_t\":", web_t, ",\"web_y\":", web_y, ",\"web_clear\":", web_clear, ",\"stop_x\":", stop_x, ",\"post_y\":", post_y,
+      ",\"lip_over\":", lip_over, ",\"lip_t\":", lip_t, ",\"lip_gap\":", lip_gap, ",\"pi_over\":", pi_over, "}",
       "}"));
 }
 
@@ -511,6 +560,8 @@ if (part == "body") rotate([0, 90, 0]) translate([-x_end_out, 0, 0]) body();   /
 else if (part == "body_asm") body();
 else if (part == "lid") lid_print();
 else if (part == "lid_asm") lid_asm();
+else if (part == "lid5") rotate([0, -90, 0]) translate([-(x_mouth - lid_t), 0, 0]) lid_asm(true);   // v0.5 concept, plate on the bed
+else if (part == "lid5_asm") lid_asm(true);
 else if (part == "feet") feet();
 else if (part == "foot") foot();                                       // one foot (sequential G-code)
 else if (part == "retainer") retainer_print();

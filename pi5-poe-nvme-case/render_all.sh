@@ -3,7 +3,7 @@
 # Needs OpenSCAD 2021+.
 cd "$(dirname "$0")"; mkdir -p stl info
 openscad -D 'part="info"' -o /tmp/_pi5_info.stl pi5_case.scad 2>&1 | sed -n 's/^ECHO: "INFO\(.*\)"$/\1/p' > info/info.json
-for P in body body_asm lid lid_asm retainer retainer_asm feet foot din din_asm din_rail; do
+for P in body body_asm lid lid_asm lid5_asm retainer retainer_asm feet foot din din_asm din_rail; do
   openscad -D "part=\"$P\"" -o stl/$P.stl pi5_case.scad >/dev/null 2>&1 && echo "done $P" &
 done
 # comparison: the same body with 3 mm walls / floor / roof / end

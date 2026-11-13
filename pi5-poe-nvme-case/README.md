@@ -2,6 +2,8 @@
 
 Slide-in "tube" case for a Raspberry Pi 5 + Waveshare PoE HAT (G) + Pimoroni NVMe Base Duo. No screws or standoffs in any board: each board rests on its own ledge. One parametric OpenSCAD file.
 
+**13 Nov 2026: lid v0.5 concept drawn, waiting on the owner's OK** ([below](#lid-v05-concept-tray-under-the-duo-13-nov-2026)): the SSDs sit on top of the Duo, so a PLA lid with a tray under the Duo and corner stops replaces the TPU card retainer. Feet for M4 button heads are queued behind it.
+
 Status (11 Nov 2026, v0.4): **body printed and working; to print next: the TPU card retainer, the PLA lid and the feet.** The body (v0.2, unchanged; printed 10 Nov in PLA) holds the NVMe Base Duo on its ledges through a shake test. v0.3 replaced the TPU lid's failed snap bumps with PLA latch arms. v0.4 moves board retention into a separate **TPU card retainer**, locked by bumps in the body's existing vent slots, so the PLA lid only closes the case. It also fixes the **feet for M3 × 8 button heads**. No body reprint.
 
 ![Assembly](img/pi5_case_3d_assembly.jpg)
@@ -129,6 +131,67 @@ Messages (verbatim, 11 Nov 2026):
 
 Tuning: `latch_t` (arm thickness, softer at 1.2) and `latch_hook` (hook height, firmer at 1.2). Both only need a lid reprint.
 
+## Lid v0.5 concept: tray under the Duo (13 Nov 2026)
+
+**Status: sketches only, waiting on the owner's OK.** Nothing to print yet.
+
+Owner's message (verbatim). It came with a photo into the body from the mouth (marked up in magenta: both top corners of the Duo, and the space under it) and a side sketch of the lid ([photos](#photos-and-sketches-originals)):
+
+> Got some lid changes
+> - The drives face up, and sit between the pi and base. Your design assumes the other way.  Which isn’t a problem, we can resolve that with a modified lid
+> - the ledge for the nvme is too narrow. In future designs it needs to be much wider
+> - For now let’s create a pla lid that has a tray to support the base for at least 50-75% the length of the card
+> - Have a much smaller lip to secure the top of the card
+> - another lip to keep the pi pressed in, this lip will press up directly against the pi
+>
+> Put together some sketches to verify that you understand my intention
+
+How it's read in the sketches (cut from the real body STL and the concept lid, `part = "lid5_asm"`):
+
+- **The SSDs are on top of the Duo**, in the 12 mm gap under the Pi.
+  - Height: 5 mm standoff + 2.38 mm drive ≈ 7.4 mm.
+  - The upper lip only reaches 1 mm in from each edge, so the drives clear it.
+  - The 9.5 mm SSD bay under the Duo is now empty, and the tray goes there.
+- **The tray is part of the PLA lid.**
+  - Plate: 2 mm thick, 49 mm wide, running between the lower ledges with 0.5 mm clear each side.
+  - Height: its top is 0.1 mm below the ledge plane.
+  - Reach: 63.75 mm under the Duo, which is 75 % of 85 (`tray_frac`).
+  - Slots: lined up with the floor vents.
+  - Webs: three 1.6 mm webs underneath run on the floor's bars, stopping 0.4 mm above the floor so the tip can't droop.
+  - Tip: a 4 × 1 mm lead-in lifts a sagging board onto the tray.
+- **Two corner posts**, 5.6 mm wide, sit in the corners circled in the photo.
+  - Stop: the post face stops both boards' SD edges with 0.2 mm float, like the v0.2 prongs.
+  - Duo lip: the "much smaller lip" is 1.6 mm thick, sits 0.2 mm above the Duo's top and reaches 1.5 mm over each top corner.
+  - Pi stop: the post top is 1 mm above the Pi's top, so the same face is the "lip against the Pi", pushing it home.
+  - Clearances: the posts stay clear of the PCIe ribbon (mid-width), the Duo's M.2 socket and ADDON FFC connector, and the Pi's power button. These positions are read off the photo, not measured.
+- **The lid replaces the TPU card retainer.** The two can't be fitted together, because the webs and the retainer ring both need the bottom of the mouth. The skirt and latch arms are v0.3, unchanged.
+- **Checks** (trimesh):
+  - lid ∩ body = 0.
+  - No contact with either board (including ±0.4 mm sideways play), the SSD envelope, the ribbon zone, or the heatsink push-pin tail under the Pi's corner.
+  - The tray's YZ profile already fits the lipped cavity along its whole length, so it slides in.
+- **Printing:** as v0.3, plate down. The tray and posts stand vertical, making the lid 82.7 mm tall. No supports.
+- **Next body:** the Duo ledge gets much wider (owner). With the drives on top, the next body can also drop the SSD bay (`drive_drop`) and carry the Duo on a wide shelf instead.
+
+Open points for the owner:
+1. Tray length: 75 % is drawn.
+2. Is the Duo's underside clear over the tray area?
+3. Pi stop: at both corners, or the GPIO side only?
+
+| | |
+|---|---|
+| ![Side section through the GPIO-side corner](img/pi5_case_lid_v0.5_sketch_side.png) | ![Corner post, 3:1](img/pi5_case_lid_v0.5_sketch_detail.png) |
+| ![From the lid end, same view as the photo](img/pi5_case_lid_v0.5_sketch_end.png) | ![Plan under the Duo](img/pi5_case_lid_v0.5_sketch_plan.png) |
+
+![Concept lid seen from inside the case](img/pi5_case_lid_v0.5_sketch_3d_lid.png)
+
+**Queued behind the lid (13 Nov 2026, verbatim):**
+
+> Add this to your work list and get to it once we’ve settled on the lid design:
+>  I’m not sure if you realised it based on my design specs, the screw holes for the TPU feet fit an m4 screw, not an m3 as initially requested.  
+> The only m4’s I have are a button cap screw with a 7mm head. So the counterbore hole for the feet needs to suit that, and be height of the feet needs to increase 3mm
+
+Note: the body's 4.0 mm foot holes were sized for M3 heat-set inserts (5.7 mm long). An M4 screw driven straight in cuts its own thread in PLA. To do: a counterbore for a Ø7 head, an M4 clearance hole, and feet 3 mm taller (6 → 9 mm). The screw length is needed to check it doesn't bottom out: printed bodies have 5.4 mm of hole below the 0.6 mm recess.
+
 ## Photos and sketches (originals)
 
 Request (verbatim, 12 Nov 2026):
@@ -147,6 +210,8 @@ Every image attached in the design chat, full resolution and byte-for-byte as up
 | v0.2 PLA body, USB/RJ45 end | NVMe Base Duo on its ledges, TPU lid prongs behind it | From the mouth: NVMe Base Duo on the lower ledges (held through a shake test) |
 | <a href="img/photos/2026-11-11_m3x8-button-head_length.jpg"><img src="img/photos/2026-11-11_m3x8-button-head_length.jpg" width="220" alt="Foot screw in calipers: ~10 mm overall, M3 x 8 button head"></a> | <a href="img/photos/2026-11-11_m3x8-button-head_head.jpg"><img src="img/photos/2026-11-11_m3x8-button-head_head.jpg" width="220" alt="Foot screw in calipers: button head"></a> | <a href="img/photos/2026-11-11_sketch-3_tpu-card-retainer.jpg"><img src="img/photos/2026-11-11_sketch-3_tpu-card-retainer.jpg" width="220" alt="Sketch 3 (11 Nov): TPU frame in the mouth pressing the board edges, which became the v0.4 card retainer"></a> |
 | Foot screw in calipers: ~10 mm overall, M3 x 8 button head | Foot screw in calipers: button head | Sketch 3 (11 Nov): TPU frame in the mouth pressing the board edges, which became the v0.4 card retainer |
+| <a href="img/photos/2026-11-13_v0.2-body_boards-from-mouth_marked-up.jpg"><img src="img/photos/2026-11-13_v0.2-body_boards-from-mouth_marked-up.jpg" width="220" alt="13 Nov: Pi and Duo in the body, seen from the mouth, marked up: Duo top corners and the space under it"></a> | <a href="img/photos/2026-11-13_sketch-4_lid-tray-side.jpg"><img src="img/photos/2026-11-13_sketch-4_lid-tray-side.jpg" width="220" alt="Sketch 4 (13 Nov): lid side view with a stub against the Pi, a small lip over the Duo and a tray under it"></a> | |
+| 13 Nov: boards in the body from the mouth, marked up (Duo top corners, space under the Duo) | Sketch 4 (13 Nov): lid with a Pi stop, a small lip over the Duo and a tray under it | |
 
 ## G-code: feet and card retainer (11 Nov 2026)
 
@@ -214,7 +279,7 @@ v0.4 stack-up (z = 0 at the case bottom; foot top sits in the recess at z = 0.6)
 | **Waveshare Power Over Ethernet HAT (G) for Raspberry Pi 5 (5V 5A)**, SKU **WS-27670** | Core Electronics order #1000592941, 13 Mar 2025 (Gmail). Same order: Raspberry Pi 5 Model B 4GB (CE09785), Raspberry Pi 5 Active Cooler (CE09791) |
 | Pimoroni NVMe Base Duo, PIM704 | User. Kit: 4 × 12 mm M2.5 standoffs, short M2.5 bolts, 5 mm M2 SSD standoffs, PCIe flex |
 
-Known data: HAT (G) 64.98 × 56.5, no fan, compatible with the Active Cooler (Waveshare). Duo 85 × 56, fits under the Pi on 12 mm standoffs, SSDs face away from the Pi (underside), two M.2 slots side by side (2230–2280), FFC moved to the middle of the SD-end edge; the ribbon blocks the Pi's microSD slot (Tom's Hardware, Pimoroni). Pi 5 port centres from its mechanical drawing: USB-C 11.2, micro HDMI 25.8 / 39.2 along the long edge; Ethernet 10.2, USB 29.1 / 47 across the USB end.
+Known data: HAT (G) 64.98 × 56.5, no fan, compatible with the Active Cooler (Waveshare). Duo 85 × 56, fits under the Pi on 12 mm standoffs, SSDs face up, between the Duo and the Pi (owner, 13 Nov 2026: the earlier note here, "face away from the Pi", was wrong), two M.2 slots side by side (2230–2280), FFC moved to the middle of the SD-end edge; the ribbon blocks the Pi's microSD slot (Tom's Hardware, Pimoroni). Pi 5 port centres from its mechanical drawing: USB-C 11.2, micro HDMI 25.8 / 39.2 along the long edge; Ethernet 10.2, USB 29.1 / 47 across the USB end.
 
 ## DIN rail bracket (added 1 Nov 2026)
 
@@ -281,6 +346,8 @@ Coordinates in the SCAD: board-aligned. X = 0 at the boards' SD edge, 85 at the 
 | `ret_fit` / `ret_reach` / `ret_bump` | 0.15 / 0.4 / 1.2 | retainer press fit per side / finger preload / bump height into the vent slots |
 | `latch_t` / `latch_hook` / `latch_w` | 1.6 / 1 / 8 | lid latch arm thickness / hook height / hook width (v0.3; replaces v0.2's `bump` 0.8) |
 | `latch_slot` / `latch_gap` / `latch_end` | 1.2 / 0.8 / 1.0 | slots freeing the arm: inside / outside through the plate / across the free end |
+| `tray_frac` / `tray_t` / `tray_drop` | 0.75 / 2.0 / 0.1 | lid v0.5 concept: tray reach as a fraction of the Duo / plate thickness / top below the ledge plane |
+| `post_y` / `stop_x` / `lip_over` / `lip_gap` | corners 5.6 wide / 0.3 / 1.5 / 0.2 | corner posts across Y / stop face (0.2 float) / lip reach over the Duo / lip above the Duo |
 
 Outside: 106.3 L (with lid) × 68.8 W × 64.6 H; 69 H on feet.
 
@@ -318,16 +385,18 @@ Print-orientation check on the exported STLs: lid has no overhangs >45°; body's
 
 | File | Purpose |
 |---|---|
-| `pi5_case.scad` | parametric model. `part = body | body_asm | lid | lid_asm | retainer | retainer_asm | feet | din | din_asm | din_rail | assembly | info` (`body`/`lid` are print-oriented; `_asm` in place) |
+| `pi5_case.scad` | parametric model. `part = body | body_asm | lid | lid_asm | lid5 | lid5_asm | retainer | retainer_asm | feet | din | din_asm | din_rail | assembly | info` (`body`/`lid` are print-oriented; `_asm` in place) |
 | `render_all.sh` | renders STLs + `info/info.json` (+ a 3 mm-wall body for comparison) |
 | `slice_all.py` | flattens PrusaSlicer vendor profiles (0.30 DRAFT and 0.20 SPEED), adds the eSun TPU FAST overrides, slices each job (per-job profile and extra CLI args) → `print_times.json`; G-code kept in `slice/` (not committed). Also writes the committed G-code to `gcode/` (eSun TPU 95A @MK3S): the feet as complete individual objects, and the card retainer |
 | `drawings.py` | 2D sections from the STLs (trimesh + shapely) → `drawings.json` |
+| `dwglib.py` | drawing helpers shared by `drawings.py` and `sketch_lid5.py` (SVG view in mm, STL sections, clipping) |
+| `sketch_lid5.py` | lid v0.5 concept sketches → `img/pi5_case_lid_v0.5_sketch_*.png` (sections of `stl/lid5_asm.stl` + an OpenSCAD preview; needs `xvfb-run` and Playwright). Run `python3 sketch_lid5.py [node_modules]` after `render_all.sh` |
 | `build_page.py` | builds the review page HTML |
 | `build_pdf.py` | prints the drawings page to an A4 PDF (Chromium via Playwright), adds 3D renders from the viewer, embeds the 4 print STLs as PDF attachments (qpdf), opens with the attachments panel. Needs `npm i @fontsource/ibm-plex-sans@5 @fontsource/ibm-plex-mono@5 @fontsource/saira-condensed@5 three@0.128.0`; run `python3 build_pdf.py <node_modules> [out.pdf]` |
 | `build_viewer.py` | builds the 3D viewer page (three.js, STLs embedded) incl. the DIN bracket and a requirements summary |
 | `gcode/` | ready-to-print G-code for the MK3S+ (written by `slice_all.py`, slower eSun TPU 95A @MK3S preset): `pi5_case_feet_x4_TPU_sequential.gcode`, `pi5_case_card_retainer_TPU.gcode` |
 | `print/` | **the files to print**: `pi5_case_body_PETG.stl`, `pi5_case_card_retainer_TPU.stl`, `pi5_case_lid_PLA.stl`, `pi5_case_feet_x4_TPU.stl`, `pi5_case_din_bracket_PETG.stl` (binary, bed-oriented, regenerated by `render_all.sh`) and the design PDF `pi5_case_design.pdf` (v0.4, 11 Nov 2026, 17 pages, the five STLs embedded) |
-| `img/` | 3D renders (from the viewer) and the Section A-A drawing |
+| `img/` | 3D renders (from the viewer), the Section A-A, latch and retainer drawings, and the lid v0.5 concept sketches |
 | `img/photos/` | every image attached in the design chat (sketches, print photos, screw measurements), full resolution |
 | `pi5_case.html`, `pi5_case_viewer.html` | the drawings page and 3D viewer, self-contained (open locally in a browser) |
 | `info/info.json` | layout values echoed by the SCAD, read by the drawing, page and viewer builders |
