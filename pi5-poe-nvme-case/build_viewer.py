@@ -16,7 +16,7 @@ def b64(name):
     return base64.b64encode(buf.getvalue()).decode()
 
 
-DATA = {k: b64(k) for k in ("body_asm", "lid_asm", "retainer_asm", "feet", "din", "din_rail")}
+DATA = {k: b64(k) for k in ("body_asm", "lid_asm", "feet", "din", "din_rail")}
 
 html = """<title>Pi 5 Case Viewer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -90,7 +90,6 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
       <button type="button" id="tab-asm" data-mode="asm" aria-pressed="true">Assembly</button>
       <button type="button" id="tab-body" data-mode="body" aria-pressed="false">Body</button>
       <button type="button" id="tab-lid" data-mode="lid" aria-pressed="false">Lid</button>
-      <button type="button" id="tab-ret" data-mode="ret" aria-pressed="false">Retainer</button>
       <button type="button" id="tab-feet" data-mode="feet" aria-pressed="false">Feet</button>
       <button type="button" id="tab-din" data-mode="din" aria-pressed="false">DIN bracket</button>
     </div>
@@ -114,7 +113,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
     <div class="ctl asm-only"><button type="button" id="t-cut" aria-pressed="false">Section</button>
       <input type="range" id="cut" min="0" max="100" step="0.5" value="54" aria-label="Section position along the case" disabled>
       <output id="cut-out" for="cut">X 54 mm</output></div>
-    <div class="legend asm-only" aria-label="Colours"><span><i style="background:#9fb2b7"></i>body</span><span><i style="background:#5b84c4"></i>lid, feet</span><span><i style="background:#2f9e9a"></i>TPU retainer</span><span><i style="background:#3c9a5f"></i>PCBs</span><span><i style="background:#8a6fd1"></i>SSDs</span><span><i style="background:#d39a2a"></i>HAT parts</span><span><i style="background:#c8322b"></i>DIN bracket</span></div>
+    <div class="legend asm-only" aria-label="Colours"><span><i style="background:#9fb2b7"></i>body</span><span><i style="background:#5b84c4"></i>lid, feet</span><span><i style="background:#3c9a5f"></i>PCBs</span><span><i style="background:#8a6fd1"></i>SSDs</span><span><i style="background:#d39a2a"></i>HAT parts</span><span><i style="background:#c8322b"></i>DIN bracket</span></div>
   </div>
 
   <section class="req" aria-labelledby="req-h">
@@ -124,17 +123,17 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
       <tbody>
         <tr><td>Pi 5 with a PoE HAT and a Pimoroni dual NVMe base</td><td>Waveshare PoE HAT (G), WS-27670 (from your Core Electronics order), NVMe Base Duo underneath</td></tr>
         <tr><td>No screws into the Pi or the NVMe base; boards sit on a lip, per your sketches</td><td>Two ledges on each wall, one per board. No standoffs; the PCIe ribbon is the only link</td></tr>
-        <tr><td>Clearance for thick NVMe drives (2 × Samsung 980)</td><td>13 mm SSD bay under the base, about 2 mm spare</td></tr>
+        <tr><td>Clearance for thick NVMe drives (2 × Samsung 980)</td><td>The SSDs sit on top of the base, in the 12 mm gap under the Pi (about 7.4 mm tall)</td></tr>
         <tr><td>Room for a chunky USB-C plug, like a Dell Thunderbolt dock's</td><td>42 × 11 mm window over USB-C and both HDMI, with the lip notched so the plug seats</td></tr>
         <tr><td>3 mm walls optional; use ribs if they save print time</td><td>2.4 mm walls stiffened by the full-length lips. Saves about an hour on the body</td></tr>
         <tr><td>2–3 parts: body and lid</td><td>Body, lid, and 4 feet</td></tr>
         <tr><td>Lid on an end; the Pi slides in like a tube</td><td>Lid at the SD end. Boards slide in USB first and stop on the closed USB end</td></tr>
-        <tr><td>Lid screwed with M3 or clicked in, TPU for a click fit</td><td>Click-in PLA lid with two flexing latch arms (v0.3; the TPU bumps were too small to print)</td></tr>
-        <tr><td>After the first print: hold the boards with a separate TPU insert, then the PLA lid goes on</td><td>TPU card retainer (v0.4): a press-fit ring with three spring fingers on the board corners, locked by bumps in the first vent slots</td></tr>
+        <tr><td>Lid screwed with M3 or clicked in, TPU for a click fit</td><td>Click-in PLA lid with two flexing latch arms (v0.3 onwards; the TPU bumps were too small to print)</td></tr>
+        <tr><td>13 Nov: a PLA lid with a tray supporting the base for 50–75 % of its length, a much smaller lip on the top of the base, and a lip pressing on the Pi</td><td>Lid v0.5: slotted tray 63.8 mm under the base (75 %) with webs to the floor; two corner posts with a small lip over the base's top corners, stopping both boards. Replaces the v0.4 TPU card retainer</td></tr>
         <tr><td>Vents top and bottom; more space around the base and HAT for heat</td><td>Roof and floor vents, side vents between the boards, 4 mm air down each side</td></tr>
-        <tr><td>Feet screwed on with M3 counterbored screws</td><td>4 TPU feet (v0.4), M3 × 8 button or socket heads into heat-set inserts</td></tr>
+        <tr><td>Feet screwed on with M3 counterbored screws</td><td>4 TPU feet (v0.5), 9 mm tall: M4 × 10 button heads (your screws, 13 Nov) straight into the floor holes, no inserts</td></tr>
         <tr><td>SIM-style SD card tray</td><td><span class="st dropped">dropped</span>At your call. The PCIe ribbon covers the slot, so fit the card before the ribbon</td></tr>
-        <tr><td>DIN rail bracket on the feet footprint: plenty of airflow clearance, sturdy enough for rough installing and removing</td><td>Bolts to the 4 foot inserts (M3 × 20). 14 mm air gap under the floor vents plus open windows. Full-width fixed hook, a latch with an over-travel stop, and 20 mm side ribs</td></tr>
+        <tr><td>DIN rail bracket on the feet footprint: plenty of airflow clearance, sturdy enough for rough installing and removing</td><td>Bolts to the 4 foot holes (M3 × 20 into heat-set inserts; not yet changed for M4). 14 mm air gap under the floor vents plus open windows. Full-width fixed hook, a latch with an over-travel stop, and 20 mm side ribs</td></tr>
         <tr><td>2D projections before the 3D model</td><td>Drawings page first, STLs once you'd answered the questions</td></tr>
       </tbody>
     </table></div>
@@ -175,7 +174,7 @@ const DATA = __DATA__;
     g.setAttribute("normal", new THREE.BufferAttribute(nor, 3));
     return g;
   }
-  const G = { body: parseSTL(DATA.body_asm), lid: parseSTL(DATA.lid_asm), ret: parseSTL(DATA.retainer_asm), feet: parseSTL(DATA.feet), din: parseSTL(DATA.din), rail: parseSTL(DATA.din_rail) };
+  const G = { body: parseSTL(DATA.body_asm), lid: parseSTL(DATA.lid_asm), feet: parseSTL(DATA.feet), din: parseSTL(DATA.din), rail: parseSTL(DATA.din_rail) };
 
   // ---------- renderer / scene (Z up, like the CAD model)
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -213,8 +212,6 @@ const DATA = __DATA__;
   const asm = new THREE.Group();
   const bodyA = solid(G.body, BODY); asm.add(bodyA);
   const lidA = solid(G.lid, LID); asm.add(lidA);
-  const RETC = 0x2f9e9a;
-  const retA = solid(G.ret, RETC); asm.add(retA);
   const feetA = new THREE.Group();
   const fd = I.foot[0], fh = I.foot[1];
   for (const x of I.foot_x) for (const y of [I.y_foot, I.bw - I.y_foot]) {
@@ -225,7 +222,7 @@ const DATA = __DATA__;
   const boards = new THREE.Group();
   const zd = I.zd, zdt = I.z_duo_t, zpb = I.z_pi_b, zpt = I.z_pi_t, bl = I.bl, bw = I.bw;
   boards.add(box(0, 0, zd, bl, bw, zdt, PCB, 0.85));                                     // NVMe Base Duo
-  for (const [y0, y1] of [[5, 27], [29, 51]]) boards.add(box(2.5, y0, zd - 7.4, 82.5, y1, zd - 5, SSD, 0.8));  // 980 SSDs (positions assumed)
+  for (const [y0, y1] of [[5, 27], [29, 51]]) boards.add(box(3.0, y0, zd + 1.6 + 5, 83.0, y1, zd + 1.6 + 7.4, SSD, 0.8));  // 980 SSDs on TOP of the Duo (positions assumed)
   boards.add(box(0, 0, zpb, bl, bw, zpt, PCB, 0.85));                                    // Pi 5
   boards.add(box(bl - 17.6 + I.port_over, 2.2, zpt, bl + I.port_over, 18.2, zpt + 13.5, JACK, 0.9));   // RJ45
   for (const y of I.usb_y) boards.add(box(bl - 17.6 + I.port_over, y - 7, zpt, bl + I.port_over, y + 7, zpt + 16, JACK, 0.9));
@@ -264,7 +261,6 @@ const DATA = __DATA__;
   const plates = {
     body: { grp: new THREE.Group(), geom: onBed(G.body, bodyPrint), color: BODY },
     lid: { grp: new THREE.Group(), geom: onBed(G.lid, lidPrint), color: LID },
-    ret: { grp: new THREE.Group(), geom: onBed(G.ret, new THREE.Matrix4().makeRotationY(-Math.PI / 2).multiply(T(-I.ret.back, 0, 0))), color: RETC },
     feet: { grp: new THREE.Group(), geom: onBed(G.feet, null), color: LID },
     din: { grp: new THREE.Group(), geom: onBed(G.din, null), color: DINC },
   };
@@ -272,16 +268,15 @@ const DATA = __DATA__;
 
   // ---------- info cards
   const PT = TIMES;
-  const total = PT.body.PETG.min + PT.lid.PLA.min + PT.retainer.TPU.min + PT.feet.TPU.min;
+  const total = PT.body.PETG.min + PT.lid.PLA_gcode.min + PT.feet.TPUforum_sequential.min;
   const CARDS = {
     asm: ["Assembly", [["Outside", f1(I.L_total) + " × " + f1(I.W) + " × " + f1(I.H)], ["On feet", f1(I.H + I.foot[1] - 0.6) + " high"], ["Print, all", hm(total)], ["Boards", "each on its own ledge"]]],
     body: ["Body", [["Material", "PETG"], ["On the bed", "USB end down"], ["Size", ""], ["Print", hm(PT.body.PETG.min) + " · " + Math.round(PT.body.PETG.g) + " g"]]],
-    lid: ["Lid v0.4", [["Material", "PLA (or PETG), 0.20 mm"], ["On the bed", "outer face down"], ["Size", ""], ["Print", hm(PT.lid.PLA.min) + " · " + Math.round(PT.lid.PLA.g) + " g"], ["Latch", "2 flexing arms, hooks in the upper side windows"]]],
-    ret: ["Card retainer v0.4", [["Material", "TPU, eSun 95A FAST"], ["On the bed", "back face down"], ["Size", ""], ["Print", hm(PT.retainer.TPU.min) + " · " + Math.round(PT.retainer.TPU.g) + " g"], ["Holds", "3 spring fingers on the board corners"], ["Locks", "4 bumps in the first roof/floor vents"]]],
-    din: ["DIN bracket", [["Material", "PETG"], ["On the bed", "rail side down"], ["Size", ""], ["Print", hm(PT.din.PETG_strong.min) + " at 4 walls, 40% gyroid · " + Math.round(PT.din.PETG_strong.g) + " g"], ["Fixing", "4 × M3 × 20 into the foot inserts"], ["Rail", "TS35 (35 × 7.5 or 15)"]]],
-    feet: ["Feet × 4", [["Material", "TPU, eSun 95A FAST"], ["On the bed", "counterbore up"], ["Size", "Ø" + f1(I.foot[0]) + " × " + f1(I.foot[1])], ["Print", hm(PT.feet.TPU.min) + " · " + Math.round(PT.feet.TPU.g) + " g"]]],
+    lid: ["Lid v0.5", [["Material", "PLA, 0.20 mm to the hooks, then 0.30"], ["On the bed", "outer face down, tray up"], ["Size", ""], ["Print", hm(PT.lid.PLA_gcode.min) + " · " + Math.round(PT.lid.PLA_gcode.g) + " g"], ["Holds", "tray under the Duo (75 %), corner posts stop both boards"], ["Latch", "2 flexing arms, hooks in the upper side windows"]]],
+    din: ["DIN bracket", [["Material", "PETG"], ["On the bed", "rail side down"], ["Size", ""], ["Print", hm(PT.din.PETG_strong.min) + " at 4 walls, 40% gyroid · " + Math.round(PT.din.PETG_strong.g) + " g"], ["Fixing", "4 × M3 × 20 into inserts in the foot holes"], ["Rail", "TS35 (35 × 7.5 or 15)"]]],
+    feet: ["Feet × 4 v0.5", [["Material", "TPU, eSun 95A, one at a time"], ["On the bed", "counterbore up"], ["Size", "Ø" + f1(I.foot[0]) + " × " + f1(I.foot[1])], ["Screws", "M4 × 10 button head, into the PLA"], ["Print", hm(PT.feet.TPUforum_sequential.min) + " · " + Math.round(PT.feet.TPUforum_sequential.g) + " g"]]],
   };
-  for (const k of ["body", "lid", "ret", "din"]) {
+  for (const k of ["body", "lid", "din"]) {
     const b = plates[k].geom.boundingBox || (plates[k].geom.computeBoundingBox(), plates[k].geom.boundingBox);
     const s = new THREE.Vector3(); plates[k].geom.boundingBox.getSize(s);
     CARDS[k][1][2][1] = f1(s.x) + " × " + f1(s.y) + " × " + f1(s.z) + " tall";

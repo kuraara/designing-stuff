@@ -15,19 +15,20 @@
 //  lower lip the wall steps back out to make the SSD bay.
 //  A low fence on each ledge (1.2 mm, under PCB thickness) locates each board
 //  sideways. The boards slide in from the SD end, USB first, stop on the
-//  closed USB end wall, and the lid's prongs push them home.
+//  closed USB end wall. v0.5: the lid's tray carries the Duo from below and
+//  its two corner posts stop both boards (no TPU retainer).
 //
 //  Print
 //    BODY : USB end wall on the bed, tube vertical. Every lip is a vertical
 //           extrusion, vents are vertical slots: no supports.
-//    LID  : outer face on the bed, PLA or PETG (two flexing latch arms click into
-//           the body's upper side windows).               FEET: flat, TPU.
+//    LID  : outer face on the bed, PLA (two flexing latch arms click into the
+//           body's upper side windows; tray and posts stand up). FEET: flat, TPU.
 //
 //  Coordinates: board-aligned. X = 0 at the boards' SD-end edge, 85 at the
 //  USB end. Y = 0 at the HDMI / USB-C edge, 56 at the GPIO edge.
 //  Z = 0 at the outside bottom of the case.
 //
-//  part = "body" | "body_asm" | "lid" | "lid_asm" | "lid5" | "lid5_asm" | "retainer" | "retainer_asm"
+//  part = "body" | "body_asm" | "lid" | "lid_asm" | "retainer" | "retainer_asm"
 //         | "feet" | "foot" | "din" | "din_asm" | "din_rail" | "assembly" | "info"
 // =====================================================================
 
@@ -112,7 +113,7 @@ function vs_c(i, ylo, yhi) = ylo + ((yhi - ylo) - ((vs_n(ylo, yhi) - 1) * vent_p
 // v0.4: a TPU ring pushed into the mouth behind the boards, before the lid. Three leaning
 // fingers spring against the board edges; four bumps drop into the first roof and floor
 // vent slots and catch on their mouth-side ends. The PLA lid then just closes (no prongs).
-retainer = true;
+retainer = false;     // v0.4 TPU card retainer. Replaced by the v0.5 lid's tray and posts (they can't be fitted together)
 ret_fit   = 0.15;     // interference per side against the cavity mouth (TPU squeeze)
 ret_wall  = 2.4;      // ring section
 ret_front = -1.5;     // ring front face (boards' SD edges sit at x = 0.5)
@@ -125,13 +126,15 @@ ret_roof_slots  = [2, 6];   // which roof vent slots (0..8) take the top bumps
 ret_floor_slots = [1, 6];   // which floor vent slots (0..7) take the bottom bumps
 side_vents = true;    // slots in both long walls between the two lips
 
-/* [Lid v0.5 concept (13 Nov): the SSDs sit on TOP of the Duo, so the bay under it is free.
+/* [Lid v0.5 (13 Nov): the SSDs sit on TOP of the Duo, so the bay under it is free.
     A PLA lid with a tray under the Duo, and corner posts that stop both boards] */
+lid_tray  = true;     // v0.5 lid. false: the v0.3 lid (then retainer = true, or prongs)
 tray_frac = 0.75;     // tray reaches this fraction of the Duo's length in from its SD edge (user: 50-75 %)
 tray_t    = 2.0;      // tray plate
 tray_side = 0.5;      // tray edge -> lower ledge face, each side
 tray_drop = 0.1;      // tray top below the ledge plane (the Duo's underside)
 tray_lead = [4, 1.0]; // lead-in on the tip's top edge: length, drop (lifts a sagging board on)
+tray_slots = true;    // slots over the floor vents (air to the Duo's underside)
 web_t     = 1.6;      // webs under the tray, down to just above the floor
 web_y     = [9.25, 28, 46.75];   // on the floor's bars between vent slots
 web_clear = 0.4;      // web bottom above the floor
@@ -141,14 +144,20 @@ lip_over  = 1.5;      // small lip over the Duo's top, measured from its SD edge
 lip_t     = 1.6;
 lip_gap   = 0.2;      // lip underside above the Duo's top
 pi_over   = 1.0;      // post top above the Pi's top
+pi_stop   = [true, true];   // [USB-C side, GPIO side]: post reaches up to stop the Pi. false: it ends at the Duo lip
 
 /* [Feet] */
-foot_d = 14; foot_h = 6; foot_x = [4, 80];
-foot_cb = [6.4, 3.0];   // counterbore Ø x depth: M3 button head (ISO 7380, Ø5.7 x 1.65) or socket head (Ø5.5 x 3)
-foot_screw = 8;         // M3 x 8 under-head length; leaves 3.0 mm of TPU under the head, 5.0 mm in the insert
+// v0.5 (13 Nov): M4 x 10 button heads (owner measured a 7 mm head) screwed straight into the
+// body's 4.0 mm holes, cutting their own thread in the PLA. Feet 3 mm taller than v0.4.
+foot_d = 14; foot_h = 9; foot_x = [4, 80];
+foot_cb = [7.6, 3.8];   // counterbore Ø x depth: M4 button head (Ø7, ~2.2 tall) sits 1.6 mm up inside it
+foot_hole = 4.5;        // M4 clearance through the TPU
+foot_screw = 10;        // M4 x 10 under-head length: 5.2 mm of TPU under the head, 4.8 mm of thread in the PLA
 foot_recess = 0.6;      // locating recess in the case floor for each foot / DIN boss
-insert_d = 4.0; insert_len = 5.7;
-insert_depth = 6.5;     // insert hole below the recess floor (v0.2 printed bodies: 5.4)
+insert_d = 4.0;         // foot hole in the body: self-tapping M4 (drawn for M3 heat-set inserts up to v0.4)
+insert_len = 5.7;       // M3 heat-set insert (DIN bracket, if used with inserts)
+insert_depth = 6.5;     // hole below the recess floor (v0.2 printed bodies: 5.4)
+body_hole = 5.4;        // hole depth in the printed v0.2 body: the screw check below uses this
 
 /* [DIN rail bracket] */
 // Bolts to the four foot inserts in place of the feet. Clips onto a TS35 rail
@@ -331,7 +340,7 @@ module lid_tray() {
             translate([t_x1 - 0.01, t_y[0], t_z[0]]) cube([0.01, t_y[1] - t_y[0], tray_t - tray_lead[1]]);
         }
         // slots over the floor's vent slots (same Y), so air still reaches the Duo's underside
-        vent_slots(t_z[0] - 0.5, t_z[1] + 0.5, low_in + 2, bw - low_in - 2, 2, t_x1 - 6);
+        if (tray_slots) vent_slots(t_z[0] - 0.5, t_z[1] + 0.5, low_in + 2, bw - low_in - 2, 2, t_x1 - 6);
     }
     for (y = web_y) hull() {   // webs, tapered at the tip
         translate([x_mouth - 0.01, y - web_t / 2, zf + web_clear]) cube([t_x1 - 10 - x_mouth, web_t, t_z[0] - zf - web_clear + 0.01]);
@@ -339,13 +348,14 @@ module lid_tray() {
     }
     for (p = post_y) {
         // post: lid plate -> end-stop face for both boards, from the tray up past the Pi's top
-        translate([x_mouth - 0.01, p[0], t_z[0]]) cube([stop_x - x_mouth + 0.01, p[1] - p[0], z_pi_t + pi_over - t_z[0]]);
+        ptop = pi_stop[p == post_y[0] ? 0 : 1] ? z_pi_t + pi_over : z_duo_t + lip_gap + lip_t;
+        translate([x_mouth - 0.01, p[0], t_z[0]]) cube([stop_x - x_mouth + 0.01, p[1] - p[0], ptop - t_z[0]]);
         // small lip over the Duo's top corner
         translate([stop_x - 0.01, p[0], z_duo_t + lip_gap]) cube([(x_end_in - bl) + lip_over - stop_x + 0.01, p[1] - p[0], lip_t]);
     }
 }
 
-module lid_asm(tray = false) {
+module lid_asm(tray = lid_tray) {
     yi0 = l_yi[0]; yi1 = l_yi[1]; zi0 = l_zi[0]; zi1 = l_zi[1];
     union() {
         difference() {
@@ -422,10 +432,10 @@ module lid_print() { rotate([0, -90, 0]) translate([-(x_mouth - lid_t), 0, 0]) l
 // screw stack (case frame, z = 0 at the case bottom): head seat, tip, hole and insert ends
 foot_seat = foot_recess - (foot_h - foot_cb[1]);
 foot_tip = foot_seat + foot_screw;
-assert(foot_tip <= foot_recess + min(insert_len, 5.4) - 0.3, "foot screw would bottom out");
+assert(foot_tip <= foot_recess + min(body_hole, insert_depth) - 0.3, "foot screw would bottom out");
 module foot() { difference() {
     cylinder(d = foot_d, h = foot_h);
-    translate([0, 0, -1]) cylinder(d = 3.4, h = foot_h + 2);
+    translate([0, 0, -1]) cylinder(d = foot_hole, h = foot_h + 2);
     translate([0, 0, foot_h - foot_cb[1]]) cylinder(d = foot_cb[0], h = foot_cb[1] + 1);
 } }
 module feet() { for (i = [0 : 3]) translate([i * (foot_d + 3), 0, 0]) foot(); }
@@ -544,14 +554,14 @@ module info() {
       ",\"roof_y\":", r_roof_y, ",\"floor_y\":", r_floor_y, ",\"bump\":", ret_bump, ",\"bw\":", ret_bw, ",\"wall\":", ret_wall,
       ",\"fit\":", ret_fit, ",\"fh\":", ret_fh, ",\"ft\":", ret_ft, "}",
       ",\"foot_cb\":", foot_cb, ",\"foot_screw\":", foot_screw, ",\"foot_seat\":", foot_seat, ",\"foot_tip\":", foot_tip,
-      ",\"foot_recess\":", foot_recess, ",\"insert\":[", insert_d, ",", insert_len, ",", insert_depth, "]",
+      ",\"foot_recess\":", foot_recess, ",\"foot_hole\":", foot_hole, ",\"body_hole\":", body_hole, ",\"insert\":[", insert_d, ",", insert_len, ",", insert_depth, "]",
       ",\"din\":{\"uc\":", din_uc, ",\"H\":", din_H, ",\"plate\":", din_plate, ",\"gap\":", din_gap, ",\"ledge\":", din_ledge,
       ",\"ut\":", d_ut, ",\"ub\":", d_ub, ",\"u0\":", d_u0, ",\"u1\":", d_u1, ",\"v0\":", d_v0, ",\"v1\":", d_v1,
       ",\"tab\":", din_tab, ",\"hook\":", din_hook, ",\"latch\":", din_latch, ",\"travel\":", din_travel, ",\"lip\":", din_lip,
       ",\"slot\":", din_slot, ",\"rib\":", din_rib, ",\"cb\":", din_cb, "}",
       ",\"tray\":{\"x1\":", t_x1, ",\"frac\":", tray_frac, ",\"y\":", t_y, ",\"z\":", t_z, ",\"lead\":", tray_lead,
       ",\"web_t\":", web_t, ",\"web_y\":", web_y, ",\"web_clear\":", web_clear, ",\"stop_x\":", stop_x, ",\"post_y\":", post_y,
-      ",\"lip_over\":", lip_over, ",\"lip_t\":", lip_t, ",\"lip_gap\":", lip_gap, ",\"pi_over\":", pi_over, "}",
+      ",\"lid_tray\":", lid_tray, ",\"pi_stop\":", pi_stop, ",\"lip_over\":", lip_over, ",\"lip_t\":", lip_t, ",\"lip_gap\":", lip_gap, ",\"pi_over\":", pi_over, "}",
       "}"));
 }
 
@@ -560,8 +570,6 @@ if (part == "body") rotate([0, 90, 0]) translate([-x_end_out, 0, 0]) body();   /
 else if (part == "body_asm") body();
 else if (part == "lid") lid_print();
 else if (part == "lid_asm") lid_asm();
-else if (part == "lid5") rotate([0, -90, 0]) translate([-(x_mouth - lid_t), 0, 0]) lid_asm(true);   // v0.5 concept, plate on the bed
-else if (part == "lid5_asm") lid_asm(true);
 else if (part == "feet") feet();
 else if (part == "foot") foot();                                       // one foot (sequential G-code)
 else if (part == "retainer") retainer_print();

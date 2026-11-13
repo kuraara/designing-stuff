@@ -17,7 +17,7 @@ NM = pathlib.Path(sys.argv[1])
 OUT = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "pi5_case_design.pdf"
 WORK = OUT.parent / "pdf_work"
 WORK.mkdir(exist_ok=True)
-STLS = ["pi5_case_body_PETG.stl", "pi5_case_card_retainer_TPU.stl", "pi5_case_lid_PLA.stl", "pi5_case_feet_x4_TPU.stl", "pi5_case_din_bracket_PETG.stl"]
+STLS = ["pi5_case_body_PETG.stl", "pi5_case_lid_PLA.stl", "pi5_case_feet_x4_TPU.stl", "pi5_case_din_bracket_PETG.stl"]
 ISSUED = datetime.date.today().strftime("%-d %b %Y")
 
 FONTS = [("IBM Plex Sans", "ibm-plex-sans", (400, 500, 600)),
@@ -54,8 +54,8 @@ def routes(page):
 # ------------------------------------------------------------------ 3D views from the viewer page
 VIEWS = [
     ("asm", "Assembly", "Case on its feet with the boards in place (boards, SSDs and HAT parts shown as blocks)."),
-    ("lid", "Lid out", "The PLA lid pulled 30 mm off the SD end. The TPU card retainer (teal) stays in, behind the boards."),
-    ("cut", "Section through the ledges", "Cut across the case: the Pi on the upper ledge, the NVMe Base Duo on the lower ledge, SSDs in the bay."),
+    ("lid", "Lid out", "The PLA lid pulled 30 mm off the SD end, its tray sliding out from under the Duo."),
+    ("cut", "Section through the ledges", "Cut across the case: the Pi on the upper ledge, the NVMe Base Duo on the lower ledge with the SSDs on top, and the lid's tray under it."),
     ("din", "On a DIN rail", "Feet replaced by the DIN rail bracket, clipped to a TS35 rail."),
 ]
 
@@ -92,6 +92,9 @@ def render_views(pw):
         im = out.resize((1400, 1050), Image.LANCZOS) if W > 1400 else out
         buf = io.BytesIO(); im.save(buf, "JPEG", quality=88, optimize=True)
         shots[k] = base64.b64encode(buf.getvalue()).decode()
+        name = {"asm": "assembly", "lid": "lid_out", "cut": "section", "din": "din_rail"}.get(k)
+        if name:                                                   # the README's 3D renders
+            (ROOT / "img" / f"pi5_case_3d_{name}.jpg").write_bytes(buf.getvalue())
 
     shot("asm")
     click("#t-lid"); click("#v-iso"); shot("lid"); click("#t-lid")
@@ -118,6 +121,8 @@ section[aria-labelledby="v3-h"], section[aria-labelledby="dw-h"], section[aria-l
 .views3d img { aspect-ratio: auto; }
 h2, h3.grp, .legend { break-after: avoid; }
 svg.dwg { max-height: 92mm; }
+.dwg-card.wide svg.dwg { max-height: 215mm; }
+.dwg-card.wide { break-before: page; }
 .dwg-card figcaption p { font-size: 11.5px; line-height: 1.45; }
 .dwg-card { padding: 10px; }
 .zoom-hint, .zoom, .zoom-close { display: none !important; }
@@ -145,7 +150,7 @@ def build_pdf(pw, shots):
     anchor = '<section aria-labelledby="dw-h">'
     assert anchor in html
     html = html.replace(anchor, views + anchor, 1)
-    old = "<p>The print-ready STLs are in the chat: body (PETG or PLA), card retainer (TPU), lid (PLA), four feet (TPU), DIN bracket (PETG). Each is already oriented for the bed.</p>"
+    old = "<p>The print-ready STLs are in the chat: body (PETG or PLA), lid (PLA), four feet (TPU), DIN bracket (PETG). Each is already oriented for the bed.</p>"
     assert old in html
     items = "".join(f"<li>{n} · {human((ROOT / 'print' / n).stat().st_size)}</li>" for n in STLS)
     html = html.replace(old, "<p>The print-ready STLs are attached to this PDF (open the attachments or paperclip panel in your PDF reader). "
@@ -155,7 +160,7 @@ def build_pdf(pw, shots):
     html = html.replace(leg, '<p class="note">Dimensions in mm. The drawings are not to scale on the page; a scale in a title (3:1, 2:1) '
                              'is relative to the other views.</p>\n    ' + leg, 1)
     html = html.replace("<details>", "<details open>")
-    html = html.replace("Enclosure study · v0.4 · body printed, lid, retainer and feet revised · 11 Nov 2026", f"Enclosure study · v0.4 · drawings + STLs · issued {ISSUED}")
+    html = html.replace("Enclosure study · v0.5 · lid with a tray under the Duo, M4 feet · 13 Nov 2026", f"Enclosure study · v0.5 · drawings + STLs · issued {ISSUED}")
     pfile = WORK / "drawings.html"
     pfile.write_text(wrap(html + PRINT_CSS))     # after the page's own <style>, so these win
 
@@ -167,7 +172,7 @@ def build_pdf(pw, shots):
     pg.wait_for_timeout(500)
     raw = WORK / "drawings_raw.pdf"
     foot = ("<div style=\"font: 8px monospace; color: #5a6b72; width: 100%; padding: 0 12mm; display: flex; justify-content: space-between;\">"
-            f"<span>Pi 5 PoE NVMe Case · v0.4 · issued {ISSUED}</span><span><span class=\"pageNumber\"></span> / <span class=\"totalPages\"></span></span></div>")
+            f"<span>Pi 5 PoE NVMe Case · v0.5 · issued {ISSUED}</span><span><span class=\"pageNumber\"></span> / <span class=\"totalPages\"></span></span></div>")
     pg.pdf(path=str(raw), format="A4", print_background=True, prefer_css_page_size=True,
            display_header_footer=True, header_template="<span></span>", footer_template=foot,
            margin={"top": "12mm", "bottom": "15mm", "left": "12mm", "right": "12mm"})

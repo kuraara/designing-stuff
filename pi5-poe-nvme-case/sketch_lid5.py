@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Concept sketches for the v0.5 lid (13 Nov 2026): tray under the NVMe Base Duo, small lips on the
-Duo's top corners, end stops for both boards. Cut from the real STLs (body_asm, lid5_asm) like the
-main drawings, plus two OpenSCAD previews. Writes img/pi5_case_lid_v0.5_sketch_*.png.
+"""Sketches and orthographic views of the v0.5 lid (13 Nov 2026): tray under the NVMe Base Duo, small lips on the
+Duo's top corners, end stops for both boards. Cut from the real STLs (body_asm, lid_asm) like the
+main drawings, plus an OpenSCAD preview. Writes img/pi5_case_lid_v0.5_sketch_*.png and sketches.json
+{view: svg} for build_page.py.
 
-  openscad -D 'part="lid5_asm"' -o stl/lid5_asm.stl pi5_case.scad   (render_all.sh does the rest)
+  ./render_all.sh   (stl/body_asm.stl, stl/lid_asm.stl, info/info.json)
   python3 sketch_lid5.py [node_modules with @fontsource]
 
 Board-top parts marked "approx." (M.2 socket, FFC connector, PCIe ribbon, Pi power button) are
@@ -17,7 +18,7 @@ NM = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else None
 I = json.loads((ROOT / "info" / "info.json").read_text())
 T = I["tray"]
 body = trimesh.load(ROOT / "stl" / "body_asm.stl")
-lid = trimesh.load(ROOT / "stl" / "lid5_asm.stl")
+lid = trimesh.load(ROOT / "stl" / "lid_asm.stl")
 bw, bl = I["bw"], I["bl"]
 zf, zd, zdt, zpb, zpt = I["zf"], I["zd"], I["z_duo_t"], I["z_pi_b"], I["z_pi_t"]
 zhb, zht, zhc, zr, H = I["z_hat_b"], I["z_hat_t"], I["z_hat_c"], I["z_roof"], I["H"]
@@ -248,7 +249,7 @@ v.leader(uR(-0.2), 47, uR(yo1) + 14, 54, "latch arm", "start")
 v.leader(pL((0, -2, 0))[0], 47, pL((0, bw / 2, 0))[0], 30, "slots freeing the latch arms", "middle")
 v.dim_v(0, Hl, pL((0, yo1, 0))[0], -1.4, f"{f1(Hl)}")
 v.dim_h(pL((0, yo1, 0))[0], pL((0, yo0, 0))[0], 0, -2.0, f"{f1(yo1 - yo0)}")
-out["ortho"] = ("Lid v0.5 concept · orthographic views",
+out["ortho"] = ("Lid v0.5 · orthographic views",
                 "Third-angle projection, all to the same scale and lined up. The side view sits in the middle. The top and "
                 "underside are above and below it, the face that goes inside the case is on the right, and the outer face is on the "
                 "left. Heights are measured from the bottom edge of the lid, and lengths from its outer face. The webs stop 0.4 mm "
@@ -259,7 +260,7 @@ out["ortho"] = ("Lid v0.5 concept · orthographic views",
 CAMS = {"3d_lid": ("lid", "115,-70,80,20,28,18")}
 scad = (ROOT / "pi5_case.scad").resolve()
 wrap = f"""use <{scad}>
-color([0.17, 0.31, 0.54]) lid_asm(true);
+color([0.17, 0.31, 0.54]) lid_asm();
 """
 with tempfile.TemporaryDirectory() as td:
     w = pathlib.Path(td) / "w.scad"; w.write_text(wrap)
@@ -324,6 +325,7 @@ DEFS = """<svg width="0" height="0" style="position:absolute"><defs>
 </defs></svg>"""
 html = f"<!doctype html><meta charset='utf-8'><style>{CSS}</style>{DEFS}" + "".join(
     f"<figure class='card' id='{k}' style='width:{(o + (1100,))[3]}px'><h4>{o[0]}</h4><p>{o[1]}</p>{o[2]}</figure>" for k, o in out.items())
+(ROOT / "sketches.json").write_text(json.dumps({k: o[2] for k, o in out.items()}))
 (ROOT / "slice").mkdir(exist_ok=True)
 page = ROOT / "slice" / "lid5_sketch.html"            # git-ignored work file
 page.write_text(html)

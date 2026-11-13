@@ -4,8 +4,9 @@ collect print time + filament. Body in PETG (and PLA for reference), lid in PLA 
 the project's eSun TPU 95A presets (printer-profiles/esun-tpu95a-mk3s): FAST for estimates, and the slower forum
 baseline for the committed feet G-code. Both are rebuilt here from the vendor 'Generic FLEX' + the same overrides.
 
-Also writes committed G-code to gcode/ (forum preset): the four feet as separate objects with
-'Complete individual objects' (sequential printing), and the card retainer.
+Also writes committed G-code to gcode/: the four feet as separate objects with 'Complete individual
+objects' (sequential printing, forum TPU preset), and the v0.5 lid (Generic PLA, 0.20 SPEED profile with
+0.20 mm layers up to the latch hooks and 0.30 mm above, through a 3MF with layer-height ranges).
 
 PrusaSlicer 2.7 CLI can't pick vendor presets by name, so the vendor bundle is flattened
 (resolving `inherits`) into one .ini per material."""
@@ -88,8 +89,7 @@ def slice_one(stem, mat, prof, extra, key):
 STRONG = ["--perimeters", "4", "--fill-density", "40%", "--fill-pattern", "gyroid"]
 JOBS = [  # (stl stem, material, profile, extra CLI args, result key)
     ("body", "PETG", "draft", [], "PETG"), ("body", "PLA", "draft", [], "PLA"), ("body_wall3", "PETG", "draft", [], "PETG"),
-    ("lid", "PLA", "speed", [], "PLA"), ("lid", "PETG", "speed", [], "PETG"),          # v0.3 lid: 0.20 mm for the hooks
-    ("retainer", "TPU", "draft", [], "TPU"),                                        # v0.4 card retainer
+    ("lid", "PLA", "speed", [], "PLA"), ("lid", "PETG", "speed", [], "PETG"),          # v0.5 lid: 0.20 mm for the hooks
     ("feet", "TPU", "draft", [], "TPU"),
     ("din", "PETG", "draft", [], "PETG"), ("din", "PETG", "draft", STRONG, "PETG_strong")]
 results = {}
@@ -122,13 +122,48 @@ else:
     results.setdefault("feet", {})["TPUforum_sequential"] = {"min": mins, "g": grams}
     print("feet TPUforum_sequential", mins, "min", grams, "g ->", gout.relative_to(root), flush=True)
 # ---- committed G-code: single objects, centred on the bed
-GCODE = [  # (stl stem, material, profile, extra CLI args, output name)
-    ("retainer", "TPUforum", "draft", [], "pi5_case_card_retainer_TPU.gcode"),   # back face down, slower TPU preset
+import shutil, zipfile
+RANGES_XML = """<?xml version="1.0" encoding="utf-8"?>
+<objects>
+ <object id="1">
+{}
+ </object>
+</objects>
+"""
+
+
+def with_layer_ranges(stl, ini, ranges, out3mf):
+    """bed-centred 3MF of one STL with PrusaSlicer layer-height ranges [(z0, z1, h)], so the CLI can slice
+    a variable layer height (no CLI flag for it): export the 3MF, add the ranges file, repack"""
+    tmp = work / "_3mf"; shutil.rmtree(tmp, ignore_errors=True)
+    subprocess.run(["prusa-slicer", "--export-3mf", "--load", str(ini), "--center", "125,105", "--ensure-on-bed",
+                    "-o", str(work / "_base.3mf"), str(stl)], capture_output=True, check=True)
+    with zipfile.ZipFile(work / "_base.3mf") as z:
+        z.extractall(tmp)
+    rng = "\n".join(f'  <range min_z="{a}" max_z="{b}">\n   <option opt_key="extruder">0</option>\n'
+                    f'   <option opt_key="layer_height">{h}</option>\n  </range>' for a, b, h in ranges)
+    (tmp / "Metadata" / "Prusa_Slicer_layer_config_ranges.xml").write_text(RANGES_XML.format(rng))
+    with zipfile.ZipFile(out3mf, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in tmp.rglob("*"):
+            if f.is_file():
+                z.write(f, f.relative_to(tmp))
+    return out3mf
+
+
+GCODE = [  # (stl stem, material, profile, extra CLI args, layer ranges or None, output name)
+    # v0.5 lid, plate down, Generic PLA: 0.20 mm up to 9 mm (the latch hooks sit 4.6-7.3 mm up), 0.30 mm above
+    ("lid", "PLA", "speed", [], [(0, 9, 0.2), (9, 200, 0.3)], "pi5_case_lid_PLA.gcode"),
 ]
-for stem, mat, prof, extra, name in GCODE:
+for stem, mat, prof, extra, ranges, name in GCODE:
     gout = root / "gcode" / name
-    cmd = ["prusa-slicer", "--export-gcode", "--load", str(work / f"{mat}_{prof}.ini"), *extra,
-           "--center", "125,105", "--ensure-on-bed", "-o", str(gout), str(root / "stl" / f"{stem}.stl")]
+    ini = work / f"{mat}_{prof}.ini"
+    src = root / "stl" / f"{stem}.stl"
+    if ranges:
+        src = with_layer_ranges(src, ini, ranges, work / f"{stem}_ranges.3mf")
+        cmd = ["prusa-slicer", "--export-gcode", "--load", str(ini), *extra, "-o", str(gout), str(src)]
+    else:
+        cmd = ["prusa-slicer", "--export-gcode", "--load", str(ini), *extra,
+               "--center", "125,105", "--ensure-on-bed", "-o", str(gout), str(src)]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode or not gout.exists():
         print("FAIL", name, (r.stderr or r.stdout)[-600:], file=sys.stderr); continue
