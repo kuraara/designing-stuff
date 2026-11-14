@@ -72,11 +72,15 @@ Travel, checked by moving the real meshes (`check_motion.py`): plunger touched a
 
 ## Print
 
-**`gcode/tpu_button_TPUsafe_0.20SPEED_solidboss.gcode`**: 3-layer (0.6) membrane, **1 h 44 min, 17.3 g**.
-2-layer (0.4) membrane: `gcode/tpu_button_m04_TPUsafe_0.20SPEED_solidboss.gcode`, 1 h 43 min, 17.1 g.
-(Sent in chat as `tpu_button_v0.2_3layer_…` / `…_2layer_…`.)
+**Quickest: `gcode/tpu_button_TPU_0.20SPEED_lean.gcode`**: 3-layer (0.6) membrane, **1 h 08 min, 14.4 g**. eSun TPU 95A **FAST** preset (225 °C, 3.5 mm³/s), 2 perimeters, 10 % infill, solid centre. The FAST preset hasn't been proven on this printer yet: if the extruder clicks or walls look starved, stop and use the safe file. 2-layer face: `gcode/tpu_button_m04_TPU_0.20SPEED_lean.gcode`, 1 h 07 min.
 
-Both are face down, no supports, eSun TPU 95A @MK3S (the forum-safe preset that the braid tool printed well with), 0.20mm SPEED. To slice it yourself in PrusaSlicer: printer *Original Prusa i3 MK3S & MK3S+*, print *0.20mm SPEED @MK3*, filament *eSun TPU 95A @MK3S* from [printer-profiles](../../printer-profiles/esun-tpu95a-mk3s), then **Perimeters 3**, **Infill > Solid infill threshold area 260 mm²** (makes only the Ø18 centre solid) and **Avoid crossing perimeters**.
+**Safe: `gcode/tpu_button_TPUsafe_0.20SPEED_solidboss.gcode`**: same part, forum-safe preset (220/212 °C, 2.4 mm³/s, as used for the braid tool), 3 perimeters, 15 % infill: **1 h 44 min, 17.3 g**. 2-layer: `gcode/tpu_button_m04_TPUsafe_0.20SPEED_solidboss.gcode`, 1 h 43 min.
+
+(Sent in chat as `tpu_button_v0.2_3layer_FAST_lean.gcode` and `tpu_button_v0.2_3layer_TPUsafe_0.20SPEED.gcode`.)
+
+All face down, no supports, 0.20mm SPEED. To slice it yourself in PrusaSlicer: printer *Original Prusa i3 MK3S & MK3S+*, print *0.20mm SPEED @MK3*, filament *eSun TPU 95A FAST @MK3S* (or *eSun TPU 95A @MK3S*) from [printer-profiles](../../printer-profiles/esun-tpu95a-mk3s), then **Infill > Solid infill threshold area 260 mm²** (makes only the Ø17 centre solid), **Avoid crossing perimeters**, and Perimeters 2 / Infill 10 % (lean) or Perimeters 3 (safe).
+
+Where the time goes: TPU is flow-limited, so time tracks plastic. The FAST preset saves 23 min, 2 perimeters 8 min, 10 % infill 5 min; cutting the base from 6 to 4 mm would only save 2.5 min and puts the COM tab on the desk.
 
 - **Sheet:** textured or satin; glue stick on smooth PEI.
 - **First layer:** the membrane *is* the first layers, so watch them. Gaps or a starved ring show up as holes in the face.
@@ -122,12 +126,14 @@ Height from face to switch top is 12.4 (the 45° cone from the rim to the throat
 
 ## Print times (PrusaSlicer 2.7.2, stock MK3S+, 0.20mm SPEED)
 
-| STL | Filament | stock (2 perimeters, 15 %) | **solidboss** (3 perimeters, solid centre) |
-|---|---|---|---|
-| `tpu_button` (0.6 membrane) | eSun TPU 95A (safe) | 1h 25m, 13.9 g | **1h 44m, 17.3 g** |
-| | eSun TPU 95A FAST | 1h 07m, 14.3 g | 1h 21m, 17.8 g |
-| `tpu_button_m04` (0.4 membrane) | eSun TPU 95A (safe) | 1h 24m, 13.7 g | **1h 43m, 17.1 g** |
-| | eSun TPU 95A FAST | 1h 07m, 14.1 g | 1h 20m, 17.5 g |
+| STL | Filament | stock (2 perimeters, 15 %) | **lean** (2 perimeters, 10 %, solid centre) | solidboss (3 perimeters, 15 %, solid centre) |
+|---|---|---|---|---|
+| `tpu_button` (0.6 membrane) | eSun TPU 95A (safe) | 1h 26m, 14.1 g | 1h 26m, 14.1 g | **1h 44m, 17.3 g** |
+| | eSun TPU 95A FAST | 1h 08m, 14.5 g | **1h 08m, 14.4 g** | 1h 21m, 17.8 g |
+| `tpu_button_m04` (0.4 membrane) | eSun TPU 95A (safe) | 1h 25m, 13.9 g | 1h 24m, 13.8 g | **1h 43m, 17.1 g** |
+| | eSun TPU 95A FAST | 1h 08m, 14.3 g | **1h 07m, 14.2 g** | 1h 20m, 17.6 g |
+
+Bold = G-code kept in `gcode/`.
 
 G-code check (`check_gcode.py`): the 0.6 file prints the free ring on layers 1–3 and nothing in it from layer 4; the 0.4 file on layers 1–2. The centre boss prints as solid infill. Overhang check (`check_overhangs.py`): only the floor bridge (118 mm² at 28 mm) and the detent bumps are steeper than 45°.
 

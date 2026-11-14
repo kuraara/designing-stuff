@@ -4,7 +4,8 @@
 Filaments from ../../printer-profiles/esun-tpu95a-mk3s (the project's eSun TPU bundle):
   TPUsafe = 'eSun TPU 95A @MK3S' (forum preset, 2.4 mm3/s, 220/212 C) -> first print
   TPU     = 'eSun TPU 95A FAST @MK3S' (3.5 mm3/s, 225 C)
-Variants: stock (profile as-is: 2 perimeters, 15 % infill) and solidboss (3 perimeters, plus
+Variants: stock (profile as-is: 2 perimeters, 15 % infill), lean (2 perimeters, 10 %, solid centre;
+the quick one with the FAST preset) and solidboss (3 perimeters, plus
 solid_infill_below_area = 260 mm2, which fills only the 18 mm centre boss solid: its slices are
 < 255 mm2 while the body's are > 450 mm2), so the centre doesn't squash under a thumb.
 Vendor presets are flattened here (resolving `inherits`), since the 2.7 CLI can't pick presets by name.
@@ -18,9 +19,11 @@ TPU_BUNDLE = root.parents[1] / "printer-profiles" / "esun-tpu95a-mk3s" / "eSun_T
 PRINTER = "Original Prusa i3 MK3S & MK3S+"
 PRINTS = {"0.20SPEED": "0.20mm SPEED @MK3"}
 FILAMENTS = {"TPUsafe": ("bundle", "eSun TPU 95A @MK3S"), "TPU": ("bundle", "eSun TPU 95A FAST @MK3S")}
-INFILL = {"stock": {}, "solidboss": {"perimeters": "3", "solid_infill_below_area": "260"}}
+INFILL = {"stock": {}, "solidboss": {"perimeters": "3", "solid_infill_below_area": "260"},
+          # quickest that keeps the solid centre: 2 perimeters, 10 % infill
+          "lean": {"perimeters": "2", "fill_density": "10%", "solid_infill_below_area": "260"}}
 COMMON = {"avoid_crossing_perimeters": "1"}
-KEEP = {("TPUsafe", "0.20SPEED", "solidboss")}
+KEEP = {("TPUsafe", "0.20SPEED", "solidboss"), ("TPU", "0.20SPEED", "lean")}
 META = {"inherits", "renamed_from", "alias", "compatible_printers", "compatible_printers_condition",
         "compatible_prints", "compatible_prints_condition", "printer_model", "printer_variant",
         "default_print_profile", "default_filament_profile", "default_sla_material_profile",
