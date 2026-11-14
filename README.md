@@ -9,6 +9,7 @@ Printer: Prusa i3 MK3S+ with a 0.4 nozzle. Materials: TPU (eSun eTPU-95A) first,
 | [fishbone-braid-tool](fishbone-braid-tool) | Zigzag French/fishbone hair braiding tool in TPU, with a short test coupon | v0.2: coupon passed, full tool ready to print |
 | [bag-tag](bag-tag) | Name + flower bag tag as a two-colour press-fit inlay for a single-extruder printer; parametric name, font and size, with a 1–4 s generator script (basis of the shiny-trinkets Bag Tag gadget) | v0.1: STLs and G-code ready, not printed |
 | [pi5-poe-nvme-case](pi5-poe-nvme-case) | Slide-in Raspberry Pi 5 case for the Waveshare PoE HAT (G) and Pimoroni NVMe Base Duo, no screws into the boards, plus a DIN rail bracket | v0.2: body printed in PLA (10 Nov), printed fine; lid, feet, bracket not yet |
+| [arcade-button-box](arcade-button-box) | Wireless ESP32-C3 arcade button boxes: printed enclosure study (6 layouts), off-the-shelf box and button research, and an all-TPU membrane button that holds the arcade microswitch | enclosure v0.1 not printed; TPU button v0.1 ready to print |
 | [printer-profiles/esun-tpu95a-mk3s](printer-profiles/esun-tpu95a-mk3s) | PrusaSlicer filament presets for eSun TPU 95A: forum-safe and FAST | sliced, not printed |
 
 ## Layout
