@@ -1,10 +1,10 @@
-# TPU membrane button — v0.1 mock
+# TPU membrane button — v0.2
 
-A single arcade button printed as **one TPU part**: the button face is a 2–3 layer membrane printed on the bed, a stiff centre presses the microswitch, and a 45° cone stops the travel before the switch can be over-pressed. The microswitch pushes in from underneath, and its tab end sticks out the side like on a Happ button. No supports.
+A single arcade button printed as **one TPU part**: the button face is a 2–3 layer membrane printed on the bed, and a stiff centre presses the microswitch. The centre's face lands on the switch's own top face, so the plunger always stops 0.2 mm above flush whatever its exact height: no shims or tape. A 45° cone behind it is the backup stop. The switch slides in from the side onto a solid floor and clicks onto two bumps in its mounting hole; its tab end sticks out like on a Happ button. No supports.
 
 Part of the [arcade-button-box](..) study: aimed at cutting box depth from ~94 mm (long-barrel buttons) to ~34 mm.
 
-Status: **v0.1, sliced and ready to print, not yet printed.** 14 Nov 2026.
+Status: **v0.2, G-code sent for printing 14 Nov 2026, not yet tested.** v0.1 (housing stop, snap-in from below) is in git history.
 
 ![Drawing](img/tpu_button_drawing.png)
 
@@ -28,6 +28,16 @@ Status: **v0.1, sliced and ready to print, not yet printed.** 14 Nov 2026.
 
 14 Nov 2026, 16:59: screenshot of the switch being used: austinamusements.com.au, *"Bulk Buy- 100 x Microswitch For Arcade Buttons"*, brand B.Lee, $135.00. Red body, orange plunger at one end of the top face, NO/NC tabs out the far end, COM out the bottom near that end, two mounting holes at diagonal corners.
 
+14 Nov 2026, 17:30:
+
+> Redo the design so I don’t need to tape anything
+
+14 Nov 2026, 17:41:
+
+> Okay just give me the one you did and I’ll print it anyway
+
+(v0.2 was sliced and checked by then, so the v0.2 G-code was sent.)
+
 14 Nov 2026, 17:10: three caliper photos of the switch (no text), read off the beam scale because the display was off:
 
 | | Read from photo | Used |
@@ -47,39 +57,43 @@ Modelled in print orientation: the bed is the button face.
 
 | Layer up from the bed | What it is |
 |---|---|
-| 0–0.6 (3 layers) | membrane across the whole face; free to flex in the ring Ø18–Ø29 |
-| Ø18 centre | solid boss bonded to the membrane, tapering at 45° to a Ø6.8 tip that presses the plunger |
-| 45° cone | the body grows inward from the Ø29 rim at 45°, parallel to the boss cone and 2.2 mm away: that gap is the travel, and cone landing on cone is the hard stop (self-centring, also limits tilt) |
-| 12.2 down | ceiling the switch's top face sits against, with a Ø8 throat for the tip |
-| pocket | 10.6 wide, open at the bottom and at the tab end; two 0.6 mm snap ridges catch the switch's bottom edges |
+| 0–0.6 (3 layers) | membrane across the whole face; free to flex in the ring Ø17–Ø29 |
+| Ø17 centre | solid boss bonded to the membrane, tapering at 45° to a Ø7 face with a 0.2 mm recess over the plunger |
+| 45° cone | the body grows inward from the Ø29 rim at 45°, parallel to the boss cone: the backup stop |
+| 12.2 down | tunnel ceiling with a Ø8 throat for the face, and a 3.6 mm groove the plunger slides in along |
+| tunnel | 10.6 wide, 15.8 tall, open at the tab end; solid floor under the plunger end (to 6 mm past the plunger), open underneath beyond that for COM; two 0.45 mm detent bumps click into the mounting hole near the plunger end |
 | +6 | base below the switch so COM clears the desk |
 
-Travel budget at rest: 0.2 gap to the plunger, click within 0.2 + 1.57 (D44X max pretravel) = 1.77, cone stop at 2.2. After the click the plunger moves at most another 2.0 − pretravel, inside the D44X's ≥ 1.27 overtravel.
+**Why no shims (v0.2):** the press stops when the centre's face lands on the switch's own top face, with the 0.2 recess over the plunger. The plunger therefore always ends 0.2 above flush: 2.0 of travel for this 2.2 plunger, where the D44X clicks within 1.57. Any plunger from 1.77 to 2.5 proud works unchanged, and the floor (not snap ridges) carries the press.
+
+Travel, checked by moving the real meshes (`check_motion.py`): plunger touched at 0.6–0.7, face lands on the switch at 2.6, cone backup at 2.9, nothing else touches. Sliding the switch in, only the detent bumps touch it, over the last 3 mm.
 
 ## Print
 
 **`gcode/tpu_button_TPUsafe_0.20SPEED_solidboss.gcode`**: 3-layer (0.6) membrane, **1 h 44 min, 17.3 g**.
 2-layer (0.4) membrane: `gcode/tpu_button_m04_TPUsafe_0.20SPEED_solidboss.gcode`, 1 h 43 min, 17.1 g.
+(Sent in chat as `tpu_button_v0.2_3layer_…` / `…_2layer_…`.)
 
 Both are face down, no supports, eSun TPU 95A @MK3S (the forum-safe preset that the braid tool printed well with), 0.20mm SPEED. To slice it yourself in PrusaSlicer: printer *Original Prusa i3 MK3S & MK3S+*, print *0.20mm SPEED @MK3*, filament *eSun TPU 95A @MK3S* from [printer-profiles](../../printer-profiles/esun-tpu95a-mk3s), then **Perimeters 3**, **Infill > Solid infill threshold area 260 mm²** (makes only the Ø18 centre solid) and **Avoid crossing perimeters**.
 
 - **Sheet:** textured or satin; glue stick on smooth PEI.
 - **First layer:** the membrane *is* the first layers, so watch them. Gaps or a starved ring show up as holes in the face.
+- **Floor bridge:** the floor under the switch prints as a 10.6 mm TPU bridge at 28 mm. A little sag only makes the switch a snug fit.
 - **Removal:** flex the steel sheet and lift from the outer edge. Don't peel the middle up first: the 0.4–0.6 ring tears or stretches before the solid parts let go.
 
 ## Fit and test
 
-1. Push the switch in from underneath, plunger end first towards the closed end of the pocket, tabs out through the side slot, until it snaps past the ridges and its top sits against the ceiling.
+1. Slide the switch in from the open side, plunger end first and the plunger up, so the plunger runs along the groove. Push until it hits the end wall and clicks onto the bumps; the tabs stay outside.
 2. Meter across COM–NO (or wire it to the ESP32), then check:
 
 | Check | Pass | If not |
 |---|---|---|
-| At rest | open | already clicked → the plunger is taller than 2.2: put a layer of tape between the switch top and the ceiling, or reprint with `pl_free` raised |
-| Press the centre | clicks before the cone stops | no click → plunger shorter than 2.2: reprint with `pl_free` lowered (or `stop` 2.4) |
-| Press near the edge of the Ø29 face | still clicks | soft edge → bigger `r_boss` |
-| Release | springs back, clicks off | sticky → 3-layer membrane instead of 2 |
-| Feel | your call | stiffer → thicker `membrane` or narrower ring (`r_rim`); lighter → the opposite |
-| Switch retention | doesn't drop out when shaken | loose → `ridge` 0.8, or `c_y` 0.05 |
+| At rest | open | plunger taller than 2.5: `pl_free` up |
+| Press the centre | clicks, then lands firmly | no click: `pl_stop` 0 (plunger pushed flush) |
+| Press near the edge of the Ø29 face | still clicks | soft edge: bigger `r_boss` |
+| Release | springs back, clicks off | sticky: 3-layer membrane instead of 2 |
+| Feel | your call | stiffer: thicker `membrane` or narrower ring (`r_rim`); lighter: the opposite |
+| Switch retention | doesn't slide out when the wires are tugged | loose: `bump_h` 0.6 |
 
 3. Report back what passed, which membrane you preferred, and how the click feels.
 
@@ -88,17 +102,21 @@ Both are face down, no supports, eSun TPU 95A @MK3S (the forum-safe preset that 
 | Name | Default | Meaning |
 |---|---|---|
 | `membrane` | 0.6 | face thickness: 0.4 = 2 layers, 0.6 = 3 (first layer 0.2) |
-| `r_rim` / `r_boss` / `R_out` | 14.5 / 9 / 18 | flexible face Ø29, stiff centre Ø18, puck Ø36 |
-| `stop` | 2.2 | travel to the cone stop |
-| `gap0` | 0.2 | tip-to-plunger gap at rest |
+| `r_rim` / `r_boss` / `R_out` | 14.5 / 8.5 / 18 | flexible face Ø29, stiff centre Ø17, puck Ø36 |
+| `t_face` | 2.4 | centre travel until its face is level with the ceiling (+ `c_z` to the switch top) |
+| `pl_stop` | 0.2 | recess: the plunger stops this far above flush |
+| `stop_margin` | 0.3 | cone backup stop after the face lands |
+| `r_face`, `r_rec` | 3.5, 2.3 | landing face and plunger recess |
 | `r_throat`, `lip` | 4, 0.8 | hole and ceiling at the plunger |
 | `sw_L`, `sw_T`, `sw_H` | 27.8, 10.3, 15.6 | switch body |
 | `pl_off`, `pl_d`, `pl_free`, `pl_pt` | 5.9, 2.7, 2.2, 1.57 | plunger position, width, height, max pretravel |
-| `c_y`, `c_end` | 0.15, 0.2 | pocket clearance |
-| `ridge`, `ridge_x` | 0.6, [−2, 12] | snap ridges |
-| `base_clear` | 6 | below the switch; 0 when it goes into a box |
+| `hole_x`, `hole_z` | 2.4, 2.9 | mounting hole near the plunger end (detent bumps) |
+| `c_y`, `c_end`, `c_z` | 0.15, 0.2, 0.2 | tunnel clearances |
+| `floor_x`, `groove_w` | 6, 3.6 | floor extent past the plunger, plunger groove width |
+| `bump_r`, `bump_h` | 1.0, 0.45 | detent bumps |
+| `base_clear` | 6 | below the switch; ≥ 2 (floor) |
 
-Height from face to switch top is `membrane + 0.3 + (r_rim − r_throat) + lip` = 12.2: the 45° cone from the rim to the throat sets it. Overall 33.8 with the 6 mm base, about 32 in a box including the COM tab.
+Height from face to switch top is 12.4 (the 45° cone from the rim to the throat sets it). Overall 34 with the 6 mm base.
 
 ## Print times (PrusaSlicer 2.7.2, stock MK3S+, 0.20mm SPEED)
 
@@ -109,11 +127,11 @@ Height from face to switch top is `membrane + 0.3 + (r_rim − r_throat) + lip` 
 | `tpu_button_m04` (0.4 membrane) | eSun TPU 95A (safe) | 1h 24m, 13.7 g | **1h 43m, 17.1 g** |
 | | eSun TPU 95A FAST | 1h 07m, 14.1 g | 1h 20m, 17.5 g |
 
-G-code check (`check_gcode.py`): the 0.6 file prints the free ring on layers 1–3 and nothing in it from layer 4; the 0.4 file on layers 1–2. The centre boss prints as solid infill. Overhang check (`check_overhangs.py`): only the two 0.6 mm snap-ridge ledges (17 mm²) are steeper than 45°.
+G-code check (`check_gcode.py`): the 0.6 file prints the free ring on layers 1–3 and nothing in it from layer 4; the 0.4 file on layers 1–2. The centre boss prints as solid infill. Overhang check (`check_overhangs.py`): only the floor bridge (118 mm² at 28 mm) and the detent bumps are steeper than 45°.
 
 ## Open questions
 
-- Plunger height is the key number (±0.3 from the photo). The test print settles it.
+- Plunger height (±0.3 from the photo) no longer matters within 1.77–2.5; the hole position for the detent bumps is also from a photo.
 - Membrane fatigue: TPU 95A at ~2 mm deflection over a 5.5 mm ring may take a set over thousands of presses.
 - Panel mounting for the box (flange, or a multi-button mat) is not designed yet.
 - The thickness (10.3) wasn't measured; the pocket is 10.6.
@@ -122,10 +140,10 @@ G-code check (`check_gcode.py`): the 0.6 file prints the free ring on layers 1�
 
 | File | Purpose |
 |---|---|
-| `tpu_button.scad` | the model. `part = button / switch / info` |
+| `tpu_button.scad` | the model. `part = button / switch / body / boss / info` |
 | `render_all.sh` | STLs (0.6 and 0.4 membranes), `info.json`, overhang check |
 | `slice_all.py` | slices with the repo's eSun TPU presets → `print_times.json`, keeps the safe solidboss G-code |
-| `check_gcode.py`, `check_overhangs.py` | membrane layer / boss fill check; overhang check |
+| `check_gcode.py`, `check_overhangs.py`, `check_motion.py` | membrane layer / boss fill; overhangs; switch insertion and press travel with the real meshes (`check_motion.txt`) |
 | `drawings.py` | `img/tpu_button_drawing.svg/.png` from STL sections |
 | `stl/`, `gcode/`, `img/` | outputs |
 

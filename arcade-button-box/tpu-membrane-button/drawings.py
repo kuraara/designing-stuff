@@ -111,21 +111,22 @@ def sec(origin, normal, to2d):
 
 
 R = I["R_out"]; sw_L, sw_T, sw_H = I["sw"]; pl_off, pl_d, pl_free, pl_pt = I["pl"]
-zc, zsb = use(I["z_ceil"]), use(I["z_sw_b"])
+zc, zst, zsb = use(I["z_ceil"]), use(I["z_sw_t"]), use(I["z_sw_b"])
 membrane, stop = I["membrane"], I["stop"]
 
 
 def switch_side(v, along_x):
     if along_x:   # switch body, plunger, tabs (approximate), dashed
-        v.rect(-pl_off, zsb, -pl_off + sw_L, zc, "sw")
-        v.rect(-pl_d / 2, zc, pl_d / 2, zc + pl_free, "plg")
+        v.rect(-pl_off, zsb, -pl_off + sw_L, zst, "sw")
+        v.rect(-pl_d / 2, zst, pl_d / 2, zst + pl_free, "plg")
+        v.circle(-pl_off + I["hole"][0], zsb + I["hole"][1], 1.2, "hid")
         x1 = -pl_off + sw_L
         for dz in (5.5, 10.5):
             v.rect(x1, zsb + dz - 0.3, x1 + 8, zsb + dz + 0.3, "tab")       # NO / NC out the end
         v.poly([(x1 - 4, zsb), (x1 - 4, zsb - 3.5), (x1 + 6, zsb - 3.5)], "tabl", closed=False)   # COM
     else:
-        v.rect(-sw_T / 2, zsb, sw_T / 2, zc, "sw")
-        v.rect(-pl_d / 2, zc, pl_d / 2, zc + pl_free, "plg")
+        v.rect(-sw_T / 2, zsb, sw_T / 2, zst, "sw")
+        v.rect(-pl_d / 2, zst, pl_d / 2, zst + pl_free, "plg")
 
 
 # ---------------------------------------------------------------- A-A: along the switch
@@ -138,17 +139,19 @@ va.dim_h(-I["r_boss"], I["r_boss"], top, top + 5, f"Ø{f1(2 * I['r_boss'])} stif
 va.dim_h(-I["r_rim"], I["r_rim"], top, top + 10, f"Ø{f1(2 * I['r_rim'])} membrane ring")
 va.dim_h(-R, R, top, top + 15, f"Ø{f1(2 * R)}")
 # height chain on the right, overall beyond it
-xr = R + 30
-va.dim_v(zc, top, R, xr, f"{f1(top - zc)}")
-va.dim_v(zsb, zc, R + 30, xr, f"{f1(sw_H)} switch")
+xr = R + 50
+va.dim_v(zst, top, R, xr, f"{f1(top - zst)}")
+va.dim_v(zsb, zst, R + 50, xr, f"{f1(sw_H)} switch")
 va.dim_v(0, zsb, R, xr, f"{f1(I['base_clear'])}")
 va.dim_v(0, top, R, xr + 7, f"{f1(ZT)} overall")
 va.leader(11.8, top - membrane / 2, 21, top + 2.5, f"membrane {f1(membrane)} ({round(membrane / 0.2)} layers)")
 zfun = use(I["z_fun"])
-va.leader(-6.5, zfun + 2.5 + stop / 2 - 0.2, -24, zfun + 6, f"cone stop, {f1(stop)} travel", "end")
-va.leader(-0.8, zc + pl_free, -24, zc - 1.5, "plunger (detail C)", "end")
-va.leader(-1.5, zsb + 0.3, -24, zsb + 3, "snap ridges", "end")
-va.leader(-pl_off + sw_L + 4, zsb + 10.5, R + 14, top - 3, "NO / NC")
+va.leader(-6.5, zfun + 2.5 + stop / 2 - 0.2, -24, zfun + 6, f"cone backup stop, {f1(stop)}", "end")
+va.leader(-0.8, zst + pl_free, -24, zst + 0.5, "face lands on switch (detail C)", "end")
+va.leader(-pl_off + I["hole"][0], zsb + I["hole"][1], -24, zsb + 6, "detent bumps in mounting hole", "end")
+va.leader(-3, zsb - 1.5, -24, zsb - 1.5, "solid floor", "end")
+va.leader(9, zc + 1.6, R + 14, zc + 3.5, "plunger groove")
+va.leader(-pl_off + sw_L + 4, zsb + 10.5, R + 14, zsb + 8, "NO / NC · slides in this way")
 va.leader(-pl_off + sw_L + 2, zsb - 3.5, R + 9, zsb - 6.5, "COM")
 ga, wa, ha = va.group(0, 0, "Section A–A", "through the plunger, along the switch · use orientation")
 
@@ -170,7 +173,7 @@ vt.rect(-pl_off + sw_L, -3, -pl_off + sw_L + 8, 3, "hid")
 vt.circle(0, 0, pl_d / 2, "hid")
 vt.line(-R - 4, 0, R + 18, 0, "cutl"); vt.text(-R - 5, -0.7, "A", "cutt", "end"); vt.text(R + 19, -0.7, "A", "cutt", "start")
 vt.line(0, -R - 4, 0, R + 4, "cutl"); vt.text(0, R + 5, "B", "cutt"); vt.text(0, -R - 7, "B", "cutt")
-vt.leader(-pl_off + sw_L + 4, 2, R + 8, 12, "switch tab end sticks out")
+vt.leader(-pl_off + sw_L + 4, 2, R + 8, 12, "switch slides in from here")
 gt, wt, ht = vt.group(wa + 18, hb + 16, "Top", "dashed = under the face")
 
 # ---------------------------------------------------------------- detail C: plunger, gap, stop (x3)
@@ -180,26 +183,26 @@ from shapely import affinity
 K = 3.0
 loops = sec([0, 0.05, 0], [0, 1, 0], lambda p: (p[0], use(p[2])))
 shape = reduce(lambda a, b: a.symmetric_difference(b), [Polygon(l).buffer(0) for l in loops if len(l) > 2])
-win = box(-9, zc - 2.2, 11.5, top + 0.6)
+win = box(-9, zst - 2.2, 11.5, top + 0.6)
 clip = affinity.scale(shape.intersection(win), K, K, origin=(0, 0))
 vc = View(fs=2.0)
 geoms = getattr(clip, "geoms", [clip])
 vc.loops([list(g.exterior.coords) for g in geoms] + [list(h.coords) for g in geoms for h in g.interiors], "cut")
-bx = [(-9 * K, (zc - 2.2) * K), (11.5 * K, (zc - 2.2) * K), (11.5 * K, (top + 0.6) * K), (-9 * K, (top + 0.6) * K)]
+bx = [(-9 * K, (zst - 2.2) * K), (11.5 * K, (zst - 2.2) * K), (11.5 * K, (top + 0.6) * K), (-9 * K, (top + 0.6) * K)]
 vc.poly(bx, "win")
 sx0 = max(-pl_off, -9) * K
-vc.poly([(sx0, (zc - 2.2) * K), (sx0, zc * K), (11.5 * K, zc * K)], "swl", closed=False)
-vc.rect(-pl_d / 2 * K, zc * K, pl_d / 2 * K, (zc + pl_free) * K, "plg")
-ztip = use(I["z_tip"]); zclick = ztip - I["gap0"] - pl_pt
-vc.line(-6 * K, zclick * K, 3 * K, zclick * K, "click")
-vc.dim_v(ztip * K, (zc + pl_free) * K, -9 * K, -10.5 * K, f"gap {I['gap0']:.1f}", side=-1)
-vc.dim_v(zclick * K, ztip * K, -9 * K, -14.5 * K, f"click ≤ {I['gap0'] + pl_pt:.2f}")
+vc.poly([(sx0, (zst - 2.2) * K), (sx0, zst * K), (11.5 * K, zst * K)], "swl", closed=False)
+vc.rect(-pl_d / 2 * K, zst * K, pl_d / 2 * K, (zst + pl_free) * K, "plg")
+ztip = use(I["z_tip"]); zrec = ztip + I["pl_stop"]
+vc.dim_v((zst + pl_free) * K, zrec * K, -9 * K, -10.5 * K, f"gap {I['rest_gap']:.1f}", side=-1)
+vc.dim_v(zst * K, ztip * K, -9 * K, -15 * K, f"face meets switch {f1(I['face_travel'])}")
 r6 = 6.0
 zb6 = use(I["z_bcyl"] + (I["r_boss"] - r6)); zf6 = use(I["z_c0"] + (I["r_rim"] - r6))
-vc.dim_v(zf6 * K, zb6 * K, r6 * K, 13.5 * K, f"stop {f1(stop)}")
-vc.text(3.4 * K, zclick * K + 0.9, "click at max pretravel (D44X 1.57)", "lt", "start", size=0.85)
-vc.text(-9 * K, (zc - 2.2) * K - 3.5, f"after the click the plunger travels {stop - I['gap0']:.1f} − pretravel more before the stop; the D44X allows ≥ 1.27", "sub", "start", size=0.85)
-gc, wc, hc = vc.group(0, ha + 16, "Detail C ×3", "boss tip, plunger and cone stop at rest")
+vc.dim_v(zf6 * K, zb6 * K, r6 * K, 13.5 * K, f"cone backup {f1(stop)}")
+vc.leader(2.0 * K, zrec * K - 0.2, 5.0 * K, (zst + pl_free + 1.2) * K, f"recess {I['pl_stop']:.1f}")
+vc.text(-9 * K, (zst - 2.2) * K - 3.5, f"the recess stops the plunger {I['pl_stop']:.1f} above flush: travel {I['pl_travel']:.1f} for this {pl_free:.1f} plunger; it clicks if ≥ {pl_pt} (D44X max pretravel)", "sub", "start", size=0.85)
+vc.text(-9 * K, (zst - 2.2) * K - 7.0, f"works unchanged for plungers {pl_pt + I['pl_stop']:.2f}–{I['face_travel'] + I['pl_stop'] - 0.3:.1f} proud (keeps ≥ 0.3 gap at rest)", "sub", "start", size=0.85)
+gc, wc, hc = vc.group(0, ha + 16, "Detail C ×3", "at rest: the face lands on the switch top, not on the housing")
 
 W = max(wa, wc, wa + 18 + max(wb, wt)) + 6
 H = max(ha + 16 + hc, hb + 16 + ht) + 6

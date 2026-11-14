@@ -7,7 +7,7 @@ Research into self-contained wireless button boxes: arcade buttons + ESP32-C3 + 
 | Enclosure v0.1 (this folder) | Printed tub + removable top plate for long-barrel screw-in buttons, six layouts 1×1 to 2×3, dimensioned 2D drawings in `arcade_button_box.html` | designed, not printed |
 | [notes/off-the-shelf-enclosures.md](notes/off-the-shelf-enclosures.md) | Jaycar / Amazon AU boxes deep enough for the long buttons | research |
 | [notes/button-options.md](notes/button-options.md) | Lower-profile button options and the TPU membrane idea, with depth comparison | research |
-| [tpu-membrane-button](tpu-membrane-button) | Single all-TPU membrane button holding the existing microswitch: box depth ~34 mm instead of ~94 | **v0.1 ready to print** |
+| [tpu-membrane-button](tpu-membrane-button) | Single all-TPU membrane button holding the existing microswitch: box depth ~34 mm instead of ~94 | **v0.2 printing** (no shims) |
 
 ## Requests (verbatim)
 
@@ -37,7 +37,17 @@ Research into self-contained wireless button boxes: arcade buttons + ESP32-C3 + 
 
 > Ohhhh I just realised we’re not on the same page regarding the micro switches
 
-14 Nov 2026, 16:59: screenshot of the microswitch in use (B.Lee, austinamusements.com.au "Bulk Buy- 100 x Microswitch For Arcade Buttons"). 17:10: three caliper photos of it. Details in [tpu-membrane-button/README.md](tpu-membrane-button/README.md).
+14 Nov 2026, 16:59: screenshot of the microswitch in use (B.Lee, austinamusements.com.au "Bulk Buy- 100 x Microswitch For Arcade Buttons"). 17:10: three caliper photos of it.
+
+14 Nov 2026, 17:30:
+
+> Redo the design so I don’t need to tape anything
+
+14 Nov 2026, 17:41:
+
+> Okay just give me the one you did and I’ll print it anyway
+
+Details in [tpu-membrane-button/README.md](tpu-membrane-button/README.md).
 
 ---
 
