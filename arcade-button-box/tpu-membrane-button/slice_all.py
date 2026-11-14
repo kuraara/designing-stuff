@@ -94,6 +94,8 @@ for fil in FILAMENTS:
         for inf in INFILL:
             write_cfg(fil, prn, inf)
             for stl in sorted((root / "stl").glob("*.stl")):
+                if stl.stem.startswith("ref_"):
+                    continue          # reference bodies aren't printed
                 if len(sys.argv) > 1 and stl.stem not in sys.argv[1:]:
                     continue
                 jobs.append((stl, fil, prn, inf))

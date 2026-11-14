@@ -2,6 +2,8 @@
 
 A single arcade button printed as **one TPU part**: the button face is a 2–3 layer membrane printed on the bed, and a stiff centre presses the microswitch. The centre's face lands on the switch's own top face, so the plunger always stops 0.2 mm above flush whatever its exact height: no shims or tape. A 45° cone behind it is the backup stop. The switch slides in from the side onto a solid floor and clicks onto two bumps in its mounting hole; its tab end sticks out like on a Happ button. No supports.
 
+**3D:** [cut through the middle with the switch in place](https://kuraara.github.io/designing-stuff/?m=arcade-button-box/tpu-membrane-button/stl/tpu_button.stl&m=arcade-button-box/tpu-membrane-button/stl/ref_microswitch.stl&cut=y&at=500&flip=1) · [the part as printed, overhangs in red](https://kuraara.github.io/designing-stuff/?m=arcade-button-box/tpu-membrane-button/stl/tpu_button.stl&over=1) · [2-layer version](https://kuraara.github.io/designing-stuff/?m=arcade-button-box/tpu-membrane-button/stl/tpu_button_m04.stl)
+
 Part of the [arcade-button-box](..) study: aimed at cutting box depth from ~94 mm (long-barrel buttons) to ~34 mm.
 
 Status: **v0.2, G-code sent for printing 14 Nov 2026, not yet tested.** v0.1 (housing stop, snap-in from below) is in git history.
@@ -146,6 +148,7 @@ G-code check (`check_gcode.py`): the 0.6 file prints the free ring on layers 1�
 | `check_gcode.py`, `check_overhangs.py`, `check_motion.py` | membrane layer / boss fill; overhangs; switch insertion and press travel with the real meshes (`check_motion.txt`) |
 | `drawings.py` | `img/tpu_button_drawing.svg/.png` from STL sections |
 | `stl/`, `gcode/`, `img/` | outputs |
+| `stl/ref_microswitch.stl` | the switch as modelled, for the 3D viewer overlay; not printed |
 
 Regenerate: `./render_all.sh && python3 slice_all.py && python3 drawings.py`.
 

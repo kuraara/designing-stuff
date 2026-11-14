@@ -1,0 +1,444 @@
+{
+ "repo": "kuraara/designing-stuff",
+ "branch": "main",
+ "designs": [
+  {
+   "folder": "arcade-button-box",
+   "title": "Arcade Button Box",
+   "status": "",
+   "stls": [
+    {
+     "path": "arcade-button-box/stl/1x1_plate.stl",
+     "name": "1x1_plate",
+     "kb": 119,
+     "tris": 2432,
+     "size": [
+      99.8,
+      90.8,
+      10.2
+     ],
+     "cm3": 36.39,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x1_plate_asm.stl",
+     "name": "1x1_plate_asm",
+     "kb": 119,
+     "tris": 2432,
+     "size": [
+      99.8,
+      90.8,
+      10.2
+     ],
+     "cm3": 36.39,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x1_tub.stl",
+     "name": "1x1_tub",
+     "kb": 129,
+     "tris": 2632,
+     "size": [
+      99.8,
+      90.8,
+      90.4
+     ],
+     "cm3": 106.56,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x2_plate.stl",
+     "name": "1x2_plate",
+     "kb": 138,
+     "tris": 2820,
+     "size": [
+      110.8,
+      90.8,
+      10.2
+     ],
+     "cm3": 37.85,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x2_plate_asm.stl",
+     "name": "1x2_plate_asm",
+     "kb": 138,
+     "tris": 2820,
+     "size": [
+      110.8,
+      90.8,
+      10.2
+     ],
+     "cm3": 37.85,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x2_tub.stl",
+     "name": "1x2_tub",
+     "kb": 129,
+     "tris": 2632,
+     "size": [
+      110.8,
+      90.8,
+      90.4
+     ],
+     "cm3": 113.61,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x3_plate.stl",
+     "name": "1x3_plate",
+     "kb": 157,
+     "tris": 3208,
+     "size": [
+      160.8,
+      90.8,
+      10.2
+     ],
+     "cm3": 53.85,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x3_plate_asm.stl",
+     "name": "1x3_plate_asm",
+     "kb": 157,
+     "tris": 3208,
+     "size": [
+      160.8,
+      90.8,
+      10.2
+     ],
+     "cm3": 53.85,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x3_tub.stl",
+     "name": "1x3_tub",
+     "kb": 129,
+     "tris": 2632,
+     "size": [
+      160.8,
+      90.8,
+      90.4
+     ],
+     "cm3": 145.62,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x4_plate.stl",
+     "name": "1x4_plate",
+     "kb": 215,
+     "tris": 4404,
+     "size": [
+      210.8,
+      90.8,
+      10.2
+     ],
+     "cm3": 69.64,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x4_plate_asm.stl",
+     "name": "1x4_plate_asm",
+     "kb": 215,
+     "tris": 4404,
+     "size": [
+      210.8,
+      90.8,
+      10.2
+     ],
+     "cm3": 69.64,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/1x4_tub.stl",
+     "name": "1x4_tub",
+     "kb": 149,
+     "tris": 3056,
+     "size": [
+      210.8,
+      90.8,
+      90.4
+     ],
+     "cm3": 182.23,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/2x2_plate.stl",
+     "name": "2x2_plate",
+     "kb": 195,
+     "tris": 3984,
+     "size": [
+      110.8,
+      140.8,
+      10.2
+     ],
+     "cm3": 55.16,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/2x2_plate_asm.stl",
+     "name": "2x2_plate_asm",
+     "kb": 195,
+     "tris": 3984,
+     "size": [
+      110.8,
+      140.8,
+      10.2
+     ],
+     "cm3": 55.16,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/2x2_tub.stl",
+     "name": "2x2_tub",
+     "kb": 157,
+     "tris": 3208,
+     "size": [
+      110.8,
+      140.8,
+      90.4
+     ],
+     "cm3": 155.46,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/2x3_plate.stl",
+     "name": "2x3_plate",
+     "kb": 251,
+     "tris": 5148,
+     "size": [
+      160.8,
+      140.8,
+      10.2
+     ],
+     "cm3": 78.47,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/2x3_plate_asm.stl",
+     "name": "2x3_plate_asm",
+     "kb": 251,
+     "tris": 5148,
+     "size": [
+      160.8,
+      140.8,
+      10.2
+     ],
+     "cm3": 78.47,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/2x3_tub.stl",
+     "name": "2x3_tub",
+     "kb": 185,
+     "tris": 3784,
+     "size": [
+      160.8,
+      140.8,
+      90.4
+     ],
+     "cm3": 200.91,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/feet_tpu.stl",
+     "name": "feet_tpu",
+     "kb": 37,
+     "tris": 752,
+     "size": [
+      60.1,
+      12.1,
+      3.0
+     ],
+     "cm3": 1.38,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/stl/fit_coupon.stl",
+     "name": "fit_coupon",
+     "kb": 74,
+     "tris": 1516,
+     "size": [
+      64.0,
+      46.0,
+      20.0
+     ],
+     "cm3": 11.83,
+     "ref": false
+    }
+   ]
+  },
+  {
+   "folder": "arcade-button-box/tpu-membrane-button",
+   "title": "TPU membrane button \u2014 v0.2",
+   "status": "v0.2, G-code sent for printing 14 Nov 2026, not yet tested.",
+   "stls": [
+    {
+     "path": "arcade-button-box/tpu-membrane-button/stl/ref_microswitch.stl",
+     "name": "ref_microswitch",
+     "kb": 7,
+     "tris": 140,
+     "size": [
+      27.8,
+      10.3,
+      17.8
+     ],
+     "cm3": 4.48,
+     "ref": true
+    },
+    {
+     "path": "arcade-button-box/tpu-membrane-button/stl/tpu_button.stl",
+     "name": "tpu_button",
+     "kb": 180,
+     "tris": 3686,
+     "size": [
+      36.0,
+      36.0,
+      34.0
+     ],
+     "cm3": 27.73,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/tpu-membrane-button/stl/tpu_button_m04.stl",
+     "name": "tpu_button_m04",
+     "kb": 180,
+     "tris": 3686,
+     "size": [
+      36.0,
+      36.0,
+      33.8
+     ],
+     "cm3": 27.53,
+     "ref": false
+    }
+   ]
+  },
+  {
+   "folder": "bag-tag",
+   "title": "Bag tag: name + flower, two-colour inlay \u2014 v0.1",
+   "status": "v0.1, STLs and G-code ready, not printed.",
+   "stls": [
+    {
+     "path": "bag-tag/stl/aubrey_base.stl",
+     "name": "aubrey_base",
+     "kb": 2459,
+     "tris": 50358,
+     "size": [
+      28.8,
+      99.7,
+      6.0
+     ],
+     "cm3": 7.14,
+     "ref": false
+    },
+    {
+     "path": "bag-tag/stl/aubrey_inlay.stl",
+     "name": "aubrey_inlay",
+     "kb": 1141,
+     "tris": 23360,
+     "size": [
+      22.2,
+      86.2,
+      4.6
+     ],
+     "cm3": 2.82,
+     "ref": false
+    }
+   ]
+  },
+  {
+   "folder": "fishbone-braid-tool",
+   "title": "Fishbone braid tool \u2014 v0.2",
+   "status": "v0.2 coupon printed and passed (7 Nov 2026). Full tool ready to print with the same conservative settings.",
+   "stls": [
+    {
+     "path": "fishbone-braid-tool/stl/braid_coupon.stl",
+     "name": "braid_coupon",
+     "kb": 530,
+     "tris": 10844,
+     "size": [
+      25.0,
+      50.0,
+      6.0
+     ],
+     "cm3": 3.18,
+     "ref": false
+    },
+    {
+     "path": "fishbone-braid-tool/stl/braid_tool.stl",
+     "name": "braid_tool",
+     "kb": 2028,
+     "tris": 41532,
+     "size": [
+      25.0,
+      190.0,
+      6.0
+     ],
+     "cm3": 12.62,
+     "ref": false
+    }
+   ]
+  },
+  {
+   "folder": "pi5-poe-nvme-case",
+   "title": "Pi 5 PoE NVMe Case \u2014 enclosure v0.5",
+   "status": "",
+   "stls": [
+    {
+     "path": "pi5-poe-nvme-case/print/pi5_case_body_PETG.stl",
+     "name": "pi5_case_body_PETG",
+     "kb": 374,
+     "tris": 7660,
+     "size": [
+      64.6,
+      68.8,
+      103.9
+     ],
+     "cm3": 73.66,
+     "ref": false
+    },
+    {
+     "path": "pi5-poe-nvme-case/print/pi5_case_din_bracket_PETG.stl",
+     "name": "pi5_case_din_bracket_PETG",
+     "kb": 133,
+     "tris": 2724,
+     "size": [
+      94.8,
+      75.5,
+      20.9
+     ],
+     "cm3": 41.34,
+     "ref": false
+    },
+    {
+     "path": "pi5-poe-nvme-case/print/pi5_case_feet_x4_TPU.stl",
+     "name": "pi5_case_feet_x4_TPU",
+     "kb": 94,
+     "tris": 1920,
+     "size": [
+      65.0,
+      14.0,
+      9.0
+     ],
+     "cm3": 4.5,
+     "ref": false
+    },
+    {
+     "path": "pi5-poe-nvme-case/print/pi5_case_lid_PLA.stl",
+     "name": "pi5_case_lid_PLA",
+     "kb": 126,
+     "tris": 2572,
+     "size": [
+      64.6,
+      68.8,
+      82.7
+     ],
+     "cm3": 25.16,
+     "ref": false
+    }
+   ]
+  }
+ ]
+}

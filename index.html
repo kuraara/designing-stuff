@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Designing Stuff Viewer</title>
+<meta name="description" content="3D viewer for the STL files in kuraara/designing-stuff: section cuts, overhang check, measuring, print bed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Condensed:wght@600;700&display=swap">
+<style>
+/* Layout: models list on the left (a drawer on phones), the model fills the stage, display controls under it.
+   Same drafting palette as the design drawing pages. */
+:root {
+  --paper: #eef2f1; --sheet: #f9fbfa; --ink: #1b2a31; --muted: #5a6b72; --rule: #c9d3d3;
+  --vp: #e3e9e9; --edge: #22323a; --dim: #0b6b87; --accent: #c8322b; --model: #8fa7ad; --bed: #b7c4c4;
+  --f-display: "Saira Condensed", "Arial Narrow", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #10171a; --sheet: #162024; --ink: #dbe6e8; --muted: #8fa3a8; --rule: #2c3b40;
+  --vp: #1a252a; --edge: #0b1114; --dim: #4fb6d6; --accent: #ff6a5c; --model: #7f979d; --bed: #35464c; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --paper: #10171a; --sheet: #162024; --ink: #dbe6e8; --muted: #8fa3a8; --rule: #2c3b40;
+  --vp: #1a252a; --edge: #0b1114; --dim: #4fb6d6; --accent: #ff6a5c; --model: #7f979d; --bed: #35464c; color-scheme: dark; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 14px/1.4 var(--f-body); }
+button, input, select { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
+a { color: var(--dim); }
+
+.app { height: 100%; display: grid; grid-template-columns: 300px minmax(0, 1fr); }
+aside { border-right: 1px solid var(--rule); background: var(--sheet); overflow-y: auto; min-height: 0;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 14px calc(14px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); }
+.brand { display: grid; gap: 2px; margin-bottom: 14px; }
+.brand h1 { margin: 0; font: 700 1.6rem/1 var(--f-display); text-transform: uppercase; letter-spacing: .02em; }
+.brand p { margin: 0; color: var(--muted); font-size: 12.5px; }
+.design { border-top: 1px solid var(--rule); padding: 10px 0; }
+.design summary { cursor: pointer; list-style: none; display: grid; gap: 2px; }
+.design summary::-webkit-details-marker { display: none; }
+.design .t { font: 600 1.05rem/1.15 var(--f-display); text-transform: uppercase; letter-spacing: .03em; }
+.design .t::before { content: "▸ "; color: var(--muted); }
+.design[open] .t::before { content: "▾ "; }
+.design .st { font: 11.5px/1.35 var(--f-mono); color: var(--muted); }
+.stls { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 1px; }
+.stls li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; }
+.stls input { margin: 0; accent-color: var(--dim); }
+.stls button { text-align: left; border: 0; background: none; padding: 5px 6px; border-radius: 3px; cursor: pointer;
+  font: 12.5px/1.25 var(--f-mono); overflow-wrap: anywhere; }
+.stls button:hover { background: color-mix(in srgb, var(--dim) 10%, transparent); }
+.stls button[aria-current="true"] { background: var(--ink); color: var(--paper); }
+.stls .kb { font: 11px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.stls .ref { font-style: italic; color: var(--muted); }
+.swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+main { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; min-width: 0; }
+.stage { position: relative; min-height: 0; background: var(--vp); overflow: hidden; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.card { position: absolute; left: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); max-width: min(340px, calc(100% - 24px));
+  background: color-mix(in srgb, var(--sheet) 92%, transparent); border: 1px solid var(--rule); border-radius: 4px; padding: 9px 11px; display: grid; gap: 4px; }
+.card .ds { font: 11.5px var(--f-mono); color: var(--muted); }
+.card .nm { font: 600 15px/1.25 var(--f-mono); overflow-wrap: anywhere; }
+.card dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; font: 12px/1.45 var(--f-mono); font-variant-numeric: tabular-nums; }
+.card dt { color: var(--muted); } .card dd { margin: 0; }
+.card .links { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; }
+.msg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font: 13px var(--f-mono); pointer-events: none; text-align: center; padding: 20px; }
+.mlabel { position: absolute; transform: translate(-50%, -130%); background: var(--ink); color: var(--paper); font: 500 12px var(--f-mono);
+  padding: 3px 6px; border-radius: 3px; pointer-events: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hint { position: absolute; right: 12px; bottom: 10px; font: 11px var(--f-mono); color: var(--muted); pointer-events: none; text-align: right; }
+.menu { display: none; position: absolute; right: max(12px, env(safe-area-inset-right, 0px)); top: calc(12px + env(safe-area-inset-top, 0px));
+  border: 1px solid var(--rule); background: var(--sheet); border-radius: 4px; padding: 8px 12px; font: 600 13px var(--f-body); cursor: pointer; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; border-top: 1px solid var(--rule); background: var(--sheet);
+  padding: 9px max(14px, env(safe-area-inset-right, 0px)) calc(9px + env(safe-area-inset-bottom, 0px)) 14px; }
+.grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.grp > span { font: 500 11px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-right: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.seg button, .tg { border: 0; background: transparent; padding: 7px 10px; font: 500 12.5px/1 var(--f-mono); color: var(--muted); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"], .tg[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.tg { border: 1px solid var(--rule); border-radius: 4px; }
+input[type=range] { width: 140px; accent-color: var(--dim); }
+.cutv { font: 12px var(--f-mono); color: var(--muted); min-width: 64px; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  aside { position: fixed; inset: 0 auto 0 0; width: min(320px, 88vw); z-index: 20; transform: translateX(-102%); transition: transform .2s; box-shadow: 0 0 0 100vmax transparent; }
+  aside.open { transform: none; box-shadow: 0 0 0 100vmax color-mix(in srgb, #000 35%, transparent); }
+  .menu { display: block; }
+  .card { top: calc(56px + env(safe-area-inset-top, 0px)); padding: 7px 9px; }
+  .card dl, .card .links { font-size: 11.5px; }
+  .hint { display: none; }
+  input[type=range] { width: 110px; }
+}
+@media (prefers-reduced-motion: reduce) { aside { transition: none; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div class="app">
+  <aside id="side" aria-label="Models">
+    <div class="brand">
+      <h1>Designing stuff</h1>
+      <p>3D viewer for the repo's STLs. Click a file to view it; tick boxes to overlay parts.</p>
+    </div>
+    <nav id="list"><p class="st">Loading models…</p></nav>
+  </aside>
+  <main>
+    <div class="stage" id="stage">
+      <canvas id="cv"></canvas>
+      <div class="card" id="card" hidden></div>
+      <div class="msg" id="msg">Loading…</div>
+      <button class="menu" id="menu" type="button" aria-controls="side" aria-expanded="false">Models</button>
+      <div class="hint">drag: rotate · right-drag / two fingers: pan · wheel / pinch: zoom</div>
+    </div>
+    <div class="bar" id="bar">
+      <div class="grp"><span>View</span>
+        <div class="seg" role="group" aria-label="View">
+          <button type="button" id="v-iso" aria-pressed="true">Iso</button><button type="button" id="v-top">Top</button>
+          <button type="button" id="v-front">Front</button><button type="button" id="v-right">Right</button>
+        </div>
+        <button type="button" class="tg" id="t-flip" aria-pressed="false" title="Turn the model over (print ↔ use orientation)">Flip</button>
+      </div>
+      <div class="grp"><span>Section</span>
+        <div class="seg" role="group" aria-label="Section plane">
+          <button type="button" id="c-off" aria-pressed="true">Off</button><button type="button" id="c-x">X</button>
+          <button type="button" id="c-y">Y</button><button type="button" id="c-z">Z</button>
+        </div>
+        <input type="range" id="cut" min="0" max="1000" value="500" aria-label="Section position" disabled>
+        <span class="cutv" id="cutv"></span>
+        <button type="button" class="tg" id="c-side" aria-pressed="false" title="Show the other side of the cut" disabled>Other side</button>
+      </div>
+      <div class="grp"><span>Show</span>
+        <button type="button" class="tg" id="t-edges" aria-pressed="true">Edges</button>
+        <button type="button" class="tg" id="t-over" aria-pressed="false" title="Red: faces steeper than 45° that face the bed (print orientation)">Overhangs</button>
+        <button type="button" class="tg" id="t-bed" aria-pressed="true" title="Prusa MK3S+ bed, 250 × 210, 10 mm grid">Bed</button>
+        <button type="button" class="tg" id="t-meas" aria-pressed="false" title="Click two points on the model">Measure</button>
+        <button type="button" class="tg" id="t-link" aria-pressed="false">Copy link</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { STLLoader } from "three/addons/loaders/STLLoader.js";
+
+const REPO = "kuraara/designing-stuff", BRANCH = "main";
+const $ = (id) => document.getElementById(id);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const PALETTE = ["--model", "#d9a441", "#5aa37a", "#6f8fd6", "#c77fb5", "#c9b458"];
+const fmt = (v) => (Math.abs(v - Math.round(v)) < 0.05 ? Math.round(v).toString() : v.toFixed(1));
+
+// ---------------------------------------------------------------- scene
+const canvas = $("cv"), stage = $("stage");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.localClippingEnabled = true;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 10000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.12;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a9499, 1.1));
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
+key.position.set(1, -1.5, 2);
+camera.add(key);
+scene.add(camera);
+
+const outer = new THREE.Group(), inner = new THREE.Group();
+outer.add(inner); scene.add(outer);
+const bed = new THREE.Group(); scene.add(bed);
+const clip = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
+let clipOn = false;
+
+function buildBed() {
+  bed.clear();
+  const g = [], col = new THREE.Color(css("--bed"));
+  for (let x = -120; x <= 120; x += 10) g.push(x, -105, 0, x, 105, 0);
+  for (let y = -100; y <= 100; y += 10) g.push(-125, y, 0, 125, y, 0);
+  const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.Float32BufferAttribute(g, 3));
+  bed.add(new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.55 })));
+  const o = [-125, -105, 0, 125, -105, 0, 125, -105, 0, 125, 105, 0, 125, 105, 0, -125, 105, 0, -125, 105, 0, -125, -105, 0];
+  const og = new THREE.BufferGeometry(); og.setAttribute("position", new THREE.Float32BufferAttribute(o, 3));
+  bed.add(new THREE.LineSegments(og, new THREE.LineBasicMaterial({ color: col })));
+  bed.position.z = -0.02;
+}
+
+// ---------------------------------------------------------------- state
+let index = null;               // models.json
+const shown = new Map();        // path -> {mesh, back, edges, info, color}
+const cache = new Map();        // path -> geometry
+let primary = null;             // path shown in the card
+let flip = false, edgesOn = true, overOn = false, cutAxis = "off", cutSide = false;
+let view = "iso";
+const loader = new STLLoader();
+
+function colorFor(i, ref) {
+  if (ref) return new THREE.Color(css("--accent"));
+  const c = PALETTE[i % PALETTE.length];
+  return new THREE.Color(c.startsWith("--") ? css(c) : c);
+}
+
+function overhangColors(geo, base) {
+  const pos = geo.attributes.position, n = pos.count, cols = new Float32Array(n * 3);
+  let zmin = Infinity;
+  for (let i = 0; i < n; i++) zmin = Math.min(zmin, pos.getZ(i));
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), nrm = new THREE.Vector3();
+  const red = new THREE.Color(css("--accent")), lim = -Math.cos(Math.PI / 4) - 0.01;
+  for (let i = 0; i < n; i += 3) {
+    a.fromBufferAttribute(pos, i); b.fromBufferAttribute(pos, i + 1); c.fromBufferAttribute(pos, i + 2);
+    nrm.subVectors(c, b).cross(a.clone().sub(b)).normalize();
+    const zc = (a.z + b.z + c.z) / 3;
+    const over = nrm.z < lim && zc > zmin + 0.05;
+    const k = over ? red : base;
+    for (let j = 0; j < 3; j++) cols.set([k.r, k.g, k.b], (i + j) * 3);
+  }
+  geo.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3));
+}
+
+function makeObjects(geo, color, ref) {
+  const planes = [clip];
+  const front = new THREE.MeshStandardMaterial({ color, roughness: 0.78, metalness: 0, flatShading: true,
+    transparent: ref, opacity: ref ? 0.38 : 1, depthWrite: !ref, side: ref ? THREE.DoubleSide : THREE.FrontSide,
+    clippingPlanes: planes, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+  const mesh = new THREE.Mesh(geo, front);
+  const group = new THREE.Group(); group.add(mesh);
+  let back = null, edges = null;
+  if (!ref) {   // inside faces show where the section cuts through material
+    back = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: new THREE.Color(css("--dim")).lerp(new THREE.Color(css("--vp")), 0.25),
+      side: THREE.BackSide, clippingPlanes: planes }));
+    group.add(back);
+    edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 28),
+      new THREE.LineBasicMaterial({ color: new THREE.Color(css("--edge")), clippingPlanes: planes, transparent: true, opacity: 0.55 }));
+    edges.visible = edgesOn; group.add(edges);
+  }
+  return { group, mesh, back, edges };
+}
+
+function findInfo(path) {
+  for (const d of index?.designs || []) for (const s of d.stls) if (s.path === path) return { design: d, stl: s };
+  return { design: null, stl: { path, name: path.split("/").pop().replace(/\.stl$/i, ""), ref: /\/ref_/.test(path) } };
+}
+
+async function getGeometry(path) {
+  if (cache.has(path)) return cache.get(path);
+  const buf = await fetch(path).then((r) => { if (!r.ok) throw new Error(`${r.status} ${path}`); return r.arrayBuffer(); });
+  const geo = loader.parse(buf);
+  geo.computeBoundingBox();
+  cache.set(path, geo);
+  return geo;
+}
+
+async function show(paths, keepView = false) {
+  $("msg").hidden = false; $("msg").textContent = "Loading " + paths.map((p) => p.split("/").pop()).join(", ") + "…";
+  for (const [p, o] of shown) if (!paths.includes(p)) { inner.remove(o.group); shown.delete(p); }
+  try {
+    let i = 0;
+    for (const p of paths) {
+      const info = findInfo(p);
+      if (!shown.has(p)) {
+        const geo = await getGeometry(p);
+        const color = colorFor(i, info.stl.ref);
+        overhangColors(geo, color);
+        const o = makeObjects(geo, color, info.stl.ref);
+        inner.add(o.group);
+        shown.set(p, { ...o, info, color });
+      }
+      if (!info.stl.ref) i++;
+    }
+    primary = paths.find((p) => !findInfo(p).stl.ref) || paths[0] || null;
+    $("msg").hidden = shown.size > 0;
+    if (!shown.size) $("msg").textContent = "Pick a model from the list.";
+  } catch (e) {
+    $("msg").hidden = false; $("msg").textContent = "Couldn't load: " + e.message;
+  }
+  applyOverhang(); layout(); if (!keepView) setView(view); updateCut(); updateCard(); markList(); writeURL();
+}
+
+function layout() {          // flip, then sit the parts on the bed, centred
+  inner.rotation.set(flip ? Math.PI : 0, 0, 0);
+  outer.position.set(0, 0, 0); outer.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(inner);
+  if (box.isEmpty()) return;
+  const c = box.getCenter(new THREE.Vector3());
+  outer.position.set(-c.x, -c.y, -box.min.z);
+  outer.updateMatrixWorld(true);
+  clearMeasure();
+}
+
+function worldBox() { outer.updateMatrixWorld(true); return new THREE.Box3().setFromObject(inner); }
+
+function setView(v) {
+  view = v;
+  for (const k of ["iso", "top", "front", "right"]) $("v-" + k).setAttribute("aria-pressed", String(k === v));
+  const box = worldBox(); if (box.isEmpty()) return;
+  const c = box.getCenter(new THREE.Vector3()), r = box.getBoundingSphere(new THREE.Sphere()).radius;
+  const dir = { iso: [0.9, -1.3, 0.95], top: [0, -0.0001, 1], front: [0, -1, 0.0001], right: [1, 0, 0.0001] }[v];
+  const d = (r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2))) * 1.08;
+  camera.position.copy(c).add(new THREE.Vector3(...dir).normalize().multiplyScalar(d));
+  camera.near = d / 100; camera.far = d * 20; camera.updateProjectionMatrix();
+  controls.target.copy(c); controls.update();
+}
+
+function applyOverhang() {
+  for (const o of shown.values()) {
+    if (o.info.stl.ref) continue;
+    o.mesh.material.vertexColors = overOn;
+    o.mesh.material.color.copy(overOn ? new THREE.Color(1, 1, 1) : o.color);
+    o.mesh.material.needsUpdate = true;
+  }
+}
+
+// ---------------------------------------------------------------- section
+function updateCut() {
+  const box = worldBox(), en = cutAxis !== "off" && !box.isEmpty();
+  $("cut").disabled = !en; $("c-side").disabled = !en; $("c-side").hidden = !en;
+  for (const k of ["off", "x", "y", "z"]) $("c-" + k).setAttribute("aria-pressed", String(k === cutAxis));
+  clipOn = en;
+  if (!en) { clip.set(new THREE.Vector3(0, 0, -1), 1e9); $("cutv").textContent = ""; return; }
+  const ax = { x: 0, y: 1, z: 2 }[cutAxis];
+  const lo = box.min.getComponent(ax), hi = box.max.getComponent(ax);
+  const t = $("cut").value / 1000, at = lo + (hi - lo) * t;
+  const n = new THREE.Vector3(); n.setComponent(ax, cutSide ? -1 : 1);
+  clip.set(n, cutSide ? at : -at);
+  // report the position in the model's own coordinates (what the SCAD uses)
+  const p = new THREE.Vector3(); p.setComponent(ax, at);
+  const local = inner.worldToLocal(p.clone());
+  $("cutv").textContent = cutAxis.toUpperCase() + " " + fmt(local.getComponent(ax));
+  clearMeasure();
+}
+
+// ---------------------------------------------------------------- measure
+let measOn = false, pts = [], mGroup = new THREE.Group(), mLabel = null;
+scene.add(mGroup);
+function clearMeasure() {
+  pts = []; mGroup.clear(); if (mLabel) { mLabel.remove(); mLabel = null; } updateCard();
+}
+const ray = new THREE.Raycaster();
+let downAt = null;
+canvas.addEventListener("pointerdown", (e) => { downAt = [e.clientX, e.clientY]; });
+canvas.addEventListener("pointerup", (e) => {
+  if (!measOn || !downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
+  const rect = canvas.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1), camera);
+  const hits = ray.intersectObjects([...shown.values()].map((o) => o.mesh), false)
+    .filter((h) => !clipOn || clip.distanceToPoint(h.point) >= -1e-3);
+  if (!hits.length) return;
+  if (pts.length >= 2) clearMeasure();
+  pts.push(hits[0].point.clone());
+  const r = Math.max(0.25, worldBox().getBoundingSphere(new THREE.Sphere()).radius * 0.012);
+  const dot = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color(css("--accent")), depthTest: false }));
+  dot.position.copy(pts.at(-1)); dot.renderOrder = 10; mGroup.add(dot);
+  if (pts.length === 2) {
+    const g = new THREE.BufferGeometry().setFromPoints(pts);
+    const line = new THREE.Line(g, new THREE.LineBasicMaterial({ color: new THREE.Color(css("--accent")), depthTest: false }));
+    line.renderOrder = 10; mGroup.add(line);
+    mLabel = document.createElement("div"); mLabel.className = "mlabel"; stage.appendChild(mLabel);
+    mLabel.textContent = pts[0].distanceTo(pts[1]).toFixed(2) + " mm";
+  }
+  updateCard();
+});
+
+// ---------------------------------------------------------------- card, list, url
+function updateCard() {
+  const card = $("card");
+  if (!primary || !shown.has(primary)) { card.hidden = true; return; }
+  const { design, stl } = shown.get(primary).info;
+  const raw = `https://github.com/${REPO}/blob/${BRANCH}/${stl.path}`;
+  const folder = design ? `https://github.com/${REPO}/tree/${BRANCH}/${design.folder}` : null;
+  let rows = "";
+  if (stl.size) rows += `<dt>size</dt><dd>${stl.size.map(fmt).join(" × ")} mm</dd>`;
+  if (stl.cm3 != null) rows += `<dt>volume</dt><dd>${stl.cm3} cm³ · ${(stl.cm3 * 1.21).toFixed(1)} g TPU</dd>`;
+  if (stl.tris) rows += `<dt>mesh</dt><dd>${stl.tris.toLocaleString()} tris · ${stl.kb} KB</dd>`;
+  if (pts.length === 2) {
+    const d = pts[1].clone().sub(pts[0]);
+    rows += `<dt>measure</dt><dd>${pts[0].distanceTo(pts[1]).toFixed(2)} mm</dd><dt></dt><dd>Δ ${[d.x, d.y, d.z].map((v) => Math.abs(v).toFixed(2)).join(" / ")}</dd>`;
+  } else if (measOn) rows += `<dt>measure</dt><dd>${pts.length ? "click the 2nd point" : "click a point"}</dd>`;
+  const others = [...shown.keys()].filter((p) => p !== primary).length;
+  card.innerHTML = `${design ? `<div class="ds">${design.title}</div>` : ""}<div class="nm">${stl.name}${others ? ` <span class="ds">+${others}</span>` : ""}</div>
+    <dl>${rows}</dl><div class="links"><a href="${stl.path}" download>Download STL</a>
+    ${folder ? `<a href="${folder}" target="_blank" rel="noopener">Folder & README</a>` : ""}<a href="${raw}" target="_blank" rel="noopener">On GitHub</a></div>`;
+  card.hidden = false;
+}
+
+function buildList() {
+  const nav = $("list"); nav.innerHTML = "";
+  index.designs.forEach((d) => {
+    const det = document.createElement("details"); det.className = "design"; det.dataset.folder = d.folder;
+    det.innerHTML = `<summary><span class="t">${d.title}</span><span class="st">${d.folder}${d.status ? " · " + d.status : ""}</span></summary>`;
+    const ul = document.createElement("ul"); ul.className = "stls";
+    d.stls.forEach((s) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<input type="checkbox" aria-label="Overlay ${s.name}"><button type="button" class="${s.ref ? "ref" : ""}"><span class="swatch"></span>${s.name}${s.ref ? " (reference)" : ""}</button><span class="kb">${s.size ? s.size.map(fmt).join("×") : ""}</span>`;
+      li.querySelector("button").addEventListener("click", () => { show([s.path]); closeDrawer(); });
+      li.querySelector("input").addEventListener("change", (e) => {
+        const cur = [...shown.keys()];
+        show(e.target.checked ? [...cur, s.path] : cur.filter((p) => p !== s.path), true);
+      });
+      li.dataset.path = s.path; ul.appendChild(li);
+    });
+    det.appendChild(ul); nav.appendChild(det);
+  });
+}
+
+function markList() {
+  document.querySelectorAll(".stls li").forEach((li) => {
+    const p = li.dataset.path, o = shown.get(p);
+    li.querySelector("input").checked = !!o;
+    li.querySelector("button").setAttribute("aria-current", String(p === primary));
+    li.querySelector(".swatch").style.background = o ? "#" + o.color.getHexString() : "transparent";
+    if (o) li.closest("details").open = true;
+  });
+}
+
+function writeURL() {        // readable links: keep the slashes in paths
+  const q = [...shown.keys()].map((p) => "m=" + encodeURI(p));
+  if (cutAxis !== "off") { q.push("cut=" + cutAxis, "at=" + $("cut").value); if (cutSide) q.push("side=1"); }
+  if (flip) q.push("flip=1");
+  if (overOn) q.push("over=1");
+  history.replaceState(null, "", q.length ? "?" + q.join("&") : location.pathname);
+}
+
+// ---------------------------------------------------------------- controls
+for (const k of ["iso", "top", "front", "right"]) $("v-" + k).addEventListener("click", () => setView(k));
+for (const k of ["off", "x", "y", "z"]) $("c-" + k).addEventListener("click", () => { cutAxis = k; updateCut(); writeURL(); });
+$("cut").addEventListener("input", () => { updateCut(); writeURL(); });
+$("c-side").addEventListener("click", (e) => { cutSide = !cutSide; e.currentTarget.setAttribute("aria-pressed", String(cutSide)); updateCut(); writeURL(); });
+$("t-flip").addEventListener("click", (e) => { flip = !flip; e.currentTarget.setAttribute("aria-pressed", String(flip)); layout(); setView(view); updateCut(); writeURL(); });
+$("t-edges").addEventListener("click", (e) => { edgesOn = !edgesOn; e.currentTarget.setAttribute("aria-pressed", String(edgesOn)); for (const o of shown.values()) if (o.edges) o.edges.visible = edgesOn; });
+$("t-over").addEventListener("click", (e) => { overOn = !overOn; e.currentTarget.setAttribute("aria-pressed", String(overOn)); applyOverhang(); writeURL(); });
+$("t-bed").addEventListener("click", (e) => { bed.visible = !bed.visible; e.currentTarget.setAttribute("aria-pressed", String(bed.visible)); });
+$("t-meas").addEventListener("click", (e) => { measOn = !measOn; e.currentTarget.setAttribute("aria-pressed", String(measOn)); clearMeasure(); canvas.style.cursor = measOn ? "crosshair" : ""; });
+$("t-link").addEventListener("click", async (e) => {
+  const b = e.currentTarget;
+  try { await navigator.clipboard.writeText(location.href); b.textContent = "Copied"; }
+  catch { prompt("Link to this view:", location.href); }
+  setTimeout(() => (b.textContent = "Copy link"), 1500);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.target.matches("input, textarea")) return;
+  if (e.key === "Escape") clearMeasure();
+  if (e.key === "f") setView(view);
+});
+const closeDrawer = () => { $("side").classList.remove("open"); $("menu").setAttribute("aria-expanded", "false"); };
+$("menu").addEventListener("click", () => { const o = $("side").classList.toggle("open"); $("menu").setAttribute("aria-expanded", String(o)); });
+document.addEventListener("pointerdown", (e) => { if ($("side").classList.contains("open") && !e.target.closest("aside, #menu")) closeDrawer(); });
+
+// ---------------------------------------------------------------- render loop
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / Math.max(h, 1); camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+function themeColors() {
+  scene.background = new THREE.Color(css("--vp")); buildBed();
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { themeColors(); });
+const proj = new THREE.Vector3();
+renderer.setAnimationLoop(() => {
+  controls.update();
+  renderer.render(scene, camera);
+  if (mLabel && pts.length === 2) {
+    proj.copy(pts[0]).add(pts[1]).multiplyScalar(0.5).project(camera);
+    mLabel.style.left = ((proj.x + 1) / 2) * stage.clientWidth + "px";
+    mLabel.style.top = ((1 - proj.y) / 2) * stage.clientHeight + "px";
+  }
+});
+
+// ---------------------------------------------------------------- start
+async function loadIndex() {
+  try {
+    const r = await fetch("viewer/models.json", { cache: "no-cache" });
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch {   // fallback: list STLs straight from the GitHub API
+    const t = await fetch(`https://api.github.com/repos/${REPO}/git/trees/${BRANCH}?recursive=1`).then((r) => r.json());
+    const designs = {};
+    for (const f of t.tree || []) {
+      if (!/\.stl$/i.test(f.path)) continue;
+      const parts = f.path.split("/"), folder = parts.slice(0, Math.max(1, parts.length - 2)).join("/");
+      (designs[folder] ||= { folder, title: folder, status: "", stls: [] }).stls.push(
+        { path: f.path, name: parts.at(-1).replace(/\.stl$/i, ""), kb: Math.round((f.size || 0) / 1024), ref: /^ref_/.test(parts.at(-1)) });
+    }
+    return { designs: Object.values(designs) };
+  }
+}
+
+(async () => {
+  themeColors(); resize();
+  index = await loadIndex();
+  buildList();
+  const q = new URLSearchParams(location.search);
+  flip = q.get("flip") === "1"; $("t-flip").setAttribute("aria-pressed", String(flip));
+  overOn = q.get("over") === "1"; $("t-over").setAttribute("aria-pressed", String(overOn));
+  if (q.get("cut")) { cutAxis = q.get("cut"); $("cut").value = q.get("at") || 500; cutSide = q.get("side") === "1"; $("c-side").setAttribute("aria-pressed", String(cutSide)); }
+  let paths = q.getAll("m");
+  if (!paths.length && q.get("d")) {
+    const d = index.designs.find((x) => x.folder === q.get("d"));
+    if (d) paths = [d.stls.find((s) => !s.ref)?.path || d.stls[0].path];
+  }
+  if (!paths.length) {
+    const d = index.designs[0];
+    $("msg").textContent = "Pick a model from the list.";
+    if (window.matchMedia("(min-width: 761px)").matches && d) paths = [d.stls.find((s) => !s.ref).path];
+  }
+  if (paths.length) await show(paths); else markList();
+})();
+</script>
+</body>
+</html>

@@ -2,6 +2,8 @@
 
 Research into self-contained wireless button boxes: arcade buttons + ESP32-C3 + a Li-ion cell. Started 30 Oct 2026 in the claude.ai project *Designing stuff*.
 
+**3D:** [2×2 tub, cut through the battery bay](https://kuraara.github.io/designing-stuff/?m=arcade-button-box/stl/2x2_tub.stl&cut=x&at=500) · [2×3 top plate](https://kuraara.github.io/designing-stuff/?m=arcade-button-box/stl/2x3_plate.stl) · [TPU button with its switch](https://kuraara.github.io/designing-stuff/?m=arcade-button-box/tpu-membrane-button/stl/tpu_button.stl&m=arcade-button-box/tpu-membrane-button/stl/ref_microswitch.stl&cut=y&at=500&flip=1) · all STLs in the [viewer](https://kuraara.github.io/designing-stuff/?d=arcade-button-box)
+
 | Piece | What | Status |
 |---|---|---|
 | Enclosure v0.1 (this folder) | Printed tub + removable top plate for long-barrel screw-in buttons, six layouts 1×1 to 2×3, dimensioned 2D drawings in `arcade_button_box.html` | designed, not printed |

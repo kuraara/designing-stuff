@@ -2,6 +2,8 @@
 
 A copy of the cheap "fish bone / French braid tool roller" (zigzag strip with a hook), made parametric and set up for TPU on the MK3S+. Status: **v0.2 coupon printed and passed (7 Nov 2026). Full tool ready to print with the same conservative settings.** 8 Nov 2026.
 
+**3D:** [braid tool in the viewer](https://kuraara.github.io/designing-stuff/?m=fishbone-braid-tool/stl/braid_tool.stl) · [coupon](https://kuraara.github.io/designing-stuff/?m=fishbone-braid-tool/stl/braid_coupon.stl)
+
 ## Requests (verbatim)
 
 7 Nov 2026, 16:14:

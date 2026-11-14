@@ -2,6 +2,8 @@
 
 Slide-in "tube" case for a Raspberry Pi 5 + Waveshare PoE HAT (G) + Pimoroni NVMe Base Duo. No screws or standoffs in any board: each board rests on its own ledge. One parametric OpenSCAD file.
 
+**3D:** [body](https://kuraara.github.io/designing-stuff/?m=pi5-poe-nvme-case/print/pi5_case_body_PETG.stl) · [lid](https://kuraara.github.io/designing-stuff/?m=pi5-poe-nvme-case/print/pi5_case_lid_PLA.stl) · [feet](https://kuraara.github.io/designing-stuff/?m=pi5-poe-nvme-case/print/pi5_case_feet_x4_TPU.stl) · [DIN bracket](https://kuraara.github.io/designing-stuff/?m=pi5-poe-nvme-case/print/pi5_case_din_bracket_PETG.stl) in the viewer
+
 Status (13 Nov 2026, v0.5): **body printed and working; to print next: the v0.5 PLA lid and the v0.5 feet.** The SSDs turned out to sit on top of the NVMe Base Duo, so the empty bay under it now takes a **tray on the lid** that carries the Duo for 75 % of its length. Two corner posts stop both boards and put a small lip over the Duo's top corners ([lid v0.5](#lid-v05-tray-under-the-duo-13-nov-2026)). This replaces the v0.4 TPU card retainer. The **feet now take the owner's M4 × 10 button heads**, screwed straight into the body's 4 mm holes, and are 3 mm taller ([feet v0.5](#feet-v05-m4--10-button-heads-13-nov-2026)). No body reprint.
 
 History: v0.2 body printed 10 Nov in PLA, and its ledges hold the Duo through a shake test. v0.3 replaced the TPU lid's failed snap bumps with PLA latch arms. v0.4 added a TPU card retainer, now superseded.

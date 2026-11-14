@@ -2,6 +2,8 @@
 
 A parametric remake of the yellow/white "AUBREY" school-bag tag: a name hanging under a five-petal flower, done as **two separate prints that press together**, so two colours work on a single-extruder MK3S+. Any name, any font OpenSCAD can see, and an optional size. The generator script (`bag_tag.py`) is also the basis for the *Bag Tag* gadget in [shiny-trinkets](https://github.com/kuraara/shiny-trinkets/tree/master/gadgets/bag-tag). Status: **v0.1, STLs and G-code ready, not printed.** 8 Nov 2026.
 
+**3D:** [base + inlay in the viewer](https://kuraara.github.io/designing-stuff/?m=bag-tag/stl/aubrey_base.stl&m=bag-tag/stl/aubrey_inlay.stl)
+
 ![AUBREY preview, with an AAA battery for scale](img/aubrey_preview.svg)
 
 ## Request (verbatim)
