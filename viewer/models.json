@@ -271,8 +271,8 @@
   },
   {
    "folder": "arcade-button-box/tpu-membrane-button",
-   "title": "TPU membrane button \u2014 v0.2",
-   "status": "v0.2, G-code sent for printing 14 Nov 2026, not yet tested.",
+   "title": "TPU membrane button \u2014 v0.3 (compact)",
+   "status": "v0.3 (compact), sliced and ready to print, not yet printed.",
    "stls": [
     {
      "path": "arcade-button-box/tpu-membrane-button/stl/ref_microswitch.stl",
@@ -290,27 +290,27 @@
     {
      "path": "arcade-button-box/tpu-membrane-button/stl/tpu_button.stl",
      "name": "tpu_button",
-     "kb": 180,
-     "tris": 3686,
+     "kb": 234,
+     "tris": 4794,
      "size": [
-      36.0,
-      36.0,
-      34.0
+      23.0,
+      23.0,
+      27.2
      ],
-     "cm3": 27.73,
+     "cm3": 3.4,
      "ref": false
     },
     {
      "path": "arcade-button-box/tpu-membrane-button/stl/tpu_button_m04.stl",
      "name": "tpu_button_m04",
-     "kb": 180,
-     "tris": 3686,
+     "kb": 234,
+     "tris": 4794,
      "size": [
-      36.0,
-      36.0,
-      33.8
+      23.0,
+      23.0,
+      27.0
      ],
-     "cm3": 27.53,
+     "cm3": 3.36,
      "ref": false
     }
    ]

@@ -146,12 +146,14 @@ va.dim_v(0, zsb, R, xr, f"{f1(I['base_clear'])}")
 va.dim_v(0, top, R, xr + 7, f"{f1(ZT)} overall")
 va.leader(11.8, top - membrane / 2, 21, top + 2.5, f"membrane {f1(membrane)} ({round(membrane / 0.2)} layers)")
 zfun = use(I["z_fun"])
-va.leader(-6.5, zfun + 2.5 + stop / 2 - 0.2, -24, zfun + 6, f"cone backup stop, {f1(stop)}", "end")
+r_m = (I["r_throat"] + I["r_boss"]) / 2      # mid of the cone seat
+z_gap = use((I["z_c0"] + I["r_rim"] - r_m + I["z_bcyl"] + I["r_boss"] - r_m) / 2)
+va.leader(-r_m, z_gap, -24, zfun + 6, f"cone backup stop, {f1(stop)}", "end")
 va.leader(-0.8, zst + pl_free, -24, zst + 0.5, "face lands on switch (detail C)", "end")
 va.leader(-pl_off + I["hole"][0], zsb + I["hole"][1], -24, zsb + 6, "detent bumps in mounting hole", "end")
 va.leader(-3, zsb - 1.5, -24, zsb - 1.5, "solid floor", "end")
-va.leader(9, zc + 1.6, R + 14, zc + 3.5, "plunger groove")
-va.leader(-pl_off + sw_L + 4, zsb + 10.5, R + 14, zsb + 8, "NO / NC · slides in this way")
+va.leader(I["floor_x"] - 2, zc + 1.2, R + 14, zc + 3.5, "plunger groove")
+va.leader(-pl_off + sw_L + 4, zsb + 10.5, -pl_off + sw_L + 11, zsb + 13, "NO / NC · slides in this way")
 va.leader(-pl_off + sw_L + 2, zsb - 3.5, R + 9, zsb - 6.5, "COM")
 ga, wa, ha = va.group(0, 0, "Section A–A", "through the plunger, along the switch · use orientation")
 
@@ -196,7 +198,7 @@ vc.rect(-pl_d / 2 * K, zst * K, pl_d / 2 * K, (zst + pl_free) * K, "plg")
 ztip = use(I["z_tip"]); zrec = ztip + I["pl_stop"]
 vc.dim_v((zst + pl_free) * K, zrec * K, -9 * K, -10.5 * K, f"gap {I['rest_gap']:.1f}", side=-1)
 vc.dim_v(zst * K, ztip * K, -9 * K, -15 * K, f"face meets switch {f1(I['face_travel'])}")
-r6 = 6.0
+r6 = (I["r_throat"] + I["r_boss"]) / 2
 zb6 = use(I["z_bcyl"] + (I["r_boss"] - r6)); zf6 = use(I["z_c0"] + (I["r_rim"] - r6))
 vc.dim_v(zf6 * K, zb6 * K, r6 * K, 13.5 * K, f"cone backup {f1(stop)}")
 vc.leader(2.0 * K, zrec * K - 0.2, 5.0 * K, (zst + pl_free + 1.2) * K, f"recess {I['pl_stop']:.1f}")

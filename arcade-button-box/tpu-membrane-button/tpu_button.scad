@@ -1,8 +1,13 @@
 // =====================================================================
-//  TPU membrane arcade button  -  v0.2
+//  TPU membrane button  -  v0.3 (compact)
 //  One TPU part. The button face is a thin membrane printed as the first
 //  2-3 layers on the bed; a stiff centre, a 45-degree cone backup stop and
 //  the microswitch tunnel all grow up from it, so no supports are needed.
+//
+//  v0.3: compact. A 19 mm face on a 23 mm head with a 45-degree underside,
+//  then a narrow stem that only hugs the plunger end of the switch (the
+//  rest of the switch sticks out of the side). About a fifth of v0.2's
+//  plastic. The no-shim mechanism below is unchanged.
 //
 //  v0.2: no shimming. The centre's face lands on the SWITCH'S OWN TOP FACE,
 //  so the plunger always ends up `pl_stop` above flush whatever its real
@@ -29,19 +34,22 @@ part = "button";
 /* [Membrane and centre] */
 membrane = 0.6;    // 3 layers at 0.2 (first layer 0.2). 0.4 = 2 layers
 gap_c    = 0.3;    // cavity above the membrane at the rim before the cone starts
-r_rim    = 14.5;   // free membrane outer radius -> flexible face 29 mm
-r_boss   = 8.5;    // stiff centre radius -> 17 mm (6 mm free ring)
-R_out    = 18.0;   // puck radius -> 36 mm
+r_rim    = 9.5;    // free membrane outer radius -> flexible face 19 mm
+r_boss   = 4.5;    // stiff centre radius -> 9 mm (5 mm free ring)
+R_out    = 11.5;   // head radius -> 23 mm
+head_t   = 1.4;    // head rim thickness before its 45-degree underside starts
+wall     = 1.6;    // stem walls around the switch tunnel
+stem_x   = 8.5;    // stem ends here (+X); COM leaves the switch at ~9.7, outside it
 
 /* [Travel] */
-t_face   = 2.4;    // centre travel from rest until its face is level with the ceiling
+t_face   = 2.1;    // centre travel from rest until its face is level with the ceiling
 pl_stop  = 0.2;    // recess in the face: the plunger stops this far above flush
 stop_margin = 0.3; // cone backup stop lands this far after the face meets the switch
-r_face   = 3.5;    // face that lands on the switch top
-r_rec    = 2.3;    // recess over the plunger (plunger 2.7 wide, +/-0.9 position)
+r_face   = 3.0;    // face that lands on the switch top
+r_rec    = 2.0;    // recess over the plunger (plunger 2.7 wide, +/-0.65 position)
 
 /* [Throat] */
-r_throat = 4.0;    // hole through the ceiling for the face (clipped to the tunnel)
+r_throat = 3.5;    // hole through the ceiling for the face (clipped to the tunnel)
 lip      = 0.8;    // ceiling thickness at the throat
 
 /* [Switch: B.Lee arcade microswitch, measured 14 Nov 2026 from caliper photos (+/-0.3)] */
@@ -58,12 +66,11 @@ hole_z   = 2.9;    //   ... and above the bottom face (from photo)
 /* [Tunnel] */
 c_y      = 0.15;   // side clearance per side (TPU pockets print slightly small)
 c_end    = 0.2;    // clearance at the plunger end
-c_z      = 0.2;    // switch rests on the floor; its top is this far below the ceiling
-floor_x  = 6.0;    // solid floor under the switch from the end wall to here (COM is at ~9.7)
+c_z      = 0.3;    // switch rests on the floor; its top is this far below the ceiling (bridge sag takes some)
 groove_w = 3.6;    // slot in the ceiling for the plunger to slide in under
 bump_r   = 1.0;    // detent bumps on both side walls, into the mounting hole
 bump_h   = 0.45;
-base_clear = 6;    // below the switch, so COM clears the desk; 2 is the minimum (floor)
+base_clear = 3.6;  // floor under the switch; 3.6 lets it stand on a desk clear of the COM tab
 
 $fn = 96;
 
@@ -90,6 +97,7 @@ assert(r_face < r_throat - 0.3, "face would rub the throat");
 assert(rest_gap >= 0.3, "plunger would be pressed at rest");
 assert(pl_travel >= pl_pt, "plunger may not reach its click point");
 assert(base_clear >= 2, "floor needs at least 2 mm under the switch");
+assert(stem_x > hole_x - pl_off + 3, "stem too short for the detent bumps");
 
 // ---------------------------------------------------------------- parts
 module boss()
@@ -104,24 +112,29 @@ module cavity()      // free ring + funnel, above the membrane
 
 module tunnel2d() translate([px0, -pw]) square([R_out + 5 - px0, 2 * pw]);
 
+// outside: round head, 45-degree underside (keeps >= 2.5 mm outside the funnel), narrow stem
+module shell() {
+    cylinder(r = R_out, h = head_t);
+    translate([0, 0, head_t - 0.01]) cylinder(r1 = R_out, r2 = 0.5, h = R_out - 0.5);
+    translate([px0 - wall, -(pw + wall), 0])
+        linear_extrude(z_tot) offset(r = 1) offset(delta = -1) square([stem_x - px0 + wall, 2 * (pw + wall)]);
+}
+
 module bumps()
     for (s = [-1, 1])
         translate([-pl_off + hole_x, s * (pw + bump_r - bump_h), z_sw_b - hole_z]) sphere(r = bump_r, $fn = 32);
 
 module body() {
     difference() {
-        cylinder(r = R_out, h = z_tot);
+        shell();
         cavity();
         // throat through the lip
         translate([0, 0, z_fun - 0.01]) linear_extrude(lip + 0.02)
             intersection() { circle(r_throat); tunnel2d(); }
         // switch tunnel, open at +X
         translate([0, 0, z_ceil]) linear_extrude(z_sw_b - z_ceil) tunnel2d();
-        // open underneath beyond the floor (COM tab, wires)
-        translate([0, 0, z_sw_b - 0.01]) linear_extrude(z_tot)
-            intersection() { tunnel2d(); translate([floor_x, -50]) square(100); }
         // 45-degree lead-in on the floor's entry edge
-        translate([floor_x, 0, z_sw_b]) rotate([90, 0, 0])
+        translate([stem_x, 0, z_sw_b]) rotate([90, 0, 0])
             linear_extrude(2 * pw, center = true) polygon([[0.01, -0.01], [-1, -0.01], [0.01, 1]]);
         // plunger slides in under the ceiling along this groove
         translate([0, -groove_w / 2, z_ceil - pl_free - 0.5]) cube([R_out + 5, groove_w, pl_free + 0.6]);
@@ -143,13 +156,13 @@ module switch_ref() {
 }
 
 module info() echo(str("INFO {",
-    "\"version\":\"0.2\",\"membrane\":", membrane, ",\"r_rim\":", r_rim, ",\"r_boss\":", r_boss, ",\"R_out\":", R_out,
+    "\"version\":\"0.3\",\"membrane\":", membrane, ",\"r_rim\":", r_rim, ",\"r_boss\":", r_boss, ",\"R_out\":", R_out,
     ",\"t_face\":", t_face, ",\"face_travel\":", face_travel, ",\"stop\":", stop, ",\"pl_stop\":", pl_stop,
     ",\"rest_gap\":", rest_gap, ",\"pl_travel\":", pl_travel, ",\"r_face\":", r_face, ",\"r_rec\":", r_rec,
     ",\"r_throat\":", r_throat, ",\"lip\":", lip,
     ",\"z_c0\":", z_c0, ",\"z_fun\":", z_fun, ",\"z_ceil\":", z_ceil, ",\"z_bcyl\":", z_bcyl, ",\"z_fc\":", z_fc,
     ",\"z_tip\":", z_tip, ",\"z_sw_t\":", z_sw_t, ",\"z_sw_b\":", z_sw_b, ",\"z_tot\":", z_tot,
-    ",\"px0\":", px0, ",\"pw\":", pw, ",\"c_z\":", c_z, ",\"floor_x\":", floor_x, ",\"groove_w\":", groove_w,
+    ",\"px0\":", px0, ",\"pw\":", pw, ",\"c_z\":", c_z, ",\"floor_x\":", stem_x, ",\"groove_w\":", groove_w,
     ",\"hole\":[", hole_x, ",", hole_z, "],\"bump\":[", bump_r, ",", bump_h, "]",
     ",\"sw\":[", sw_L, ",", sw_T, ",", sw_H, "],\"pl\":[", pl_off, ",", pl_d, ",", pl_free, ",", pl_pt, "]",
     ",\"base_clear\":", base_clear, "}"));

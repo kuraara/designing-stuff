@@ -9,7 +9,7 @@ Research into self-contained wireless button boxes: arcade buttons + ESP32-C3 + 
 | Enclosure v0.1 (this folder) | Printed tub + removable top plate for long-barrel screw-in buttons, six layouts 1×1 to 2×3, dimensioned 2D drawings in `arcade_button_box.html` | designed, not printed |
 | [notes/off-the-shelf-enclosures.md](notes/off-the-shelf-enclosures.md) | Jaycar / Amazon AU boxes deep enough for the long buttons | research |
 | [notes/button-options.md](notes/button-options.md) | Lower-profile button options and the TPU membrane idea, with depth comparison | research |
-| [tpu-membrane-button](tpu-membrane-button) | Single all-TPU membrane button holding the existing microswitch: box depth ~34 mm instead of ~94 | **v0.2 printing** (no shims) |
+| [tpu-membrane-button](tpu-membrane-button) | Small all-TPU membrane button holding the existing microswitch: Ø23 head, 27 mm deep instead of ~94, 36 min print | **v0.3 ready to print** |
 
 ## Requests (verbatim)
 
@@ -49,7 +49,17 @@ Research into self-contained wireless button boxes: arcade buttons + ESP32-C3 + 
 
 > Okay just give me the one you did and I’ll print it anyway
 
-Details in [tpu-membrane-button/README.md](tpu-membrane-button/README.md).
+14 Nov 2026, 17:44:
+
+> Can you include a better stl viewer in the GitHub docs, by using GitHub pages? Their inbuilt viewer is a bit a erage
+
+(→ repo-wide viewer, see the root README.)
+
+14 Nov 2026, 17:57 – 18:57: which file to print, GitHub upload, OctoPrint's model size, print time, and:
+
+> You know the TPU button doesn’t need to be full arcade sized, I just wanted a lower profile button that would print faster. This thing is a bit too big
+
+Details in [tpu-membrane-button/README.md](tpu-membrane-button/README.md). All messages are quoted there in full.
 
 ---
 
