@@ -1,0 +1,54 @@
+{
+ "tpu_button": {
+  "TPUsafe": {
+   "0.20SPEED": {
+    "stock": {
+     "min": 84.8,
+     "g": 13.86
+    },
+    "solidboss": {
+     "min": 104.2,
+     "g": 17.32
+    }
+   }
+  },
+  "TPU": {
+   "0.20SPEED": {
+    "stock": {
+     "min": 67.2,
+     "g": 14.25
+    },
+    "solidboss": {
+     "min": 81.1,
+     "g": 17.8
+    }
+   }
+  }
+ },
+ "tpu_button_m04": {
+  "TPUsafe": {
+   "0.20SPEED": {
+    "stock": {
+     "min": 83.9,
+     "g": 13.68
+    },
+    "solidboss": {
+     "min": 102.7,
+     "g": 17.05
+    }
+   }
+  },
+  "TPU": {
+   "0.20SPEED": {
+    "stock": {
+     "min": 66.6,
+     "g": 14.06
+    },
+    "solidboss": {
+     "min": 80.1,
+     "g": 17.53
+    }
+   }
+  }
+ }
+}
