@@ -21,9 +21,12 @@ PRINTS = {"0.20SPEED": "0.20mm SPEED @MK3"}
 FILAMENTS = {"TPUsafe": ("bundle", "eSun TPU 95A @MK3S"), "TPU": ("bundle", "eSun TPU 95A FAST @MK3S")}
 INFILL = {"stock": {}, "solidboss": {"perimeters": "3", "solid_infill_below_area": "260"},
           # quickest that keeps the solid centre: 2 perimeters, 10 % infill
-          "lean": {"perimeters": "2", "fill_density": "10%", "solid_infill_below_area": "260"}}
+          "lean": {"perimeters": "2", "fill_density": "10%", "solid_infill_below_area": "260"},
+          # solidboss + speed schedule (M220): 100 % for the membrane and the 45-degree cones,
+          # 140 % after, back to 100 % for the floor bridge, then 140 % to the end
+          "ramp140": {"perimeters": "3", "solid_infill_below_area": "260", "_ramp": 140}}
 COMMON = {"avoid_crossing_perimeters": "1"}
-KEEP = {("TPUsafe", "0.20SPEED", "solidboss"), ("TPU", "0.20SPEED", "lean")}
+KEEP = {("TPUsafe", "0.20SPEED", "ramp140"), ("TPUsafe", "0.20SPEED", "solidboss")}
 META = {"inherits", "renamed_from", "alias", "compatible_printers", "compatible_printers_condition",
         "compatible_prints", "compatible_prints_condition", "printer_model", "printer_variant",
         "default_print_profile", "default_filament_profile", "default_sla_material_profile",
@@ -58,12 +61,32 @@ work.mkdir(exist_ok=True)
 (root / "gcode").mkdir(exist_ok=True)
 
 
+def ramp_gcode(cfg, pct):
+    """Speed schedule from the model (info.json, 3-layer version; the 2-layer one sits 0.2 lower,
+    which the windows cover). Layer n (0-based) prints at z = first_layer + n * layer_height."""
+    I = json.loads((root / "info.json").read_text())
+    fl, lh = float(cfg["first_layer_height"]), float(cfg["layer_height"])
+    layer = lambda z: max(0, int(round((z - fl) / lh)))
+    fast_from = layer(I["z_fun"] + 0.4) + 1                  # last 45-degree overhang (funnel) done
+    slow_from = layer(I["z_sw_b"] - 0.2)                     # floor bridge over the switch tunnel
+    fast_again = layer(I["z_sw_b"] + 0.6) + 1                # bridge + 3 layers on top of it
+    g = (f"{{if layer_num == {fast_from}}}M220 S{pct} ; overhangs done"
+         f"{{elsif layer_num == {slow_from}}}M220 S100 ; floor bridge"
+         f"{{elsif layer_num == {fast_again}}}M220 S{pct} ; bridge done{{endif}}")
+    return {"layer_gcode": cfg.get("layer_gcode", "") + "\\n" + g,
+            "end_filament_gcode": '"M220 S100 ; speed back to 100 %"',
+            # layer_gcode doesn't run on the first layer, so reset any leftover knob setting here
+            "start_filament_gcode": '"M900 K0 ; Filament gcode\\nM220 S100 ; membrane and 45-degree cones at 100 %"'}
+
+
 def write_cfg(fil, prn, inf):
     cfg = {}
     for kind, name in (("printer", PRINTER), ("print", PRINTS[prn]), ("filament", FILAMENTS[fil][1])):
         cfg.update({k: v for k, v in flat(kind, name).items() if k not in META})
     cfg.update(COMMON)
-    cfg.update(INFILL[inf])
+    cfg.update({k: v for k, v in INFILL[inf].items() if not k.startswith("_")})
+    if "_ramp" in INFILL[inf]:
+        cfg.update(ramp_gcode(cfg, INFILL[inf]["_ramp"]))
     (work / f"{fil}_{prn}_{inf}.ini").write_text("\n".join(f"{k} = {v}" for k, v in cfg.items()) + "\n")
 
 

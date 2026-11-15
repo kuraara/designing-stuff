@@ -6,7 +6,7 @@ A small, low-profile button printed as **one TPU part** around an arcade microsw
 
 Part of the [arcade-button-box](..) study: aimed at cutting box depth from ~94 mm (long-barrel buttons) to ~27 mm, and at quick prints.
 
-Status: **v0.3 (compact), sliced and ready to print, not yet printed.** 14 Nov 2026. v0.2 (same mechanism, Ø36 × 34 puck, 1 h 08–1 h 44) and v0.1 (housing stop, snap-in from below) are in git history.
+Status: **v0.3 (compact), sliced and ready to print, not yet printed.** 15 Nov 2026: **v0.2 printed well** (safe preset, last 1–2 mm at 140 % speed); switch fit and click not reported yet. v0.2 (same mechanism, Ø36 × 34 puck, 1 h 08–1 h 44) and v0.1 (housing stop, snap-in from below) are in git history.
 
 ![Drawing](img/tpu_button_drawing.png)
 
@@ -66,6 +66,20 @@ Status: **v0.3 (compact), sliced and ready to print, not yet printed.** 14 Nov 2
 
 (→ v0.3.)
 
+15 Nov 2026, 10:08:
+
+> Okay so the 90 minute print turned out pretty well, I think once ou get past the initial layers the speed can be ramped up considerably
+
+15 Nov 2026, 10:09:
+
+> In the last 1-2mm I had the printer at 140% speed
+
+15 Nov 2026, 10:09:
+
+> So maybe after the overhangs have mostly cleared
+
+(The 90-minute print is v0.2, `tpu_button_TPUsafe_0.20SPEED_solidboss.gcode`. → the `ramp140` speed schedule.)
+
 14 Nov 2026, 17:10: three caliper photos of the switch (no text), read off the beam scale because the display was off:
 
 | | Read from photo | Used |
@@ -99,13 +113,22 @@ Travel, checked by moving the real meshes (`check_motion.py`): plunger touched a
 
 ## Print
 
-**Recommended: `gcode/tpu_button_TPUsafe_0.20SPEED_solidboss.gcode`**: 3-layer (0.6) membrane, **36 min, 4.5 g**. eSun TPU 95A forum-safe preset (220/212 °C, as used for the braid tool), 3 perimeters, solid centre. 2-layer face: `gcode/tpu_button_m04_TPUsafe_0.20SPEED_solidboss.gcode`, 35 min, 4.4 g.
+**Recommended: `gcode/tpu_button_TPUsafe_0.20SPEED_ramp140.gcode`**: 3-layer (0.6) membrane, **30 min, 4.5 g**. eSun TPU 95A forum-safe preset (220/212 °C), 3 perimeters, solid centre, with a speed schedule built from the v0.2 print:
 
-**Quicker: `gcode/tpu_button_TPU_0.20SPEED_lean.gcode`**: 30 min, 4.6 g with the FAST preset (225 °C). Only ~6 min quicker now the part is small, and the FAST preset hasn't been proven on this printer, so the safe file is the default. 2-layer: `gcode/tpu_button_m04_TPU_0.20SPEED_lean.gcode`.
+| Height | Speed | Why |
+|---|---|---|
+| start – 7.4 | 100 % | membrane, then the 45° cones inside and under the head |
+| 7.6 – 23.2 | **140 %** | overhangs done (v0.2's last 1–2 mm ran fine at 140 %) |
+| 23.4 – 24.2 | 100 % | floor bridge over the switch tunnel, plus 3 layers on it |
+| 24.4 – end | **140 %** | floor |
 
-(Sent in chat as `tpu_button_v0.3_3layer_TPUsafe.gcode`.)
+It's done with `M220` (the same as the printer's speed knob): `M220 S100` in the filament start G-code, the changes in the after-layer G-code, `M220 S100` at the end so the next print starts at 100 %. Turning the knob mid-print still works until the next scheduled change. PrusaSlicer's time estimate includes it.
 
-All face down, no supports, 0.20mm SPEED. To slice it yourself in PrusaSlicer: printer *Original Prusa i3 MK3S & MK3S+*, print *0.20mm SPEED @MK3*, filament *eSun TPU 95A @MK3S* from [printer-profiles](../../printer-profiles/esun-tpu95a-mk3s), then **Perimeters 3**, **Infill > Solid infill threshold area 260 mm²** (fills the small centre and stem sections solid) and **Avoid crossing perimeters**.
+2-layer face: `gcode/tpu_button_m04_TPUsafe_0.20SPEED_ramp140.gcode`, 30 min, 4.4 g. Without the schedule: `gcode/tpu_button_TPUsafe_0.20SPEED_solidboss.gcode`, 36 min, 4.5 g.
+
+(Sent in chat as `tpu_button_v0.3_3layer_TPUsafe_ramp140.gcode`.)
+
+All face down, no supports, 0.20mm SPEED. To slice it yourself in PrusaSlicer: printer *Original Prusa i3 MK3S & MK3S+*, print *0.20mm SPEED @MK3*, filament *eSun TPU 95A @MK3S* from [printer-profiles](../../printer-profiles/esun-tpu95a-mk3s), then **Perimeters 3**, **Infill > Solid infill threshold area 260 mm²** (fills the small centre and stem sections solid) and **Avoid crossing perimeters**. For the schedule, add to *Printer > Custom G-code > After layer change*: `{if layer_num == 37}M220 S140{elsif layer_num == 116}M220 S100{elsif layer_num == 121}M220 S140{endif}`, and `M220 S100` to the filament start and end G-code (`slice_all.py` works the layer numbers out from the model).
 
 - **Sheet:** textured or satin; glue stick on smooth PEI.
 - **First layer:** the membrane *is* the first layers, so watch them. Gaps or a starved ring show up as holes in the face.
@@ -150,14 +173,14 @@ All face down, no supports, 0.20mm SPEED. To slice it yourself in PrusaSlicer: p
 
 ## Print times (PrusaSlicer 2.7.2, stock MK3S+, 0.20mm SPEED)
 
-| STL | Filament | stock (2 perimeters, 15 %) | lean (2 perimeters, 10 %, solid small sections) | solidboss (3 perimeters, 15 %, solid small sections) |
-|---|---|---|---|---|
-| `tpu_button` (0.6 membrane) | eSun TPU 95A (safe) | 34 min, 4.0 g | 36 min, 4.5 g | **36 min, 4.5 g** |
-| | eSun TPU 95A FAST | 28 min, 4.1 g | **30 min, 4.6 g** | 30 min, 4.6 g |
-| `tpu_button_m04` (0.4 membrane) | eSun TPU 95A (safe) | 33 min, 3.9 g | 36 min, 4.5 g | **35 min, 4.4 g** |
-| | eSun TPU 95A FAST | 28 min, 4.0 g | **30 min, 4.6 g** | 30 min, 4.5 g |
+| STL | Filament | stock (2 perimeters, 15 %) | lean (2 perimeters, 10 %) | solidboss (3 perimeters, 15 %) | **ramp140** (solidboss + speed schedule) |
+|---|---|---|---|---|---|
+| `tpu_button` (0.6 membrane) | eSun TPU 95A (safe) | 34 min, 4.0 g | 36 min, 4.5 g | **36 min, 4.5 g** | **30 min, 4.5 g** |
+| | eSun TPU 95A FAST | 28 min, 4.1 g | 30 min, 4.6 g | 30 min, 4.6 g | 26 min, 4.6 g |
+| `tpu_button_m04` (0.4 membrane) | eSun TPU 95A (safe) | 33 min, 3.9 g | 36 min, 4.5 g | **35 min, 4.4 g** | **30 min, 4.4 g** |
+| | eSun TPU 95A FAST | 28 min, 4.0 g | 30 min, 4.6 g | 30 min, 4.5 g | 25 min, 4.5 g |
 
-Bold = G-code kept in `gcode/`. v0.2 for comparison: 1 h 44 min / 17.3 g (safe), 1 h 08 min (FAST lean).
+"Solid" variants fill the small centre and stem sections solid (`solid_infill_below_area` 260). Bold = G-code kept in `gcode/`. v0.2 for comparison: 1 h 44 min / 17.3 g (safe), printed 15 Nov in about 90 min by OctoPrint's clock.
 
 G-code check (`check_gcode.py`): the 0.6 file prints the free ring on layers 1–3 and nothing in it from layer 4; the 0.4 file on layers 1–2. The centre boss prints as solid infill. Overhang check (`check_overhangs.py`): only the floor bridge (144 mm² at 23.6 mm) and the detent bumps are steeper than 45°.
 
@@ -175,7 +198,7 @@ G-code check (`check_gcode.py`): the 0.6 file prints the free ring on layers 1�
 |---|---|
 | `tpu_button.scad` | the model. `part = button / switch / body / boss / info` |
 | `render_all.sh` | STLs (0.6 and 0.4 membranes), `info.json`, overhang check |
-| `slice_all.py` | slices with the repo's eSun TPU presets → `print_times.json`, keeps the safe solidboss G-code |
+| `slice_all.py` | slices with the repo's eSun TPU presets → `print_times.json`; keeps the safe solidboss and ramp140 G-code; `ramp_gcode()` builds the speed schedule from `info.json` |
 | `check_gcode.py`, `check_overhangs.py`, `check_motion.py` | membrane layer / boss fill; overhangs; switch insertion and press travel with the real meshes (`check_motion.txt`) |
 | `drawings.py` | `img/tpu_button_drawing.svg/.png` from STL sections |
 | `stl/`, `gcode/`, `img/` | outputs |

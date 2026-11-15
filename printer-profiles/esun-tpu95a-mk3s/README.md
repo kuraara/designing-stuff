@@ -1,6 +1,6 @@
 # eSun eTPU-95A — PrusaSlicer filament profiles for MK3S / MK3S+
 
-Status: **built and test-sliced (PrusaSlicer 2.7.2 CLI), not yet printed.** 31 Oct 2026.
+Status: **forum preset (eSun TPU 95A @MK3S) proven in prints; FAST preset still untested.** Built 31 Oct 2026; field notes below.
 
 ## Requests (verbatim, 31 Oct 2026)
 
@@ -48,6 +48,15 @@ Retraction is 1 mm (between Artur5's 0.5 on a Mosquito and Snowballs Chance's 2)
 | Ring Ø60/Ø50 × 15 | 0.20 QUALITY | 1h 41m | 58m | 59m | **50m** |
 
 G-code check (FAST, draft block): M104 S225; fan off then ramps to 70–90 %; 1 mm retractions at F1500; steady extrusion ~3.8 mm³/s (3.5 × the 1.10 multiplier).
+
+## Field notes
+
+| Date | Part | Preset, print profile | Result |
+|---|---|---|---|
+| 7 Nov 2026 | [braid tool coupon](../../fishbone-braid-tool) | forum (safe), 0.20 SPEED, 5 perimeters | passed |
+| 15 Nov 2026 | [TPU membrane button v0.2](../../arcade-button-box/tpu-membrane-button) (0.6 mm face, Ø36 × 34) | forum (safe), 0.20 SPEED, 3 perimeters | "turned out pretty well"; the last 1–2 mm ran at **140 %** speed (printer knob) without trouble |
+
+Owner's observation (15 Nov): once past the first layers, and after the overhangs have mostly cleared, the speed can go up considerably. 140 % on the forum preset is about 3.4 mm³/s, the FAST preset's flow, but at 212 °C. The TPU button's `slice_all.py` (`ramp_gcode()`) turns this into a per-model `M220` schedule: 100 % for the first layers and 45° overhangs, 140 % after, 100 % again for bridges.
 
 ## Tuning FAST
 
