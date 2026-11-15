@@ -124,26 +124,28 @@ module bumps()
     for (s = [-1, 1])
         translate([-pl_off + hole_x, s * (pw + bump_r - bump_h), z_sw_b - hole_z]) sphere(r = bump_r, $fn = 32);
 
-module body() {
-    difference() {
-        shell();
-        cavity();
-        // throat through the lip
-        translate([0, 0, z_fun - 0.01]) linear_extrude(lip + 0.02)
-            intersection() { circle(r_throat); tunnel2d(); }
-        // switch tunnel, open at +X
-        translate([0, 0, z_ceil]) linear_extrude(z_sw_b - z_ceil) tunnel2d();
-        // 45-degree lead-in on the floor's entry edge
-        translate([stem_x, 0, z_sw_b]) rotate([90, 0, 0])
-            linear_extrude(2 * pw, center = true) polygon([[0.01, -0.01], [-1, -0.01], [0.01, 1]]);
-        // plunger slides in under the ceiling along this groove
-        translate([0, -groove_w / 2, z_ceil - pl_free - 0.5]) cube([R_out + 5, groove_w, pl_free + 0.6]);
-        // small chamfer on the bed edge (stops elephant's foot on the face)
-        translate([0, 0, -0.01]) difference() {
-            cylinder(r = R_out + 1, h = 0.51);
-            cylinder(r1 = R_out - 0.5, r2 = R_out + 0.01, h = 0.51);
-        }
+// everything removed from the shell (shared with gang.scad)
+module cuts(edge_chamfer = true) {
+    cavity();
+    // throat through the lip
+    translate([0, 0, z_fun - 0.01]) linear_extrude(lip + 0.02)
+        intersection() { circle(r_throat); tunnel2d(); }
+    // switch tunnel, open at +X
+    translate([0, 0, z_ceil]) linear_extrude(z_sw_b - z_ceil) tunnel2d();
+    // 45-degree lead-in on the floor's entry edge
+    translate([stem_x, 0, z_sw_b]) rotate([90, 0, 0])
+        linear_extrude(2 * pw, center = true) polygon([[0.01, -0.01], [-1, -0.01], [0.01, 1]]);
+    // plunger slides in under the ceiling along this groove
+    translate([0, -groove_w / 2, z_ceil - pl_free - 0.5]) cube([R_out + 5, groove_w, pl_free + 0.6]);
+    // small chamfer on the bed edge (stops elephant's foot on the face)
+    if (edge_chamfer) translate([0, 0, -0.01]) difference() {
+        cylinder(r = R_out + 1, h = 0.51);
+        cylinder(r1 = R_out - 0.5, r2 = R_out + 0.01, h = 0.51);
     }
+}
+
+module body() {
+    difference() { shell(); cuts(); }
     bumps();
 }
 

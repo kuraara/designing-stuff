@@ -275,6 +275,45 @@
    "status": "v0.3 (compact), sliced and ready to print, not yet printed.",
    "stls": [
     {
+     "path": "arcade-button-box/tpu-membrane-button/stl/esp_cradle.stl",
+     "name": "esp_cradle",
+     "kb": 22,
+     "tris": 452,
+     "size": [
+      47.2,
+      26.6,
+      9.1
+     ],
+     "cm3": 7.47,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/tpu-membrane-button/stl/gang3.stl",
+     "name": "gang3",
+     "kb": 600,
+     "tris": 12288,
+     "size": [
+      66.4,
+      71.0,
+      27.2
+     ],
+     "cm3": 19.18,
+     "ref": false
+    },
+    {
+     "path": "arcade-button-box/tpu-membrane-button/stl/gang4.stl",
+     "name": "gang4",
+     "kb": 788,
+     "tris": 16136,
+     "size": [
+      66.4,
+      95.0,
+      27.2
+     ],
+     "cm3": 23.51,
+     "ref": false
+    },
+    {
      "path": "arcade-button-box/tpu-membrane-button/stl/ref_microswitch.stl",
      "name": "ref_microswitch",
      "kb": 7,

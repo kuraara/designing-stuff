@@ -184,6 +184,28 @@ All face down, no supports, 0.20mm SPEED. To slice it yourself in PrusaSlicer: p
 
 G-code check (`check_gcode.py`): the 0.6 file prints the free ring on layers 1–3 and nothing in it from layer 4; the 0.4 file on layers 1–2. The centre boss prints as solid infill. Overhang check (`check_overhangs.py`): only the floor bridge (144 mm² at 23.6 mm) and the detent bumps are steeper than 45°.
 
+## Gang vs singles (study, 15 Nov 2026)
+
+15 Nov 2026, 10:19:
+
+> How do the economics of printing multiple single buttons compared to a single 3 or 4 gang button box with space for an esp32 c3? It does need any fancy mounting.
+> Just a channel underneath for the usb cable that opens out for the esp32 board
+
+`gang.scad` builds N v0.3 buttons in a row (24 mm pitch, switches side by side) on one 1.6 mm top plate, plus an ESP32-C3 Super Mini block behind the row: board pocket (23.2 × 18.6 × 5), a 12.5 × 7.5 zone for the USB-C plug, and a 4.5 mm cable channel out to the edge, all open underneath. The button mechanism is the same code as the single. All sliced with the recommended settings (safe preset, ramp140):
+
+| | 3 buttons | 4 buttons |
+|---|---|---|
+| Singles, all on one plate | 77 min, 13.2 g | 102 min, 17.6 g |
+| ESP32 cradle (separate, same pocket and channel) | 46 min, 7.7 g | 46 min, 7.7 g |
+| **Singles + cradle** | **123 min, 20.9 g** (2 jobs, or 1 shared plate) | **148 min, 25.3 g** |
+| **Gang box** ([3](https://kuraara.github.io/designing-stuff/?m=arcade-button-box/tpu-membrane-button/stl/gang3.stl&cut=y&at=500), [4](https://kuraara.github.io/designing-stuff/?m=arcade-button-box/tpu-membrane-button/stl/gang4.stl)) | **135 min, 22.9 g** | **168 min, 28.4 g** |
+| (one single on its own) | 30 min, 4.5 g; 3 separate jobs = 91 min | 121 min |
+
+- **Print cost is a wash:** the gang is ~10 % *more*, not less. TPU time follows plastic, the buttons are spaced too far apart to share walls, and the joining plate adds area. Printing singles together already saves ~15 % over one at a time (layer-time limits stop mattering).
+- **The ESP32 block is the expensive part:** 46 min, more than a button. A thin-walled frame instead of a solid block would roughly halve it, in either option.
+- **What the gang buys:** one print and one object, no mounting, internal wire runs, fixed spacing, and the cable channel. **What it costs:** a failure loses 2+ hours instead of 30 min, the layout is fixed, and a 1.6 mm TPU plate is floppy between buttons.
+- Not resolved: the switch tabs face +X while the ESP32 sits at −X, so wires run under the plate between the stems.
+
 ## Open questions
 
 - Plunger height (±0.3 from the photo) no longer matters within 1.77–2.5; the hole position for the detent bumps is also from a photo.
@@ -197,6 +219,7 @@ G-code check (`check_gcode.py`): the 0.6 file prints the free ring on layers 1�
 | File | Purpose |
 |---|---|
 | `tpu_button.scad` | the model. `part = button / switch / body / boss / info` |
+| `gang.scad` | gang study: N buttons + ESP32 block. `part = gang / singles / cradle`, `n` |
 | `render_all.sh` | STLs (0.6 and 0.4 membranes), `info.json`, overhang check |
 | `slice_all.py` | slices with the repo's eSun TPU presets → `print_times.json`; keeps the safe solidboss and ramp140 G-code; `ramp_gcode()` builds the speed schedule from `info.json` |
 | `check_gcode.py`, `check_overhangs.py`, `check_motion.py` | membrane layer / boss fill; overhangs; switch insertion and press travel with the real meshes (`check_motion.txt`) |
