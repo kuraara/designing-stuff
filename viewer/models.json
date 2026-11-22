@@ -481,46 +481,72 @@
   },
   {
    "folder": "smiggle-bottle-bumper",
-   "title": "Smiggle bottle bumper: TPU, with a name \u2014 v0.1",
-   "status": "v0.1, STLs and G-code ready, not printed.",
+   "title": "Smiggle bottle bumper: TPU, with a name \u2014 v0.2",
+   "status": "v0.2 (vase mode), STLs and G-code ready, not printed.",
    "stls": [
     {
      "path": "smiggle-bottle-bumper/stl/aubrey_bumper.stl",
      "name": "aubrey_bumper",
-     "kb": 2685,
-     "tris": 54982,
+     "kb": 2100,
+     "tris": 42998,
      "size": [
-      74.4,
-      75.2,
-      22.8
+      72.0,
+      72.8,
+      22.0
      ],
-     "cm3": 14.86,
+     "cm3": 9.61,
      "ref": false
     },
     {
-     "path": "smiggle-bottle-bumper/stl/fit_gauge.stl",
-     "name": "fit_gauge",
-     "kb": 283,
-     "tris": 5784,
+     "path": "smiggle-bottle-bumper/stl/fit_ring_1_tight.stl",
+     "name": "fit_ring_1_tight",
+     "kb": 94,
+     "tris": 1924,
      "size": [
-      154.3,
-      145.8,
-      3.0
+      71.4,
+      73.0,
+      6.0
      ],
-     "cm3": 3.38,
+     "cm3": 1.09,
+     "ref": false
+    },
+    {
+     "path": "smiggle-bottle-bumper/stl/fit_ring_2_default.stl",
+     "name": "fit_ring_2_default",
+     "kb": 94,
+     "tris": 1928,
+     "size": [
+      72.0,
+      73.6,
+      6.0
+     ],
+     "cm3": 1.13,
+     "ref": false
+    },
+    {
+     "path": "smiggle-bottle-bumper/stl/fit_ring_3_loose.stl",
+     "name": "fit_ring_3_loose",
+     "kb": 94,
+     "tris": 1932,
+     "size": [
+      72.6,
+      74.2,
+      6.0
+     ],
+     "cm3": 1.17,
      "ref": false
     },
     {
      "path": "smiggle-bottle-bumper/stl/lincoln_bumper.stl",
      "name": "lincoln_bumper",
-     "kb": 2661,
-     "tris": 54496,
+     "kb": 2077,
+     "tris": 42536,
      "size": [
-      74.4,
-      75.2,
-      22.8
+      72.0,
+      72.8,
+      22.0
      ],
-     "cm3": 14.86,
+     "cm3": 9.61,
      "ref": false
     }
    ]

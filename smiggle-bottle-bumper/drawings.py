@@ -56,9 +56,13 @@ dim(ax, (r_o + 12, b["floor"]), (r_o + 12, step_z), f"seat {b['seat_depth']:g}",
 dim(ax, (-r_o - 6, 0), (-r_o - 6, b["floor"]), f"floor {b['floor']:g}", off=(-6, 0))
 ax.text(-r_o - 2, H + 2.5, f"name side\nraised {first['emboss']:g}", ha="center", fontsize=8)
 ax.text(r_o - 2, H + 2.5, f"wall {b['wall']:g}", ha="center", fontsize=8)
-ax.text(r_i - 9, H - 1.5, f"45° rim chamfer {b['top_c']:g}\n(sits in the bottle's step)", ha="right",
-        fontsize=7)
-ax.text(r_i - 6, b["floor"] + 1, f"R{b['inner_r']:g}", fontsize=7)
+if b["top_c"] > 0:
+    ax.text(r_i - 9, H - 1.5, f"45° rim chamfer {b['top_c']:g}\n(sits in the bottle's step)",
+            ha="right", fontsize=7)
+if b["inner_r"] > 0:
+    ax.text(r_i - 6, b["floor"] + 1, f"R{b['inner_r']:g}", fontsize=7)
+ax.text(r_i - 3, H - 4, f"wall = one {b['wall']:g} line,\nprinted as a spiral (vase mode)\n"
+        f"floor = {round(b['floor'] / 0.2)} solid layers", ha="right", fontsize=7)
 ax.text(r_o + 1.5, 0.4, f"{b['bot_c']:g}×45°", fontsize=7)
 ax.set_title("Section through the middle of the name (as printed: floor on the bed)", fontsize=10)
 fig.tight_layout()

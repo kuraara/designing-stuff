@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Slice the bumpers and the fit gauge with the PrusaSlicer 2.7 CLI on the stock MK3S+ printer.
+"""Slice the bumpers and the fit rings in spiral vase mode with the PrusaSlicer 2.7 CLI on the
+stock MK3S+ printer.
+
+Vase mode: the floor prints as normal solid layers (bottom_solid_layers = floor / layer height,
+from info.json), then the wall is one continuous spiral, one line `wall` wide (also from
+info.json): no layer changes, no seam, no retractions. The fit rings have no floor, so they're a
+spiral from the first layer. Vase mode takes one object per G-code.
 
 Filaments: the project's eSun TPU 95A presets (../printer-profiles/esun-tpu95a-mk3s: conservative
 "TPUsafe" and "TPU" FAST). No PETG: the bumper is a stretch fit, so it has to be TPU. Vendor
 presets are flattened here (resolving `inherits`), since the 2.7 CLI can't pick presets by name.
-Seam goes at the back (+Y), away from the name, which faces the front. Writes print_times.json
-and keeps every G-code in gcode/.
+Writes print_times.json and keeps every G-code in gcode/.
 
 Usage: python3 slice_all.py [stl stem ...]     (no args = every STL in stl/)
 """
@@ -18,9 +23,22 @@ PRINTER = "Original Prusa i3 MK3S & MK3S+"
 PRINTS = {"0.20SPEED": "0.20mm SPEED @MK3"}
 FILAMENTS = {"TPUsafe": ("bundle", "eSun TPU 95A @MK3S"),        # forum preset: 2.4 mm3/s, 220/212 C
              "TPU": ("bundle", "eSun TPU 95A FAST @MK3S")}        # 3.5 mm3/s, 225 C
-# avoid crossing perimeters: fewer strings for TPU; seam at the back, the name faces the front
+# avoid crossing perimeters: fewer strings for TPU; seam (floor layers only) at the back
 COMMON = {"avoid_crossing_perimeters": "1", "seam_position": "rear"}
 KEEP = None                                  # None = keep every G-code
+INFO = json.loads((root / "info.json").read_text())
+_b = next(iter(INFO.values()))["bumper"]
+WALL, FLOOR = _b["wall"], _b["floor"]
+
+
+def vase(stem, layer_h):
+    """Spiral vase overrides for one part. Bumpers: floor as solid layers; rings: no floor."""
+    bottom = round(FLOOR / layer_h) if stem.endswith("_bumper") else 0
+    w = f"{WALL:g}"
+    return {"spiral_vase": "1", "perimeters": "1", "top_solid_layers": "0", "fill_density": "0%",
+            "bottom_solid_layers": str(bottom), "bottom_solid_min_thickness": "0",
+            "ensure_vertical_shell_thickness": "0", "support_material": "0", "complete_objects": "0",
+            "perimeter_extrusion_width": w, "external_perimeter_extrusion_width": w}
 META = {"inherits", "renamed_from", "alias", "compatible_printers", "compatible_printers_condition",
         "compatible_prints", "compatible_prints_condition", "printer_model", "printer_variant",
         "default_print_profile", "default_filament_profile", "default_sla_material_profile",
@@ -75,9 +93,13 @@ def to_min(s):
 
 
 def slice_one(stl, fil, prn):
-    ini = work / f"{fil}_{prn}.ini"
+    base = (work / f"{fil}_{prn}.ini").read_text().splitlines()
+    cfg = dict(l.split(" = ", 1) for l in base if " = " in l)
+    cfg.update(vase(stl.stem, float(cfg["layer_height"])))
+    ini = work / f"{stl.stem}_{fil}_{prn}.ini"
+    ini.write_text("\n".join(f"{k} = {v}" for k, v in cfg.items()) + "\n")
     keep = KEEP is None or (stl.stem, fil) in KEEP
-    out = (root / "gcode" if keep else work) / f"{stl.stem}_{fil}_{prn}.gcode"
+    out = (root / "gcode" if keep else work) / f"{stl.stem}_{fil}_{prn}_vase.gcode"
     cmd = ["prusa-slicer", "--export-gcode", "--load", str(ini), "--center", "125,105",
            "--ensure-on-bed", "-o", str(out), str(stl)]
     r = subprocess.run(cmd, capture_output=True, text=True)
@@ -108,6 +130,6 @@ with cf.ThreadPoolExecutor(max_workers=4) as ex:
         if err:
             print("FAIL", stem, fil, prn, err, file=sys.stderr)
         results.setdefault(stem, {}).setdefault(fil, {})[prn] = {"min": mins, "g": grams}
-        print(f"{stem:16s} {fil:8s} {prn:9s} {mins} min {grams} g", flush=True)
+        print(f"{stem:22s} {fil:8s} {prn:9s} {mins} min {grams} g", flush=True)
 
 pt.write_text(json.dumps(results, indent=1))

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Smiggle bottle bumper generator: name in, print-ready STL out.
 
-Wraps bumper.scad. OpenSCAD draws the 2D parts: the half section of the bumper and the name,
-flat. It also measures the name (part="probe"), so the cap height is exact in any font. This
-script then revolves the section and wraps the name round the wall with manifold3d. That takes
+Wraps bumper.scad, which is made for spiral vase slicing (see slice_all.py). OpenSCAD draws the
+2D parts: the half section of the bumper and the name, flat. It also measures the name
+(part="probe"), so the cap height is exact in any font. This script then revolves the section and wraps the name round the wall with manifold3d. That takes
 about a second; OpenSCAD 2021.01 takes minutes to render the same thing.
 
     python3 bumper.py --name Aubrey                      # Sniglet ExtraBold, 12 mm capitals, raised 0.8
