@@ -478,6 +478,52 @@
      "ref": false
     }
    ]
+  },
+  {
+   "folder": "smiggle-bottle-bumper",
+   "title": "Smiggle bottle bumper: TPU, with a name \u2014 v0.1",
+   "status": "v0.1, STLs and G-code ready, not printed.",
+   "stls": [
+    {
+     "path": "smiggle-bottle-bumper/stl/aubrey_bumper.stl",
+     "name": "aubrey_bumper",
+     "kb": 2685,
+     "tris": 54982,
+     "size": [
+      74.4,
+      75.2,
+      22.8
+     ],
+     "cm3": 14.86,
+     "ref": false
+    },
+    {
+     "path": "smiggle-bottle-bumper/stl/fit_gauge.stl",
+     "name": "fit_gauge",
+     "kb": 283,
+     "tris": 5784,
+     "size": [
+      154.3,
+      145.8,
+      3.0
+     ],
+     "cm3": 3.38,
+     "ref": false
+    },
+    {
+     "path": "smiggle-bottle-bumper/stl/lincoln_bumper.stl",
+     "name": "lincoln_bumper",
+     "kb": 2661,
+     "tris": 54496,
+     "size": [
+      74.4,
+      75.2,
+      22.8
+     ],
+     "cm3": 14.86,
+     "ref": false
+    }
+   ]
   }
  ]
 }

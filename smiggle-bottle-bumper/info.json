@@ -1,0 +1,94 @@
+{
+ "aubrey": {
+  "name": "Aubrey",
+  "font": "Sniglet:style=ExtraBold",
+  "letter_h": 12.0,
+  "text_size": 11.9665,
+  "emboss": 0.8,
+  "name_len": 64.0,
+  "name_arc_deg": 98.6,
+  "letters_z": [
+   2.4,
+   18.92
+  ],
+  "bumper": {
+   "bore": 71.2,
+   "od": 74.4,
+   "height": 22.8,
+   "wall": 1.6,
+   "floor": 2,
+   "hole": 37.5,
+   "fit": 0.8,
+   "seat_depth": 20,
+   "top_c": 0.8,
+   "bot_c": 1.6,
+   "inner_r": 4
+  },
+  "params": {
+   "emboss": 0.8,
+   "emboss_root": 0.3,
+   "copies": 1,
+   "text_angle": 0,
+   "spacing": 1.0,
+   "text_size": 11.9665,
+   "cap_ratio": 1.0028,
+   "text_dx": -0.0933,
+   "baseline_z": 6.2
+  },
+  "mesh": {
+   "volume_cm3": 14.86,
+   "tris": 54982,
+   "genus": 1
+  },
+  "warnings": [],
+  "stl": "aubrey_bumper.stl",
+  "engine": "manifold",
+  "seconds": 0.8
+ },
+ "lincoln": {
+  "name": "Lincoln",
+  "font": "Sniglet:style=ExtraBold",
+  "letter_h": 12.0,
+  "text_size": 11.9665,
+  "emboss": 0.8,
+  "name_len": 64.7,
+  "name_arc_deg": 99.7,
+  "letters_z": [
+   5.84,
+   18.83
+  ],
+  "bumper": {
+   "bore": 71.2,
+   "od": 74.4,
+   "height": 22.8,
+   "wall": 1.6,
+   "floor": 2,
+   "hole": 37.5,
+   "fit": 0.8,
+   "seat_depth": 20,
+   "top_c": 0.8,
+   "bot_c": 1.6,
+   "inner_r": 4
+  },
+  "params": {
+   "emboss": 0.8,
+   "emboss_root": 0.3,
+   "copies": 1,
+   "text_angle": 0,
+   "spacing": 1.0,
+   "text_size": 11.9665,
+   "cap_ratio": 1.0028,
+   "text_dx": -0.2801,
+   "baseline_z": 6.2
+  },
+  "mesh": {
+   "volume_cm3": 14.86,
+   "tris": 54496,
+   "genus": 1
+  },
+  "warnings": [],
+  "stl": "lincoln_bumper.stl",
+  "engine": "manifold",
+  "seconds": 0.8
+ }
+}

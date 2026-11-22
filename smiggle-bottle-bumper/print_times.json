@@ -1,0 +1,44 @@
+{
+ "aubrey_bumper": {
+  "TPUsafe": {
+   "0.20SPEED": {
+    "min": 108.3,
+    "g": 18.21
+   }
+  },
+  "TPU": {
+   "0.20SPEED": {
+    "min": 86.0,
+    "g": 18.72
+   }
+  }
+ },
+ "fit_gauge": {
+  "TPUsafe": {
+   "0.20SPEED": {
+    "min": 27.3,
+    "g": 4.4
+   }
+  },
+  "TPU": {
+   "0.20SPEED": {
+    "min": 22.4,
+    "g": 4.53
+   }
+  }
+ },
+ "lincoln_bumper": {
+  "TPUsafe": {
+   "0.20SPEED": {
+    "min": 108.3,
+    "g": 18.2
+   }
+  },
+  "TPU": {
+   "0.20SPEED": {
+    "min": 86.0,
+    "g": 18.71
+   }
+  }
+ }
+}

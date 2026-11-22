@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Build both bumpers (Aubrey, Lincoln), the fit gauge, previews and info.json, then the drawings.
+# Needs python3 + numpy + manifold3d (+ fontTools), OpenSCAD 2021+, xvfb-run; trimesh, shapely and
+# matplotlib for drawings.py.
+set -euo pipefail
+cd "$(dirname "$0")"
+rm -rf _build && mkdir -p stl img _build
+for n in Aubrey Lincoln; do
+  python3 bumper.py --name "$n" --png --out _build
+done
+mv _build/*_bumper.stl stl/
+mv _build/*_bumper.png img/
+python3 - <<'PY'
+import json, pathlib
+b = pathlib.Path("_build")
+info = {p.stem.replace("_info", ""): json.loads(p.read_text()) for p in sorted(b.glob("*_info.json"))}
+pathlib.Path("info.json").write_text(json.dumps(info, indent=1))
+PY
+# fit gauge: three short rings at fit 1.4 / 0.8 / 0.2 (1, 2, 3 lugs)
+openscad -o stl/fit_gauge.stl -D 'part="gauge"' bumper.scad
+python3 -c "import trimesh,sys; [trimesh.load(f).export(f) for f in sys.argv[1:]]" stl/fit_gauge.stl
+echo 'color("#58b4e8") import("stl/fit_gauge.stl");' > _view.scad
+${XVFB:-xvfb-run -a} openscad -o img/fit_gauge.png --imgsize=1000,900 --colorscheme=Tomorrow \
+  --camera=0,-4,0,25,0,0,400 --projection=p _view.scad
+rm -f _view.scad
+rm -rf _build
+python3 drawings.py
