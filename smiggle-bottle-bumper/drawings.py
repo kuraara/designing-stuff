@@ -95,7 +95,7 @@ for ax, (stem, d) in zip(axes, info.items()):
     ax.set_title(f"{d['name']}: capitals {d['letter_h']:g} mm, {d['name_len']:g} mm long "
                  f"({d['name_arc_deg']:g}° of the wall), raised {d['emboss']:g} mm, "
                  f"letters z {z0:g}–{z1:g}", fontsize=9)
-axes[-1].set_xlabel("mm along the outside of the wall (0 = front of the print, seam at the back)",
+axes[-1].set_xlabel("mm along the outside of the wall (0 = front of the print)",
                     fontsize=8)
 fig.tight_layout()
 fig.savefig(img / "names_unwrapped.png", dpi=150)
