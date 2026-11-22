@@ -2,16 +2,11 @@
 // with a name embossed (raised) or debossed on the side wall.
 //
 // Use orientation = print orientation: floor on the bed, opening up.
-// Origin: Z = 0 on the bed, Z axis = bottle axis. The name faces -Y (front of the plate).
-//
-// Made for PrusaSlicer's spiral vase mode: the floor prints as normal solid layers, then the
-// wall is one continuous spiral of a single line `wall` wide that follows the OUTSIDE of the
-// model (letters included). The slicer ignores the inside of the wall, so the bore comes out at
-// OD - 2 * wall. That's why the wall here is exactly one line wide, with no inside chamfer or
-// fillet: what's modelled is what prints.
+// Origin: Z = 0 on the bed, Z axis = bottle axis. The name faces -Y (front of the plate),
+// so the slicer seam can go at the back (+Y) and stay out of the letters.
 //
 //   openscad -o bumper.stl -D 'name="Aubrey"' bumper.scad         standalone (slow in 2021.01)
-//   openscad -o ring.stl -D 'part="ring"' -D 'ring=1' bumper.scad   fit ring 1 of gauge_fits
+//   openscad -o fit_gauge.stl -D 'part="gauge"' bumper.scad
 //   python3 bumper.py --name Aubrey                               fast path (manifold3d), ~1 s
 //
 // bumper.py reads the 2D parts (profile2d, text2d, probe) from this file and does the 3D itself.
@@ -20,7 +15,7 @@
 use <fonts/Sniglet-ExtraBold.ttf>
 
 /* [Part] */
-part = "bumper";            // [bumper, ring, gauge, profile2d, text2d, probe, info]
+part = "bumper";            // [bumper, gauge, profile2d, text2d, probe, info]
 
 /* [Name] */
 name = "Aubrey";
@@ -55,27 +50,23 @@ seat_depth = 20;
 base_r = 5;
 
 /* [Bumper] */
-// Stretch fit: printed bore = bottle_d - fit. 1.6 on a 0.8 wall grips about like 0.8 on 1.6.
-fit = 1.6;
-// Wall = the vase-mode line width (slice with perimeter widths = wall).
-wall = 0.8;
-// Floor: printed as normal solid layers (bottom_solid_layers = floor_t / layer height).
+// Stretch fit: printed bore = bottle_d - fit.
+fit = 0.8;
+wall = 1.6;
 floor_t = 2.0;
 // Centre hole in the floor (original: 37.5).
 hole_d = 37.5;
-// 45° chamfer inside the rim, to sit in the bottle's step. 0 for vase mode (it can't print it).
-top_c = 0;
+// 45° chamfer inside the rim, which sits into the bottle's 45° step.
+top_c = 0.8;
 // 45° chamfer on the outside bottom edge (also hides elephant foot).
 bot_c = 1.6;
-// Fillet inside, floor to wall. 0 for vase mode (it can't print it).
-inner_r = 0;
+// Fillet inside, floor to wall. Keep it under base_r so the bottle sits on the floor.
+inner_r = 4;
 
-/* [Fit rings] */
+/* [Fit gauge] */
 // One ring per value of fit. Ring n has n lugs (1 = tightest).
-gauge_fits = [2.2, 1.6, 1.0];
-// Which ring part="ring" makes (1-based).
-ring = 2;
-gauge_h = 6;
+gauge_fits = [1.4, 0.8, 0.2];
+gauge_h = 3;
 gauge_gap = 5;
 
 /* [Detail] */
@@ -90,7 +81,7 @@ r_b = (bottle_d - fit) / 2;           // printed bore radius
 r_o = r_b + wall;                     // outer radius
 r_h = hole_d / 2;
 H   = floor_t + seat_depth + top_c;   // overall height
-assert(top_c == 0 || top_c < wall, "top_c must be less than wall");
+assert(top_c < wall, "top_c must be less than wall");
 assert(inner_r < seat_depth, "inner_r too big");
 assert(r_h < r_b - inner_r, "hole_d too big for the floor");
 
@@ -106,9 +97,9 @@ function profile_pts(rb, h_top, with_floor = true) =
     let(ro = rb + wall)
     with_floor ?
       concat(
-        [[r_h, 0], [ro - bot_c, 0], [ro, bot_c], [ro, h_top]],
-        top_c > 0 ? [[rb + top_c, h_top], [rb, h_top - top_c]] : [[rb, h_top]],
-        inner_r > 0 ? arc([rb - inner_r, floor_t + inner_r], inner_r, 0, -90) : [[rb, floor_t]],
+        [[r_h, 0], [ro - bot_c, 0], [ro, bot_c], [ro, h_top],
+         [rb + top_c, h_top], [rb, h_top - top_c]],
+        arc([rb - inner_r, floor_t + inner_r], inner_r, 0, -90),
         [[r_h, floor_t]])
     : [[rb, 0], [ro, 0], [ro, h_top], [rb, h_top]];
 
@@ -160,18 +151,17 @@ module bumper() {
 function gauge_pos(i) = let(p = 2 * (bottle_d / 2 + wall) + gauge_gap)
     [[-p / 2, -p * sqrt(3) / 4], [p / 2, -p * sqrt(3) / 4], [0, p * sqrt(3) / 4]][i % 3];
 
-// One fit ring: a short tube, wall one line wide, i + 1 lugs on the outside (i is 0-based).
-// Vase mode prints one object at a time, so each ring is its own STL / G-code.
-module fit_ring(i) {
-    rb = (bottle_d - gauge_fits[i]) / 2;
-    rotate_extrude() polygon(profile_pts(rb, gauge_h, false));
-    for (k = [0:i])
-        rotate([0, 0, (k - i / 2) * 8])
-            translate([-1.5, -(rb + wall + 1.6), 0]) cube([3, 1.6 + wall / 2, gauge_h]);
+module gauge() {
+    for (i = [0:len(gauge_fits) - 1]) {
+        rb = (bottle_d - gauge_fits[i]) / 2;
+        translate(gauge_pos(i)) {
+            rotate_extrude() polygon(profile_pts(rb, gauge_h, false));
+            for (k = [0:i])
+                rotate([0, 0, (k - i / 2) * 8])
+                    translate([-1.5, -(rb + wall + 1.6), 0]) cube([3, 2, gauge_h]);
+        }
+    }
 }
-
-// All rings on one plate, for viewing (print them one at a time in vase mode).
-module gauge() { for (i = [0:len(gauge_fits) - 1]) translate(gauge_pos(i)) fit_ring(i); }
 
 // Name at size 10 plus an "H" 500 mm up: bumper.py measures cap height and ink box from it.
 module probe() {
@@ -180,7 +170,6 @@ module probe() {
 }
 
 if (part == "bumper") bumper();
-else if (part == "ring") fit_ring(ring - 1);
 else if (part == "gauge") gauge();
 else if (part == "profile2d") profile2d();
 else if (part == "text2d") name2d();

@@ -2,70 +2,42 @@
  "aubrey_bumper": {
   "TPUsafe": {
    "0.20SPEED": {
-    "min": 69.0,
-    "g": 11.96
+    "min": 108.3,
+    "g": 18.21
    }
   },
   "TPU": {
    "0.20SPEED": {
-    "min": 50.5,
-    "g": 12.3
+    "min": 86.0,
+    "g": 18.72
    }
   }
  },
- "fit_ring_1_tight": {
+ "fit_gauge": {
   "TPUsafe": {
    "0.20SPEED": {
-    "min": 8.1,
-    "g": 1.41
+    "min": 27.3,
+    "g": 4.4
    }
   },
   "TPU": {
    "0.20SPEED": {
-    "min": 5.7,
-    "g": 1.45
-   }
-  }
- },
- "fit_ring_2_default": {
-  "TPUsafe": {
-   "0.20SPEED": {
-    "min": 8.1,
-    "g": 1.44
-   }
-  },
-  "TPU": {
-   "0.20SPEED": {
-    "min": 5.7,
-    "g": 1.48
-   }
-  }
- },
- "fit_ring_3_loose": {
-  "TPUsafe": {
-   "0.20SPEED": {
-    "min": 8.2,
-    "g": 1.47
-   }
-  },
-  "TPU": {
-   "0.20SPEED": {
-    "min": 5.8,
-    "g": 1.51
+    "min": 22.4,
+    "g": 4.53
    }
   }
  },
  "lincoln_bumper": {
   "TPUsafe": {
    "0.20SPEED": {
-    "min": 69.0,
-    "g": 11.97
+    "min": 108.3,
+    "g": 18.2
    }
   },
   "TPU": {
    "0.20SPEED": {
-    "min": 50.5,
-    "g": 12.31
+    "min": 86.0,
+    "g": 18.71
    }
   }
  }
