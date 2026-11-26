@@ -421,6 +421,104 @@
    ]
   },
   {
+   "folder": "mavic-pro-bait-release",
+   "title": "Mavic Pro bait release \u2014 v0.1",
+   "status": "v0.1 designed, nothing printed. Needs belly measurements before printing (see Open questions).",
+   "stls": [
+    {
+     "path": "mavic-pro-bait-release/stl/horn.stl",
+     "name": "horn",
+     "kb": 109,
+     "tris": 2236,
+     "size": [
+      20.5,
+      19.6,
+      4.0
+     ],
+     "cm3": 0.65,
+     "ref": false
+    },
+    {
+     "path": "mavic-pro-bait-release/stl/lid.stl",
+     "name": "lid",
+     "kb": 71,
+     "tris": 1452,
+     "size": [
+      90.7,
+      62.3,
+      2.0
+     ],
+     "cm3": 10.04,
+     "ref": false
+    },
+    {
+     "path": "mavic-pro-bait-release/stl/ref_boards.stl",
+     "name": "ref_boards",
+     "kb": 2,
+     "tris": 48,
+     "size": [
+      56.0,
+      34.6,
+      7.0
+     ],
+     "cm3": 8.54,
+     "ref": true
+    },
+    {
+     "path": "mavic-pro-bait-release/stl/ref_holder.stl",
+     "name": "ref_holder",
+     "kb": 1,
+     "tris": 12,
+     "size": [
+      76.0,
+      22.0,
+      21.0
+     ],
+     "cm3": 35.11,
+     "ref": true
+    },
+    {
+     "path": "mavic-pro-bait-release/stl/ref_horn_locked.stl",
+     "name": "ref_horn_locked",
+     "kb": 109,
+     "tris": 2236,
+     "size": [
+      4.0,
+      19.6,
+      20.5
+     ],
+     "cm3": 0.65,
+     "ref": true
+    },
+    {
+     "path": "mavic-pro-bait-release/stl/ref_servo.stl",
+     "name": "ref_servo",
+     "kb": 40,
+     "tris": 820,
+     "size": [
+      30.9,
+      32.6,
+      17.6
+     ],
+     "cm3": 7.59,
+     "ref": true
+    },
+    {
+     "path": "mavic-pro-bait-release/stl/tub.stl",
+     "name": "tub",
+     "kb": 179,
+     "tris": 3662,
+     "size": [
+      80.7,
+      62.3,
+      25.8
+     ],
+     "cm3": 21.92,
+     "ref": false
+    }
+   ]
+  },
+  {
    "folder": "pi5-poe-nvme-case",
    "title": "Pi 5 PoE NVMe Case \u2014 enclosure v0.5",
    "status": "",
