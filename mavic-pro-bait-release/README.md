@@ -27,6 +27,14 @@ A drone-fishing drop release for a first-generation DJI Mavic Pro. It runs on it
 
 > For mounting point, 3M hook and loop tape (the heavy duty shit) or just double sided tape should do the job
 
+26 Nov 2026, 09:49:
+
+> Bare in mind that I have attached a GoPro Max to the top of a Mavic without issue so the weight isn't an issue.
+>
+> Did you just copy that very popular design from thingiverse?
+>
+> Would a linear actuator be a better option here?
+
 Printer: Prusa i3 MK3S+. Project preference: functional over pretty, faster over perfect; TPU first, PETG sometimes.
 
 ## How it works
@@ -47,6 +55,31 @@ Loading: switch to OPEN, push the loop up into the gap, switch to LOCK.
 **Why not the SpeedyBee F405s?** A full flight controller is heavier, needs 2S or more on its battery pad (or a separate 5 V feed), and would need INAV servo mixing for one switch. The ESP32-C3 does the job at 2 g.
 
 **No-code fallback.** A Crossfire Nano RX can drive the servo directly from one of its outputs set to PWM. The same goes for an ELRS PWM receiver. You lose the boot lock and the telemetry, and the servo follows the switch through failsafe according to the receiver's failsafe setting. The pod fits either way.
+
+## Prior art
+
+Nothing here is copied from another model. Before designing, I read listing descriptions only, without downloading or opening any files, for:
+
+- the Thingiverse *Low-profile Mavic Pro Electronic Bait Drop*, which clips under the body, hooks over the battery buttons, uses an SG90 servo and is triggered by a photocell on the front LED;
+- Willem Jordaan's *DJI Mavic Bait Drop* (thing:3437969), which is that design's electronics basis;
+- commercial releases: Gannet, BRDRC, Hanatora, STARTRC.
+
+Every dimension in `bait_release.scad` was written from scratch for this brief: own radio and power, tape mount, TPU. The underlying idea is the standard one for drop releases: the load hangs on a pin, and a servo pulls the pin out from under the loop. Driving the pin on an arc around the servo shaft, rather than through a pushrod, is a known RC tow and drop release approach too. Expect it to look familiar.
+
+## Release options considered
+
+The job is to pull a pin out from under a loaded loop. The pin carries the load in the housing in every option, so the actuator only fights friction: roughly 0.5–1 × the load, so 1–3 N for a few hundred grams of bait plus some line drag.
+
+| | Arc pin on a micro servo (v0.1) | Actuonix PQ12-R linear servo | Micro RC linear servo (Spektrum etc.) | 5 V push-pull solenoid |
+|---|---|---|---|---|
+| Force on the pin | ~12 N at the arc (1.6 kg·cm at R13 mm). Ample, because the servo holds no load | 18 N (30:1) to 50 N (100:1) at 6 V, less at 5 V | 0.8–3.2 N | Adafruit mini: 0.8 N, 3 mm throw. JF-0530B: 5 N/10 mm, but that's the 12 V version |
+| Speed for ~10 mm | ~0.1 s | ~0.4 s (30:1) to ~1 s (100:1) | ~0.15 s | instant |
+| Drive | RC PWM | RC PWM, the same firmware (1.0 ms extended, 2.0 ms retracted) | RC PWM, 3.2–4.2 V, JST-SH | MOSFET + flyback diode, ~1 A while energised |
+| Holds unpowered | gearbox friction, and the load doesn't back-drive it | yes, back-drive 9–35 N | weak | only with a spring return |
+| Sealing | none (ES08MA II) | IP54 | none, nylon gears | open frame |
+| Cost (AU) | ~A$13 | ~A$150–300 | ~A$30–40 | ~A$8–15 |
+
+**Verdict:** a linear actuator isn't worth it here *unless salt spray kills servos*. The arc pin already gives the main benefit of a pin-pull: the actuator carries no load. A geared micro servo does that faster and for about a tenth of the price. The tiny RC linear servos and the 5 V solenoids are too weak to pull a loaded pin reliably. The PQ12-R is the only linear option that makes sense. It is sealed, strong, holds its position, and runs off the same PWM. If the ES08MA II corrodes after a season of beach launches, the PQ12-R with a straight 2 mm stainless pin is the v0.2 swap. It would need a new bay; the electronics and firmware stay as they are.
 
 ## Next steps
 
@@ -157,7 +190,7 @@ Overhang check: the only downward faces are the 6 mm rear-notch bridge, the swit
 | Boards, wires, switch, screws | ~14 |
 | **Pod, estimated** | **~122** |
 
-The Mavic Pro weighs 734 g as standard. DJI publishes no payload figure. The Gannet release's listing says the Mavic Pro can carry 400–450 g at most and doesn't recommend more. One Mavic forum owner who logged current draw suggests staying under about 300 g. Take off the ~122 g pod and that leaves **about 180 g of bait and sinker on the forum figure, 280–330 g on the Gannet figure**. Flight time drops with every gram. The 18650 is most of the pod's weight. A 1S 300–450 mAh LiPo (8–12 g) would save about 40 g if you ever want it (see Ideas).
+**Weight is not a design driver.** The owner has flown a GoPro Max on top of a Mavic without trouble (26 Nov). The figures stay here for reference only. The Mavic Pro weighs 734 g as standard and DJI publishes no payload figure. The Gannet release's listing says the Mavic Pro can carry 400–450 g at most and doesn't recommend more. One Mavic forum owner who logged current draw suggests staying under about 300 g. Flight time drops with every gram.
 
 ## Key numbers (all in `bait_release.scad`)
 
@@ -206,12 +239,12 @@ Regenerate: `./render_all.sh && python3 slice_all.py`. Needs OpenSCAD 2021+, xvf
 
 ## Changelog
 
+- **v0.1 docs** (26 Nov 2026): weight dropped as a constraint, per the owner. Added *Prior art* and *Release options considered* (linear actuator, solenoid). No geometry changes.
 - **v0.1** (26 Nov 2026): first design. Started as a strap-on pod, then switched to tape or hook-and-loop on a flat lid after the 09:16 message. Rotary arc-pin release, ESP32-C3 CRSF firmware with boot lock, failsafe hold and telemetry. Walls trimmed to 1.6 mm, the floor to 1.2 mm and the lid to 2.0 mm, saving ~10 g and ~30 min against the first render.
 
 ## Ideas for v0.2
 
 - Move the gap nearer the pod's centre of mass (servo in the middle, holder split around it).
-- A lighter power option: a 1S LiPo instead of the 18650 saves ~40 g.
 - Lid with windows between the tape areas (−5 g, −20 min).
 - Printed TPU leg extensions sized to clear the pod.
 - A light pipe or window for the ESP32's status LED.
